@@ -1,6 +1,7 @@
 import 'package:fluttermint/utils/unimplemented.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widgets/contentpadding.dart';
 import '../widgets/fediappbar.dart';
@@ -11,17 +12,19 @@ class SendConfirm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Textured(
+    return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: FediAppBar(
             title: "Confirm",
             closeAction: () {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
+              // context.go("/");
+              context.pop();
+              context.pop();
             },
             backAction: () {
-              Navigator.popUntil(context, ModalRoute.withName('/send'));
+              // context.go("/send");
+              context.pop();
             },
           ),
           body: ContentPadding(
@@ -34,6 +37,6 @@ class SendConfirm extends StatelessWidget {
               ],
             ),
           )),
-    ));
+    );
   }
 }

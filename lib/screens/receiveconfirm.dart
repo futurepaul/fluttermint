@@ -4,6 +4,7 @@ import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/chillinfocard.dart';
 import 'package:fluttermint/widgets/smallbalancedisplay.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/contentpadding.dart';
 import '../widgets/fediappbar.dart';
 import '../widgets/textured.dart';
@@ -23,17 +24,17 @@ class ReceiveConfirm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Textured(
+    return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: FediAppBar(
             title: "Receive bitcoin",
             backAction: () {
-              Navigator.popUntil(context, ModalRoute.withName('/receive'));
+              context.go("/receive");
+              // context.back();
             },
             closeAction: () {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
+              context.go("/");
             },
           ),
           body: ContentPadding(
@@ -116,6 +117,6 @@ class ReceiveConfirm extends StatelessWidget {
               ],
             ),
           )),
-    ));
+    );
   }
 }

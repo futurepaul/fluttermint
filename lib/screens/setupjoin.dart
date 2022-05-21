@@ -6,26 +6,33 @@ import '../widgets/contentpadding.dart';
 import '../widgets/fediappbar.dart';
 import '../widgets/textured.dart';
 
-class Send extends StatelessWidget {
-  const Send({Key? key}) : super(key: key);
+class SetupJoin extends StatelessWidget {
+  const SetupJoin({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Textured(
       child: Scaffold(
-          backgroundColor: Colors.transparent,
           appBar: FediAppBar(
-            title: "Send",
-            closeAction: () {
-              context.go("/");
-            },
+            title: "Join Federation",
+            closeAction: () => context.go("/setup"),
           ),
+          backgroundColor: Colors.transparent,
           body: ContentPadding(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                const Spacer(),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: const Image(
+                      image: AssetImage(
+                    "images/dirtyqr.png",
+                  )),
+                ),
+                const Spacer(),
                 OutlineGradientButton(
-                    text: "Continue", onTap: () => context.go("/send/confirm"))
+                    text: "Continue", onTap: () => context.go("/"))
               ],
             ),
           )),

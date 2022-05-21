@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../utils/constants.dart';
 
@@ -11,21 +12,27 @@ class FedimintLogoAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: const [
-        Text("Fedimint",
-            style: TextStyle(fontSize: 18, color: COLOR_WHITE, fontVariations: [
-              FontVariation("wdth", 112.0),
-              FontVariation("wght", 600.0)
-            ])),
-        Icon(
-          Icons.expand_more,
-          color: COLOR_GREY,
-          size: 24.0,
-        ),
-      ],
+    return GestureDetector(
+      onTap: () => context.go("/setup"),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [
+          Text("Fedimint",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: COLOR_WHITE,
+                  fontVariations: [
+                    FontVariation("wdth", 112.0),
+                    FontVariation("wght", 600.0)
+                  ])),
+          // Icon(
+          //   Icons.expand_more,
+          //   color: COLOR_GREY,
+          //   size: 24.0,
+          // ),
+        ],
+      ),
     );
   }
 }

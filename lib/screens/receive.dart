@@ -1,5 +1,6 @@
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widgets/contentpadding.dart';
 import '../widgets/fediappbar.dart';
@@ -10,14 +11,13 @@ class Receive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Textured(
+    return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: FediAppBar(
             title: "Receive",
             closeAction: () {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
+              context.go("/");
             },
           ),
           body: ContentPadding(
@@ -26,11 +26,10 @@ class Receive extends StatelessWidget {
               children: [
                 OutlineGradientButton(
                     text: "Continue",
-                    onTap: () =>
-                        Navigator.pushNamed(context, "/receive/confirm"))
+                    onTap: () => context.go("/receive/confirm"))
               ],
             ),
           )),
-    ));
+    );
   }
 }

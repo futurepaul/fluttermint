@@ -14,7 +14,7 @@ class Textured extends StatelessWidget {
       decoration: const BoxDecoration(
           image: DecorationImage(
               image: AssetImage("images/bg-dark.png"), fit: BoxFit.cover)),
-      child: child,
+      child: SafeArea(child: child),
     );
   }
 }
