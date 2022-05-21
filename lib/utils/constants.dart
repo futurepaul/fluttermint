@@ -14,30 +14,56 @@ const COLOR_WHITE = Color(0xFFF1F1F1);
 // );
 
 const TextTheme TEXT_THEME_DEFAULT = TextTheme(
-    headline1: TextStyle(
-        fontFamily: "Archivo",
-        color: COLOR_WHITE,
-        fontSize: 64,
-        fontVariations: [
-          FontVariation("wdth", 120.0),
-          FontVariation("wght", 500.0)
-        ]),
-    headline2: TextStyle(
-        fontFamily: "Archivo",
-        color: COLOR_WHITE,
-        fontSize: 22,
-        fontVariations: [
-          FontVariation("wdth", 120.0),
-          FontVariation("wght", 500.0)
-        ]),
-    headline3: TextStyle(
-        color: COLOR_WHITE,
-        fontSize: 18,
-        fontVariations: [FontVariation("wght", 400.0)]),
-    headline4: TextStyle(color: COLOR_WHITE, fontSize: 16),
-    headline5: TextStyle(color: COLOR_WHITE, fontSize: 14),
-    headline6: TextStyle(color: COLOR_WHITE, fontSize: 12),
-    bodyText1: TextStyle(color: COLOR_WHITE, fontSize: 14, height: 1.5),
-    bodyText2: TextStyle(color: COLOR_GREY, fontSize: 14, height: 1.5),
-    subtitle1: TextStyle(color: COLOR_WHITE, fontSize: 12),
-    subtitle2: TextStyle(color: COLOR_GREY, fontSize: 12));
+  headline1: TextStyle(
+      fontFamily: "Archivo",
+      color: COLOR_WHITE,
+      fontSize: 64,
+      fontVariations: [
+        FontVariation("wdth", 120.0),
+        FontVariation("wght", 500.0)
+      ]),
+  headline2: TextStyle(
+      fontFamily: "Archivo",
+      color: COLOR_WHITE,
+      fontSize: 22,
+      fontVariations: [
+        FontVariation("wdth", 120.0),
+        FontVariation("wght", 500.0)
+      ]),
+  headline3: TextStyle(
+      color: COLOR_WHITE,
+      fontSize: 18,
+      fontVariations: [FontVariation("wght", 400.0)]),
+  // Body 2 in the Figma
+  headline4: TextStyle(
+      color: COLOR_WHITE,
+      fontSize: 16,
+      fontVariations: [FontVariation("wght", 600.0)]),
+  // Smaller balance display
+  headline5: TextStyle(
+      fontFamily: "Archivo",
+      color: COLOR_WHITE,
+      fontSize: 28,
+      fontVariations: [
+        FontVariation("wdth", 120.0),
+        FontVariation("wght", 400.0)
+      ]),
+  // Unit for smaller balance display
+  headline6: TextStyle(
+      fontFamily: "Archivo",
+      color: COLOR_WHITE,
+      fontSize: 18,
+      fontVariations: [
+        FontVariation("wdth", 120.0),
+        FontVariation("wght", 500.0)
+      ]),
+  bodyText1: TextStyle(color: COLOR_WHITE, fontSize: 14, height: 1.5),
+  bodyText2: TextStyle(
+      fontFamily: "Archivo",
+      color: const Color(0xCCF1F1F1),
+      fontSize: 14,
+      fontVariations: [FontVariation("wght", 400.0)]),
+  subtitle1: TextStyle(color: COLOR_WHITE, fontSize: 12),
+  subtitle2: TextStyle(color: COLOR_GREY, fontSize: 12),
+  caption: TextStyle(fontFamily: "Archivo", color: COLOR_BLACK, fontSize: 12),
+);

@@ -11,7 +11,7 @@ class ContentPadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 24.0),
         child: child);
   }
 }
