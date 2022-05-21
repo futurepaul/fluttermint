@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 const COLOR_BLACK = Color(0xFF212121);
 const COLOR_GREY = Color(0x7FFFFFFF);
@@ -18,30 +17,27 @@ const TextTheme TEXT_THEME_DEFAULT = TextTheme(
     headline1: TextStyle(
         fontFamily: "Archivo",
         color: COLOR_WHITE,
-        fontWeight: FontWeight.normal,
-        fontSize: 26,
-        fontFeatures: [FontFeature('wdth', 120)]),
+        fontSize: 64,
+        fontVariations: [
+          FontVariation("wdth", 120.0),
+          FontVariation("wght", 500.0)
+        ]),
     headline2: TextStyle(
-        color: COLOR_WHITE, fontWeight: FontWeight.w700, fontSize: 22),
-    headline3: TextStyle(
-        color: COLOR_WHITE, fontWeight: FontWeight.w700, fontSize: 20),
-    headline4: TextStyle(
-        color: COLOR_WHITE, fontWeight: FontWeight.w700, fontSize: 16),
-    headline5: TextStyle(
-        color: COLOR_WHITE, fontWeight: FontWeight.w700, fontSize: 14),
-    headline6: TextStyle(
-        color: COLOR_WHITE, fontWeight: FontWeight.w700, fontSize: 12),
-    bodyText1: TextStyle(
+        fontFamily: "Archivo",
         color: COLOR_WHITE,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        height: 1.5),
-    bodyText2: TextStyle(
-        color: COLOR_GREY,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        height: 1.5),
-    subtitle1: TextStyle(
-        color: COLOR_WHITE, fontSize: 12, fontWeight: FontWeight.w400),
-    subtitle2: TextStyle(
-        color: COLOR_GREY, fontSize: 12, fontWeight: FontWeight.w400));
+        fontSize: 22,
+        fontVariations: [
+          FontVariation("wdth", 120.0),
+          FontVariation("wght", 500.0)
+        ]),
+    headline3: TextStyle(
+        color: COLOR_WHITE,
+        fontSize: 18,
+        fontVariations: [FontVariation("wght", 400.0)]),
+    headline4: TextStyle(color: COLOR_WHITE, fontSize: 16),
+    headline5: TextStyle(color: COLOR_WHITE, fontSize: 14),
+    headline6: TextStyle(color: COLOR_WHITE, fontSize: 12),
+    bodyText1: TextStyle(color: COLOR_WHITE, fontSize: 14, height: 1.5),
+    bodyText2: TextStyle(color: COLOR_GREY, fontSize: 14, height: 1.5),
+    subtitle1: TextStyle(color: COLOR_WHITE, fontSize: 12),
+    subtitle2: TextStyle(color: COLOR_GREY, fontSize: 12));
