@@ -38,6 +38,7 @@ const TextTheme TEXT_THEME_DEFAULT = TextTheme(
         FontVariation("wght", 500.0)
       ]),
   headline3: TextStyle(
+      fontFamily: "Archivo",
       color: COLOR_WHITE,
       fontSize: 18,
       fontVariations: [FontVariation("wght", 400.0)]),

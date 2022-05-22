@@ -21,6 +21,7 @@ class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
       padding: const EdgeInsets.all(24.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           backAction != null
               ? InkWell(
