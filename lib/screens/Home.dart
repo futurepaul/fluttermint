@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:go_router/go_router.dart';
 
-import '../widgets/balancedisplay.dart';
-import '../widgets/contentpadding.dart';
-import '../widgets/logoaction.dart';
+import 'package:fluttermint/widgets/balance_display.dart';
+import 'package:fluttermint/widgets/content_padding.dart';
+import 'package:fluttermint/widgets/logo_action.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);

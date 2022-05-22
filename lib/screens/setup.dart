@@ -5,9 +5,8 @@ import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../widgets/contentpadding.dart';
-import '../widgets/fediappbar.dart';
-import '../widgets/textured.dart';
+import 'package:fluttermint/widgets/content_padding.dart';
+import 'package:fluttermint/widgets/textured.dart';
 
 class Setup extends StatelessWidget {
   const Setup({Key? key}) : super(key: key);

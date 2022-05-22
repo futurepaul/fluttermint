@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:fluttermint/widgets/outlinegradient.dart';
+import 'package:fluttermint/widgets/outline_gradient.dart';
 
 import '../utils/constants.dart';
 

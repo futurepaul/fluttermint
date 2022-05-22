@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttermint/screens/receive.dart';
-import 'package:fluttermint/screens/receiveconfirm.dart';
+import 'package:fluttermint/screens/receive_confirm.dart';
 import 'package:fluttermint/screens/send.dart';
-import 'package:fluttermint/screens/sendconfirm.dart';
+import 'package:fluttermint/screens/send_confirm.dart';
+import 'package:fluttermint/screens/send_finish.dart';
 import 'package:fluttermint/screens/setup.dart';
-import 'package:fluttermint/screens/setupjoin.dart';
+import 'package:fluttermint/screens/setup_join.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/screens/home.dart';
 import 'package:go_router/go_router.dart';
@@ -63,6 +64,10 @@ class App extends StatelessWidget {
               GoRoute(
                 path: 'confirm',
                 builder: (context, state) => const SendConfirm(),
+              ),
+              GoRoute(
+                path: 'finish',
+                builder: (context, state) => const SendFinish(),
               ),
             ]),
         GoRoute(

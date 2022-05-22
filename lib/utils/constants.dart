@@ -4,14 +4,6 @@ import 'package:flutter/material.dart';
 const COLOR_BLACK = Color(0xFF212121);
 const COLOR_GREY = Color(0x7FFFFFFF);
 const COLOR_WHITE = Color(0xFFF1F1F1);
-// const COLOR_PALE_SCREEN = Color.fromRGBO(255, 255, 255, 0.2);
-
-// const GRADIENT_DARK = LinearGradient(
-//   begin: Alignment.topCenter,
-//   end: Alignment.bottomCenter,
-//   colors: <Color>[
-//     COLOR_BLACK.withOpacity(0.4), Colors.white.withOpacity(0.2)],
-// );
 
 const TextTheme TEXT_THEME_DEFAULT = TextTheme(
   headline1: TextStyle(
