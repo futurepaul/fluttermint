@@ -5,6 +5,21 @@ const COLOR_BLACK = Color(0xFF212121);
 const COLOR_GREY = Color(0x7FFFFFFF);
 const COLOR_WHITE = Color(0xFFF1F1F1);
 
+Map<int, Color> color = {
+  50: Color.fromRGBO(241, 241, 241, .1),
+  100: Color.fromRGBO(241, 241, 241, .2),
+  200: Color.fromRGBO(241, 241, 241, .3),
+  300: Color.fromRGBO(241, 241, 241, .4),
+  400: Color.fromRGBO(241, 241, 241, .5),
+  500: Color.fromRGBO(241, 241, 241, .6),
+  600: Color.fromRGBO(241, 241, 241, .7),
+  700: Color.fromRGBO(241, 241, 241, .8),
+  800: Color.fromRGBO(241, 241, 241, .9),
+  900: Color.fromRGBO(241, 241, 241, 1),
+};
+
+MaterialColor white = MaterialColor(0xFFF1F1F1, color);
+
 const TextTheme TEXT_THEME_DEFAULT = TextTheme(
   headline1: TextStyle(
       fontFamily: "Archivo",

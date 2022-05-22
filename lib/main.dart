@@ -37,6 +37,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
           brightness: Brightness.dark,
           primaryColor: COLOR_WHITE,
+          primarySwatch: white,
           textTheme: TEXT_THEME_DEFAULT,
           backgroundColor: COLOR_WHITE,
           scaffoldBackgroundColor: COLOR_BLACK,
@@ -53,7 +54,7 @@ class App extends StatelessWidget {
           routes: [
             GoRoute(
               path: 'join',
-              builder: (context, state) => const SetupJoin(),
+              builder: (context, state) => SetupJoin(),
             ),
           ]),
       GoRoute(path: '/', builder: (context, state) => const Home(), routes: [

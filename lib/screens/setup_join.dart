@@ -1,3 +1,6 @@
+import 'package:flutter/services.dart';
+import 'package:fluttermint/utils/constants.dart';
+import 'package:fluttermint/widgets/autopaste_text_field.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +10,7 @@ import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
 class SetupJoin extends StatelessWidget {
-  const SetupJoin({Key? key}) : super(key: key);
+  SetupJoin({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,15 +25,19 @@ class SetupJoin extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Spacer(),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: const Image(
-                      image: AssetImage(
-                    "images/dirtyqr.png",
-                  )),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: const Image(
+                        fit: BoxFit.cover,
+                        image: AssetImage(
+                          "images/dirtyqr.png",
+                        )),
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 16),
+                AutoPasteTextField(),
+                const SizedBox(height: 16),
                 OutlineGradientButton(
                     text: "Continue", onTap: () => context.go("/"))
               ],
