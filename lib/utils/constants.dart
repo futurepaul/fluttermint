@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 const COLOR_BLACK = Color(0xFF212121);
 const COLOR_GREY = Color(0x7FFFFFFF);
+const COLOR_OFF_WHITE = Color(0xFFA0A0A0);
 const COLOR_WHITE = Color(0xFFF1F1F1);
 
 Map<int, Color> color = {

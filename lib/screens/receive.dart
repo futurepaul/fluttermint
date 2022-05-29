@@ -62,6 +62,7 @@ class Receive extends StatelessWidget {
                   ],
                 ),
                 OutlineGradientButton(
+                    primary: true,
                     text: "Continue",
                     onTap: () => context.go("/receive/confirm"))
               ],

@@ -1,5 +1,6 @@
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermint/widgets/fedi_tooltip.dart';
 
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:go_router/go_router.dart';
@@ -34,16 +35,20 @@ class Home extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Expanded(
-                        child: OutlineGradientButton(
-                            text: "Receive",
-                            onTap: () {
-                              context.go("/receive");
-                            }),
+                        child: FediTooltip(
+                          title: "heyo",
+                          child: OutlineGradientButton(
+                              text: "Receive",
+                              onTap: () {
+                                context.go("/receive");
+                              }),
+                        ),
                       ),
                       const SizedBox(width: 20.0),
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Send",
+                            disabled: true,
                             onTap: () {
                               context.go("/send");
                             }),
