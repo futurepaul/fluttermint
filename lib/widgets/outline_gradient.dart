@@ -12,11 +12,11 @@ class OutlinePainter extends CustomPainter {
     final Rect rect = Rect.fromLTWH(strokeWidth / 2, strokeWidth / 2,
         size.width - strokeWidth, size.height - strokeWidth);
     final RRect rRect = RRect.fromRectAndRadius(rect, radius ?? Radius.zero);
-    final Paint _paint = Paint()
+    final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..shader = gradient.createShader(rect);
-    canvas.drawRRect(rRect, _paint);
+    canvas.drawRRect(rRect, paint);
   }
 
   @override

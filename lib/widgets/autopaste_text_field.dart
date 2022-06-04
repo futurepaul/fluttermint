@@ -2,31 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttermint/utils/constants.dart';
 
-class AutoPasteTextField extends StatefulWidget {
-  const AutoPasteTextField({Key? key}) : super(key: key);
+class AutoPasteTextField extends StatelessWidget {
+  const AutoPasteTextField(
+      {Key? key, this.initialValue, required this.controller})
+      : super(key: key);
 
-  @override
-  State<AutoPasteTextField> createState() => _AutoPasteTextFieldState();
-}
-
-class _AutoPasteTextFieldState extends State<AutoPasteTextField> {
-  final TextEditingController _federationCodeField = TextEditingController();
+  final String? initialValue;
+  final TextEditingController controller;
 
   void _clearText() {
-    _federationCodeField.clear();
+    controller.clear();
   }
 
   void _setTextFromClipboard() {
     Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      _federationCodeField.text = "${value?.text?.trim()}";
+      controller.text = "${value?.text?.trim()}";
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _federationCodeField.addListener(() {
-      setState(() {});
-    });
+    controller.text = initialValue ?? "";
     return Column(
       children: [
         Focus(
@@ -36,16 +32,16 @@ class _AutoPasteTextFieldState extends State<AutoPasteTextField> {
             }
           },
           child: TextField(
-            controller: _federationCodeField,
+            controller: controller,
             decoration: InputDecoration(
                 labelText: "Paste federation code",
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(width: 1, color: COLOR_WHITE)),
+                    borderSide: const BorderSide(width: 1, color: white)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(width: 1, color: COLOR_WHITE)),
-                suffixIcon: _federationCodeField.text.isNotEmpty
+                    borderSide: const BorderSide(width: 1, color: white)),
+                suffixIcon: controller.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: _clearText,

@@ -62,7 +62,7 @@ class ReceiveConfirm extends StatelessWidget {
                 Container(
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(12)),
-                    color: COLOR_WHITE,
+                    color: white,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),

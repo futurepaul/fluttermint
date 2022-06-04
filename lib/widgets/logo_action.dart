@@ -1,36 +1,32 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../main.dart';
 import '../utils/constants.dart';
 
-class FedimintLogoAction extends StatelessWidget {
+class FedimintLogoAction extends ConsumerWidget {
   const FedimintLogoAction({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => context.go("/setup"),
+      onTap: () async {
+        // Clear the federation code, which redirects us to setup
+        await ref.read(prefProvider.notifier).update(null);
+      },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
           Text("Fedimint",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: COLOR_WHITE,
-                  fontVariations: [
-                    FontVariation("wdth", 112.0),
-                    FontVariation("wght", 600.0)
-                  ])),
-          // Icon(
-          //   Icons.expand_more,
-          //   color: COLOR_GREY,
-          //   size: 24.0,
-          // ),
+              style: TextStyle(fontSize: 18, color: white, fontVariations: [
+                FontVariation("wdth", 112.0),
+                FontVariation("wght", 600.0)
+              ])),
         ],
       ),
     );

@@ -33,7 +33,7 @@ class Setup extends StatelessWidget {
                         fontSize: 40,
                         // 3% of 40
                         letterSpacing: -1.2,
-                        color: COLOR_WHITE,
+                        color: white,
                         fontVariations: [
                           FontVariation("wght", 600),
                           FontVariation("wdth", 120)

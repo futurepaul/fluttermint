@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttermint/screens/receive.dart';
-import 'package:fluttermint/screens/receive_confirm.dart';
-import 'package:fluttermint/screens/send.dart';
-import 'package:fluttermint/screens/send_confirm.dart';
-import 'package:fluttermint/screens/send_finish.dart';
-import 'package:fluttermint/screens/setup.dart';
-import 'package:fluttermint/screens/setup_join.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/state.dart';
+import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
-import 'package:fluttermint/screens/home.dart';
-import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(App());
+late SharedPreferences prefs;
+
+final prefProvider = createPrefProvider(
+  prefs: (_) => prefs,
+);
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  prefs = await SharedPreferences.getInstance();
+
+  runApp(const ProviderScope(child: App()));
 }
 
-class App extends StatelessWidget {
-  App({Key? key}) : super(key: key);
+class App extends ConsumerWidget {
+  const App({Key? key}) : super(key: key);
 
-  static const title = 'GoRouter Example: Initial Location';
+  static const title = 'Fluttermint';
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.dark,
@@ -30,57 +37,18 @@ class App extends StatelessWidget {
     ));
 
     return MaterialApp.router(
-      routeInformationParser: _router.routeInformationParser,
-      routerDelegate: _router.routerDelegate,
+      routeInformationParser: router.routeInformationParser,
+      routerDelegate: router.routerDelegate,
       title: title,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           brightness: Brightness.dark,
-          primaryColor: COLOR_WHITE,
-          primarySwatch: white,
-          textTheme: TEXT_THEME_DEFAULT,
-          backgroundColor: COLOR_WHITE,
-          scaffoldBackgroundColor: COLOR_BLACK,
+          primaryColor: white,
+          primarySwatch: materialWhite,
+          textTheme: textThemeDefault,
+          backgroundColor: white,
+          scaffoldBackgroundColor: black,
           fontFamily: "Archivo"),
     );
   }
-
-  final _router = GoRouter(
-    initialLocation: "/setup",
-    routes: [
-      GoRoute(
-          path: "/setup",
-          builder: (context, state) => const Setup(),
-          routes: [
-            GoRoute(
-              path: 'join',
-              builder: (context, state) => SetupJoin(),
-            ),
-          ]),
-      GoRoute(path: '/', builder: (context, state) => const Home(), routes: [
-        GoRoute(
-            path: 'send',
-            builder: (context, state) => const Send(),
-            routes: [
-              GoRoute(
-                path: 'confirm',
-                builder: (context, state) => const SendConfirm(),
-              ),
-              GoRoute(
-                path: 'finish',
-                builder: (context, state) => const SendFinish(),
-              ),
-            ]),
-        GoRoute(
-            path: 'receive',
-            builder: (context, state) => const Receive(),
-            routes: [
-              GoRoute(
-                path: 'confirm',
-                builder: (context, state) => const ReceiveConfirm(),
-              ),
-            ]),
-      ]),
-    ],
-  );
 }

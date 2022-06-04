@@ -17,10 +17,7 @@ class ChillInfoCard extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             // Add one stop for each color. Stops should increase from 0 to 1
-            colors: [
-              COLOR_WHITE.withOpacity(0.2),
-              COLOR_WHITE.withOpacity(0.04)
-            ],
+            colors: [white.withOpacity(0.2), white.withOpacity(0.04)],
           ),
         ),
         child: Padding(padding: const EdgeInsets.all(20), child: child));

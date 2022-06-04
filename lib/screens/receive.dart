@@ -52,11 +52,11 @@ class Receive extends StatelessWidget {
                         enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide:
-                                const BorderSide(width: 1, color: COLOR_WHITE)),
+                                const BorderSide(width: 1, color: white)),
                         focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide:
-                                const BorderSide(width: 1, color: COLOR_WHITE)),
+                                const BorderSide(width: 1, color: white)),
                       ),
                     ),
                   ],

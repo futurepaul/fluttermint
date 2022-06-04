@@ -17,7 +17,7 @@ class OutlineGradientButton extends StatelessWidget {
   final String? tooltip;
   final bool primary;
 
-  OutlineGradientButton(
+  const OutlineGradientButton(
       {Key? key,
       required this.text,
       this.strokeWidth = 2.0,
@@ -53,9 +53,8 @@ class OutlineGradientButton extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: br,
         child: InkWell(
-          splashColor: primary
-              ? COLOR_BLACK.withOpacity(0.1)
-              : COLOR_WHITE.withOpacity(0.1),
+          splashColor:
+              primary ? black.withOpacity(0.1) : white.withOpacity(0.1),
           borderRadius: br,
           onTap: onTap,
           onLongPress: onLongPress,
@@ -68,10 +67,10 @@ class OutlineGradientButton extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: disabled
                             ? [
-                                COLOR_WHITE.withOpacity(0.3),
-                                COLOR_OFF_WHITE.withOpacity(0.3)
+                                white.withOpacity(0.3),
+                                offwhite.withOpacity(0.3)
                               ]
-                            : [COLOR_WHITE, COLOR_OFF_WHITE]),
+                            : [white, offwhite]),
                     radius,
                     strokeWidth),
             child: Ink(
@@ -108,19 +107,19 @@ class OutlineGradientButton extends StatelessWidget {
                     child: Text(text,
                         style: TextStyle(
                             color: primary
-                                ? COLOR_BLACK
+                                ? black
                                 : disabled
-                                    ? COLOR_WHITE.withOpacity(0.3)
-                                    : COLOR_WHITE,
+                                    ? white.withOpacity(0.3)
+                                    : white,
                             fontSize: 16,
                             shadows: [
                               Shadow(
                                 blurRadius: primary ? 1.0 : 0.0,
                                 color: primary
-                                    ? COLOR_WHITE
+                                    ? white
                                     : disabled
-                                        ? COLOR_BLACK.withOpacity(0.3)
-                                        : COLOR_BLACK,
+                                        ? black.withOpacity(0.3)
+                                        : black,
                                 offset: Offset(0.0, primary ? -1.0 : 1.0),
                               ),
                             ],

@@ -26,7 +26,7 @@ class FediTooltip extends StatelessWidget {
       padding: const EdgeInsets.all(14.0),
       textStyle: const TextStyle(
           fontSize: 14.0,
-          color: COLOR_BLACK,
+          color: black,
           fontVariations: [FontVariation("wght", 500)]),
       preferBelow: false,
       decoration: BoxDecoration(
@@ -40,7 +40,7 @@ class FediTooltip extends StatelessWidget {
         gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: <Color>[COLOR_WHITE, Color(0xffc3c3c3)]),
+            colors: <Color>[white, Color(0xffc3c3c3)]),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14.0),

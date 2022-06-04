@@ -92,7 +92,7 @@ class _SendConfirmState extends State<SendConfirm> {
                           endIndent:
                               ((MediaQuery.of(context).size.width - 80) / 2.0) -
                                   12.0,
-                          color: COLOR_WHITE,
+                          color: white,
                         ),
                         const SizedBox(height: 16),
                         const Text("Fee is ~3 – 11 sats"),
