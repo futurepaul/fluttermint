@@ -9,24 +9,13 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
-class SetupJoin extends ConsumerStatefulWidget {
-  const SetupJoin({Key? key}) : super(key: key);
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SetupJoinState();
-}
-
-class _SetupJoinState extends ConsumerState<SetupJoin> {
-  @override
-  void initState() {
-    super.initState();
-    init();
-  }
-
-  void init() async {}
+class SetupJoin extends ConsumerWidget {
+  const SetupJoin({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final codeProvider = ref.read(prefProvider);
+    final codeProviderNotifier = ref.read(prefProvider.notifier);
     final textController = TextEditingController();
 
     return Textured(
@@ -61,11 +50,9 @@ class _SetupJoinState extends ConsumerState<SetupJoin> {
                     onTap: () async {
                       var newText = textController.text;
 
-                      await ref.read(prefProvider.notifier).update(newText);
+                      await codeProviderNotifier.update(newText);
 
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
-                      if (!mounted) return;
-                      context.go("/");
                     })
               ],
             ),

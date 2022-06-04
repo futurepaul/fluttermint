@@ -1,5 +1,7 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
-import 'package:fluttermint/utils/unimplemented.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/chill_info_card.dart';
@@ -13,16 +15,23 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import 'package:fluttermint/widgets/ellipsable_text.dart';
 
-class ReceiveConfirm extends StatelessWidget {
+import 'package:share_plus/share_plus.dart';
+
+class ReceiveConfirm extends ConsumerWidget {
   const ReceiveConfirm({Key? key}) : super(key: key);
 
-  static const lightningInvoice =
-      "lnbc20m1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqhp58yjmdan79s6qqdhdzgynm4zwqd5d7xmw5fk98klysy043l2ahrqsfpp3qjmp7lwpagxun9pygexvgpjdc4jdj85fr9yq20q82gphp2nflc7jtzrcazrra7wwgzxqc8u7754cdlpfrmccae92qgzqvzq2ps8pqqqqqqpqqqqq9qqqvpeuqafqxu92d8lr6fvg0r5gv0heeeqgcrqlnm6jhphu9y00rrhy4grqszsvpcgpy9qqqqqqgqqqqq7qqzqj9n4evl6mr5aj9f58zp6fyjzup6ywn3x6sk8akg5v4tgn2q8g4fhx05wf6juaxu9760yp46454gpg5mtzgerlzezqcqvjnhjh8z3g2qqdhhwkjo";
-
-  final lightningUri = "lightning$lightningInvoice";
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // This should never be null because otherwise it should navigate us away
+    final receive = ref.read(receiveProvider)!;
+    final receiveNotifier = ref.read(receiveProvider.notifier);
+
+    // This shouldn't be null because should be prepped by the constructor
+    final invoice = receive.invoice!;
+    final lightningUri = "lightning:$invoice";
+    final desc = receive.description;
+    final amount = receive.amountSats;
+
     return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -30,9 +39,9 @@ class ReceiveConfirm extends StatelessWidget {
             title: "Receive bitcoin",
             backAction: () {
               context.go("/receive");
-              // context.back();
             },
             closeAction: () {
+              receiveNotifier.clear();
               context.go("/");
             },
           ),
@@ -53,10 +62,9 @@ class ReceiveConfirm extends StatelessWidget {
                     Text("RECEIVE",
                         style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),
-                    const SmallBalanceDisplay(),
+                    SmallBalanceDisplay(amountSats: amount),
                     const SizedBox(height: 8),
-                    Text("Pineapple pizza slice",
-                        style: Theme.of(context).textTheme.bodyText2)
+                    Text(desc, style: Theme.of(context).textTheme.bodyText2)
                   ],
                 )),
                 Container(
@@ -75,7 +83,7 @@ class ReceiveConfirm extends StatelessWidget {
                             size: MediaQuery.of(context).size.width - 88.0),
                         const SizedBox(height: 16),
                         EllipsableText(
-                            text: lightningInvoice,
+                            text: invoice,
                             style: Theme.of(context).textTheme.caption),
                       ],
                     ),
@@ -86,14 +94,15 @@ class ReceiveConfirm extends StatelessWidget {
                     Expanded(
                       child: OutlineGradientButton(
                         text: "Share",
-                        onTap: () => unimplementedDialog(context),
+                        onTap: () => Share.share(lightningUri),
                       ),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
                       child: OutlineGradientButton(
                         text: "Copy",
-                        onTap: () => unimplementedDialog(context),
+                        onTap: () =>
+                            Clipboard.setData(ClipboardData(text: invoice)),
                       ),
                     )
                   ],

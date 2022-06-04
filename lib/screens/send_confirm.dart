@@ -60,7 +60,9 @@ class _SendConfirmState extends State<SendConfirm> {
                     const SizedBox(height: 8),
                     Text("SEND", style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),
-                    const SmallBalanceDisplay(),
+                    const SmallBalanceDisplay(
+                      amountSats: 12345,
+                    ),
                     const SizedBox(height: 8),
                     Text("Pineapple pizza slice",
                         style: Theme.of(context).textTheme.bodyText2),

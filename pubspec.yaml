@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.0.15
   riverpod: ^1.0.3
   flutter_riverpod: ^1.0.4
+  share_plus: ^4.0.6
 
 dev_dependencies:
   flutter_test:

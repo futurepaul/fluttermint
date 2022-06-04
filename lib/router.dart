@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/receive.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -28,15 +29,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// My favorite approach: ofc there's room for improvement, but it works fine.
-/// What I like about this is that `RouterNotifier` centralizes all the logic.
-/// The reason we use `ChangeNotifier` is because it's a `Listenable` object,
-/// as required by `GoRouter`'s `refreshListenable` parameter.
-/// Unluckily, it is not possible to use a `StateNotifier` here, since it's
-/// not a `Listenable`. Recall that `StateNotifier` is to be preferred over
-/// `ChangeNotifier`, see https://riverpod.dev/docs/concepts/providers/#different-types-of-providers
-/// There are other approaches to solve this, and they can
-/// be found in the `/others` folder.
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
@@ -44,8 +36,13 @@ class RouterNotifier extends ChangeNotifier {
   /// calls `notifyListeners()` whenever there's change onto a desider provider.
   RouterNotifier(this._ref) {
     _ref.listen<String?>(
-      prefProvider, // In our case, we're interested in the log in / log out events.
-      (_, __) => notifyListeners(), // Obviously more logic can be added here
+      prefProvider,
+      (_, __) => notifyListeners(),
+    );
+
+    _ref.listen<Receive?>(
+      receiveProvider,
+      (_, __) => notifyListeners(),
     );
   }
 
@@ -54,6 +51,7 @@ class RouterNotifier extends ChangeNotifier {
   /// We don't want to trigger a rebuild of the surrounding provider.
   String? _redirectLogic(GoRouterState state) {
     final federationCode = _ref.read(prefProvider);
+    final receive = _ref.read(receiveProvider);
 
     final areWeInSetup =
         state.location == '/setup' || state.location == '/setup/join';
@@ -61,6 +59,16 @@ class RouterNotifier extends ChangeNotifier {
     if (federationCode == null) {
       return areWeInSetup ? null : '/setup';
     }
+
+    // // Receive has been populated
+    // if (state.location == '/receive' && receive != null) {
+    //   return '/receive/confirm';
+    // }
+
+    // // Receive was cancelled
+    // if (state.location == '/receive/confirm' && receive == null) {
+    //   return '/';
+    // }
 
     return null;
   }
@@ -91,7 +99,7 @@ class RouterNotifier extends ChangeNotifier {
               ]),
           GoRoute(
               path: 'receive',
-              builder: (context, state) => const Receive(),
+              builder: (context, state) => const ReceiveScreen(),
               routes: [
                 GoRoute(
                   path: 'confirm',

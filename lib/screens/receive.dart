@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -9,17 +11,22 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
-class Receive extends StatelessWidget {
-  const Receive({Key? key}) : super(key: key);
+class ReceiveScreen extends ConsumerWidget {
+  const ReceiveScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final amountController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final receiveNotifier = ref.read(receiveProvider.notifier);
+
     return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: FediAppBar(
             title: "Receive",
             closeAction: () {
+              receiveNotifier.clear();
               context.go("/");
             },
           ),
@@ -29,12 +36,14 @@ class Receive extends StatelessWidget {
               children: [
                 Column(
                   children: [
-                    const TextField(
+                    TextField(
+                      controller: amountController,
                       autofocus: true,
-                      decoration: InputDecoration(border: InputBorder.none),
+                      decoration:
+                          const InputDecoration(border: InputBorder.none),
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 52, fontVariations: [
+                      style: const TextStyle(fontSize: 52, fontVariations: [
                         FontVariation("wght", 400),
                         FontVariation("wdth", 120)
                       ]),
@@ -44,6 +53,7 @@ class Receive extends StatelessWidget {
                       height: 36,
                     ),
                     TextField(
+                      controller: descriptionController,
                       style: const TextStyle(
                           fontSize: 16,
                           fontVariations: [FontVariation("wght", 400)]),
@@ -64,7 +74,13 @@ class Receive extends StatelessWidget {
                 OutlineGradientButton(
                     primary: true,
                     text: "Continue",
-                    onTap: () => context.go("/receive/confirm"))
+                    onTap: () async {
+                      var desc = descriptionController.text;
+                      var amount = int.parse(amountController.text);
+                      await receiveNotifier.createReceive(Receive(
+                          id: "123", description: desc, amountSats: amount));
+                      context.go("/receive/confirm");
+                    })
               ],
             ),
           )),

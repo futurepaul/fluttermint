@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttermint/data/state.dart';
+import 'package:fluttermint/data/prefs.dart';
 import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
