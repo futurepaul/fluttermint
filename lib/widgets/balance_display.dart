@@ -9,15 +9,14 @@ class BalanceDisplay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final balance = ref.read(balanceProvider);
-    final balanceNotifier = ref.read(balanceProvider.notifier);
+    final balance = ref.watch(balanceProvider);
+    final balanceNotifier = ref.watch(balanceProvider.notifier);
 
     return Column(
       children: [
         GestureDetector(
-          onTap: () {
-            debugPrint("tapped");
-            balanceNotifier.createBalance();
+          onTap: () async {
+            await balanceNotifier.createBalance();
           },
           child: Text(balance != null ? "${balance.amountSats}" : "hey",
               style: Theme.of(context).textTheme.headline1),
