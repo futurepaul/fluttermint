@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 const black = Color(0xFF212121);
@@ -23,56 +22,49 @@ MaterialColor materialWhite = MaterialColor(0xFFF1F1F1, color);
 
 const TextTheme textThemeDefault = TextTheme(
   headline1: TextStyle(
-      fontFamily: "Archivo",
-      color: white,
-      fontSize: 64,
-      fontVariations: [
-        FontVariation("wdth", 120.0),
-        FontVariation("wght", 500.0)
-      ]),
+    fontFamily: "Archivo 125",
+    color: white,
+    fontSize: 64,
+    fontWeight: FontWeight.w500,
+  ),
   headline2: TextStyle(
-      fontFamily: "Archivo",
-      color: white,
-      fontSize: 22,
-      fontVariations: [
-        FontVariation("wdth", 120.0),
-        FontVariation("wght", 500.0)
-      ]),
+    fontFamily: "Archivo 125",
+    color: white,
+    fontSize: 22,
+    fontWeight: FontWeight.w500,
+  ),
   headline3: TextStyle(
       fontFamily: "Archivo",
       color: white,
       fontSize: 18,
-      fontVariations: [FontVariation("wght", 400.0)]),
+      fontWeight: FontWeight.w400),
   // Body 2 in the Figma
   headline4: TextStyle(
+      fontFamily: "Archivo",
       color: white,
       fontSize: 16,
-      fontVariations: [FontVariation("wght", 600.0)]),
+      fontWeight: FontWeight.w600),
   // Smaller balance display
   headline5: TextStyle(
-      fontFamily: "Archivo",
+      fontFamily: "Archivo 125",
       color: white,
       fontSize: 28,
-      fontVariations: [
-        FontVariation("wdth", 120.0),
-        FontVariation("wght", 400.0)
-      ]),
+      fontWeight: FontWeight.w400),
   // Unit for smaller balance display
   headline6: TextStyle(
-      fontFamily: "Archivo",
-      color: white,
-      fontSize: 18,
-      fontVariations: [
-        FontVariation("wdth", 120.0),
-        FontVariation("wght", 500.0)
-      ]),
+    fontFamily: "Archivo 125",
+    color: white,
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+  ),
   bodyText1: TextStyle(color: white, fontSize: 14, height: 1.5),
   bodyText2: TextStyle(
-      fontFamily: "Archivo",
+      fontFamily: "Inter",
       color: Color(0xCCF1F1F1),
       fontSize: 14,
-      fontVariations: [FontVariation("wght", 400.0)]),
-  subtitle1: TextStyle(color: white, fontSize: 12),
+      fontWeight: FontWeight.w400),
+
+  subtitle1: TextStyle(color: white, fontSize: 16, fontWeight: FontWeight.w400),
   subtitle2: TextStyle(color: grey, fontSize: 12),
-  caption: TextStyle(fontFamily: "Archivo", color: black, fontSize: 12),
+  caption: TextStyle(fontFamily: "Archivo 125", color: black, fontSize: 12),
 );

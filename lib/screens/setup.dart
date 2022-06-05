@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -29,15 +27,12 @@ class Setup extends StatelessWidget {
                 const Text("Fedimint\nis a private\nlightning wallet",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontFamily: "Archivo",
-                        fontSize: 40,
+                        fontFamily: "Archivo 125",
+                        fontSize: 38,
                         // 3% of 40
                         letterSpacing: -1.2,
                         color: white,
-                        fontVariations: [
-                          FontVariation("wght", 600),
-                          FontVariation("wdth", 120)
-                        ])),
+                        fontWeight: FontWeight.w600)),
                 const Spacer(),
                 OutlineGradientButton(
                     text: "Get Started", onTap: () => context.go("/setup/join"))

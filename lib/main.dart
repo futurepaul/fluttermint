@@ -48,7 +48,7 @@ class App extends ConsumerWidget {
           textTheme: textThemeDefault,
           backgroundColor: white,
           scaffoldBackgroundColor: black,
-          fontFamily: "Archivo"),
+          fontFamily: "Inter"),
     );
   }
 }

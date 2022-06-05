@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:fluttermint/widgets/outline_gradient.dart';
 import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
 import 'package:flutter_inset_box_shadow/flutter_inset_box_shadow.dart';
@@ -106,6 +104,7 @@ class OutlineGradientButton extends StatelessWidget {
                         horizontal: 24.0, vertical: 16.0),
                     child: Text(text,
                         style: TextStyle(
+                            fontFamily: "Archivo",
                             color: primary
                                 ? black
                                 : disabled
@@ -123,9 +122,7 @@ class OutlineGradientButton extends StatelessWidget {
                                 offset: Offset(0.0, primary ? -1.0 : 1.0),
                               ),
                             ],
-                            fontVariations: const [
-                              FontVariation("wght", 600)
-                            ])),
+                            fontWeight: FontWeight.w600)),
                   ),
                 )),
           ),

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:fluttermint/utils/constants.dart';
 
@@ -25,9 +23,7 @@ class FediTooltip extends StatelessWidget {
       message: 'I am a Tooltip?',
       padding: const EdgeInsets.all(14.0),
       textStyle: const TextStyle(
-          fontSize: 14.0,
-          color: black,
-          fontVariations: [FontVariation("wght", 500)]),
+          fontSize: 14.0, color: black, fontWeight: FontWeight.w500),
       preferBelow: false,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),

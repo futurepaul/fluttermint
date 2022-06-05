@@ -51,7 +51,7 @@ class RouterNotifier extends ChangeNotifier {
   /// We don't want to trigger a rebuild of the surrounding provider.
   String? _redirectLogic(GoRouterState state) {
     final federationCode = _ref.read(prefProvider);
-    final receive = _ref.read(receiveProvider);
+    // final receive = _ref.read(receiveProvider);
 
     final areWeInSetup =
         state.location == '/setup' || state.location == '/setup/join';

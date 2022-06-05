@@ -43,10 +43,10 @@ class ReceiveScreen extends ConsumerWidget {
                           const InputDecoration(border: InputBorder.none),
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 52, fontVariations: [
-                        FontVariation("wght", 400),
-                        FontVariation("wdth", 120)
-                      ]),
+                      style: const TextStyle(
+                          fontFamily: "Archivo 125",
+                          fontSize: 52,
+                          fontWeight: FontWeight.w400),
                     ),
                     Text("SATS", style: Theme.of(context).textTheme.headline6),
                     const SizedBox(
@@ -54,9 +54,7 @@ class ReceiveScreen extends ConsumerWidget {
                     ),
                     TextField(
                       controller: descriptionController,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontVariations: [FontVariation("wght", 400)]),
+                      style: Theme.of(context).textTheme.subtitle1,
                       decoration: InputDecoration(
                         labelText: "Description",
                         enabledBorder: OutlineInputBorder(

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,11 +20,14 @@ class FedimintLogoAction extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
-          Text("Fedimint",
-              style: TextStyle(fontSize: 18, color: white, fontVariations: [
-                FontVariation("wdth", 112.0),
-                FontVariation("wght", 600.0)
-              ])),
+          Text(
+            "Fedimint",
+            style: TextStyle(
+                fontFamily: "Archivo 125",
+                fontSize: 18,
+                color: white,
+                fontWeight: FontWeight.w600),
+          )
         ],
       ),
     );
