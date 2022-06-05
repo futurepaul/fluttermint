@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 
-class BalanceDisplay extends StatelessWidget {
+class BalanceDisplay extends ConsumerWidget {
   const BalanceDisplay({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final balance = ref.read(balanceProvider);
+    final balanceNotifier = ref.read(balanceProvider.notifier);
+
     return Column(
       children: [
-        Text("32,615", style: Theme.of(context).textTheme.headline1),
+        GestureDetector(
+          onTap: () {
+            debugPrint("tapped");
+            balanceNotifier.createBalance();
+          },
+          child: Text(balance != null ? "${balance.amountSats}" : "hey",
+              style: Theme.of(context).textTheme.headline1),
+        ),
         Text("SATS", style: Theme.of(context).textTheme.headline2),
       ],
     );
