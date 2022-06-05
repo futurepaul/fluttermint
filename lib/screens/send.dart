@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/send.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -11,17 +13,49 @@ import 'package:fluttermint/widgets/textured.dart';
 
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-class Send extends StatelessWidget {
-  const Send({Key? key}) : super(key: key);
+class SendScreen extends ConsumerStatefulWidget {
+  const SendScreen({Key? key}) : super(key: key);
+
+  @override
+  SendScreenState createState() => SendScreenState();
+}
+
+class SendScreenState extends ConsumerState<SendScreen> {
+  MobileScannerController? controller;
+
+  // TODO not positive I need this (which makes this into a stateful widget)
+  // But I was getting some errors about the camera already being started
+
+  // TODO error: MobileScanner: Called start() while already started!
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // "ref" can be used in all life-cycles of a StatefulWidget.
+    // ref.read(counterProvider);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final sendNotifier = ref.read(sendProvider.notifier);
+
+    // TODO is it right that I'm defining the function in here?
     void onDetect(Barcode barcode, MobileScannerArguments? arguments) async {
       final data = barcode.rawValue;
       if (data != null) {
         debugPrint('Barcode found! $data');
         // TODO use rust to figure out if it's a valid bolt11
-        context.go("/send/confirm");
+        await sendNotifier.createSend(Send(
+            description: "This is a test", amountSats: 42069, invoice: data));
+
+        if (mounted) {
+          context.go("/send/confirm");
+        }
       }
     }
 
@@ -37,9 +71,11 @@ class Send extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
+                  // TODO some sort of clip for aiming the scanner
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
                     child: MobileScanner(
+                        controller: controller,
                         allowDuplicates: false,
                         onDetect: onDetect,
                         fit: BoxFit.cover),
@@ -53,21 +89,4 @@ class Send extends StatelessWidget {
           )),
     );
   }
-}
-
-class InvertedClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final side = min(size.width, size.height);
-    final xOffset = (size.width - side) / 2;
-    final yOffset = (size.height - side) / 2;
-
-    return Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..addRect(Rect.fromLTWH(xOffset, yOffset, side, side))
-      ..fillType = PathFillType.evenOdd;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
 }

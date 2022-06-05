@@ -86,7 +86,7 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(path: '/', builder: (context, state) => const Home(), routes: [
           GoRoute(
               path: 'send',
-              builder: (context, state) => const Send(),
+              builder: (context, state) => const SendScreen(),
               routes: [
                 GoRoute(
                   path: 'confirm',
