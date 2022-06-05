@@ -51,6 +51,7 @@ class SetupJoin extends ConsumerWidget {
                       var newText = textController.text;
 
                       await codeProviderNotifier.update(newText);
+                      context.go("/");
 
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
                     })

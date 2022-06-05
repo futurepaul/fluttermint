@@ -77,8 +77,9 @@ class ReceiveScreen extends ConsumerWidget {
                     onTap: () async {
                       var desc = descriptionController.text;
                       var amount = int.parse(amountController.text);
-                      await receiveNotifier.createReceive(Receive(
-                          id: "123", description: desc, amountSats: amount));
+                      await receiveNotifier.createReceive(
+                          Receive(description: desc, amountSats: amount));
+                      // TODO figure out the right way to do this async without the mounted flag
                       context.go("/receive/confirm");
                     })
               ],

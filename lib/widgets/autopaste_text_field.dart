@@ -16,7 +16,9 @@ class AutoPasteTextField extends StatelessWidget {
 
   void _setTextFromClipboard() {
     Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      controller.text = "${value?.text?.trim()}";
+      if (value != null) {
+        controller.text = "${value.text?.trim()}";
+      }
     });
   }
 

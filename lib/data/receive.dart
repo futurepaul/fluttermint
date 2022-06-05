@@ -4,22 +4,16 @@ import 'package:riverpod/riverpod.dart';
 @immutable
 class Receive {
   const Receive(
-      {required this.id,
-      required this.description,
-      required this.amountSats,
-      this.invoice});
+      {required this.description, required this.amountSats, this.invoice});
 
-  final String id;
   final String description;
   final int amountSats;
   final String? invoice;
 
   // Since Receive is immutable, we implement a method that allows cloning the
   // Receive with slightly different content.
-  Receive copyWith(
-      {String? id, String? description, int? amountSats, String? invoice}) {
+  Receive copyWith({String? description, int? amountSats, String? invoice}) {
     return Receive(
-      id: id ?? this.id,
       description: description ?? this.description,
       amountSats: amountSats ?? this.amountSats,
       invoice: invoice ?? this.invoice,
