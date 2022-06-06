@@ -436,28 +436,16 @@ checksum = "9a41df6ad9642c5c15ae312dd3d074de38fd3eb7cc87ad4ce10f90292a83fe4d"
 dependencies = [
  "bech32",
  "bitcoin_hashes",
- "bitcoinconsensus",
- "secp256k1 0.20.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "secp256k1",
  "serde",
 ]
 
 [[package]]
 name = "bitcoin_hashes"
 version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "006cc91e1a1d99819bc5b8214be3555c1f0611b169f527a1fdc54ed1f2b745b0"
+source = "git+https://github.com/fedimint/bitcoin_hashes?branch=minimint#fb2be02f95fac4d21cc8822f4bf63166c7aa8d47"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "bitcoinconsensus"
-version = "0.19.0-3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a8aa43b5cd02f856cb126a9af819e77b8910fdd74dd1407be649f2f5fe3a1b5"
-dependencies = [
- "cc",
- "libc",
 ]
 
 [[package]]
@@ -1652,7 +1640,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "580647f97f8e6d138ad724027c8ca9b890b1001b05374c270bbee4c10309b641"
 dependencies = [
  "bitcoin",
- "secp256k1 0.20.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "secp256k1",
 ]
 
 [[package]]
@@ -1665,7 +1653,7 @@ dependencies = [
  "bitcoin_hashes",
  "lightning",
  "num-traits",
- "secp256k1 0.20.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "secp256k1",
 ]
 
 [[package]]
@@ -1752,6 +1740,7 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "minimint"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1785,6 +1774,7 @@ dependencies = [
 [[package]]
 name = "minimint-api"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "async-trait",
  "bitcoin",
@@ -1807,6 +1797,7 @@ dependencies = [
 name = "minimint-bridge"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bitcoin",
  "bitcoincore-rpc",
  "flutter_rust_bridge",
@@ -1829,6 +1820,7 @@ dependencies = [
 [[package]]
 name = "minimint-derive"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "heck 0.3.3",
  "proc-macro2 1.0.39",
@@ -1839,6 +1831,7 @@ dependencies = [
 [[package]]
 name = "minimint-ln"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1848,7 +1841,7 @@ dependencies = [
  "lightning",
  "lightning-invoice",
  "minimint-api",
- "secp256k1 0.20.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "secp256k1",
  "serde",
  "thiserror",
  "threshold_crypto",
@@ -1858,6 +1851,7 @@ dependencies = [
 [[package]]
 name = "minimint-mint"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1877,6 +1871,7 @@ dependencies = [
 [[package]]
 name = "minimint-wallet"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "async-trait",
  "bitcoin",
@@ -1887,7 +1882,7 @@ dependencies = [
  "minimint-derive",
  "miniscript",
  "rand 0.6.5",
- "secp256k1 0.20.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "secp256k1",
  "serde",
  "thiserror",
  "tokio",
@@ -1917,6 +1912,7 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "async-trait",
  "base64 0.13.0",
@@ -2656,32 +2652,12 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 [[package]]
 name = "secp256k1"
 version = "0.20.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97d03ceae636d0fed5bae6a7f4f664354c5f4fcedf6eef053fef17e49f837d0a"
-dependencies = [
- "rand 0.6.5",
- "secp256k1-sys 0.4.0",
- "serde",
-]
-
-[[package]]
-name = "secp256k1"
-version = "0.20.3"
 source = "git+https://github.com/fedimint/rust-secp256k1/?branch=minimint#37b9d77d98a497fddfb435df4f806b17276edb8d"
 dependencies = [
  "bitcoin_hashes",
  "rand 0.6.5",
- "secp256k1-sys 0.4.1",
+ "secp256k1-sys",
  "serde",
-]
-
-[[package]]
-name = "secp256k1-sys"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67e4b6455ee49f5901c8985b88f98fb0a0e1d90a6661f5a03f4888bd987dad29"
-dependencies = [
- "cc",
 ]
 
 [[package]]
@@ -2698,7 +2674,7 @@ version = "0.4.0"
 source = "git+https://github.com/fedimint/rust-secp256k1-zkp?branch=minimint#1c4d6e843333947804df1be20d7fe9bd636a1555"
 dependencies = [
  "rand 0.6.5",
- "secp256k1 0.20.3 (git+https://github.com/fedimint/rust-secp256k1/?branch=minimint)",
+ "secp256k1",
  "secp256k1-zkp-sys",
  "serde",
 ]
@@ -2709,7 +2685,7 @@ version = "0.4.0"
 source = "git+https://github.com/fedimint/rust-secp256k1-zkp?branch=minimint#1c4d6e843333947804df1be20d7fe9bd636a1555"
 dependencies = [
  "cc",
- "secp256k1-sys 0.4.1",
+ "secp256k1-sys",
 ]
 
 [[package]]
@@ -3065,6 +3041,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/minimint?branch=plugin#8761b1462161401d64d9ca523aca9c11a2daea73"
 dependencies = [
  "bls12_381",
  "ff",
