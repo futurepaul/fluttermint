@@ -11,6 +11,7 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
+import '../ffi.dart';
 import '../widgets/chill_info_card.dart';
 import '../widgets/small_balance_display.dart';
 
@@ -20,7 +21,7 @@ class SendConfirm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final send = ref.read(sendProvider)!;
-    // final sendNotifier = ref.read(sendProvider.notifier);
+    final sendNotifier = ref.read(sendProvider.notifier);
 
     final invoice = send.invoice!;
     // final lightningUri = "lightning:$invoice";
@@ -86,7 +87,13 @@ class SendConfirm extends ConsumerWidget {
                 )),
                 OutlineGradientButton(
                     text: "Send $amount SATS",
-                    onTap: () => context.go("/send/finish"))
+                    onTap: () async {
+                      try {
+                        sendNotifier.pay(send).then((_) => context.go("/"));
+                      } catch (err) {
+                        context.go("/errormodal", extra: err);
+                      }
+                    })
               ],
             ),
           )),

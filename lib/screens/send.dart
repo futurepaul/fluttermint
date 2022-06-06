@@ -27,7 +27,6 @@ class SendScreen extends ConsumerWidget {
         debugPrint('Barcode found! $data');
         // TODO use rust to figure out if it's a valid bolt11
         try {
-          throw Exception("yeeeehaw");
           await sendNotifier
               .createSend(Send(
                   description: "This is a test",
