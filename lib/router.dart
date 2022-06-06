@@ -110,10 +110,9 @@ class RouterNotifier extends ChangeNotifier {
           GoRoute(
               path: "errormodal",
               pageBuilder: (context, state) {
-                var reason = state.extra as Exception;
                 return MaterialPage(
                     fullscreenDialog: true,
-                    child: ErrorPage(errorReason: reason.toString()));
+                    child: ErrorPage(errorReason: state.extra.toString()));
               })
         ]),
       ];
