@@ -44,6 +44,7 @@ dependencies:
   flutter_rust_bridge: ^1.33.0
   path_provider: ^2.0.9
   mobile_scanner: ^2.0.0
+  rive: ^0.8.4
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/
+    - assets/spinny_globe.riv
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

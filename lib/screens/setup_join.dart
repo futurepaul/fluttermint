@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SetupJoin extends ConsumerWidget {
   const SetupJoin({super.key});
@@ -17,6 +18,16 @@ class SetupJoin extends ConsumerWidget {
     final codeProvider = ref.read(prefProvider);
     final codeProviderNotifier = ref.read(prefProvider.notifier);
     final textController = TextEditingController();
+
+    void onDetect(Barcode barcode, MobileScannerArguments? arguments) async {
+      final data = barcode.rawValue;
+      if (data != null) {
+        debugPrint('Barcode found! $data');
+        await codeProviderNotifier.update(data).then((_) {
+          context.go("/");
+        });
+      }
+    }
 
     return Textured(
       child: Scaffold(
@@ -30,15 +41,15 @@ class SetupJoin extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: const Image(
-                        fit: BoxFit.cover,
-                        image: AssetImage(
-                          "images/dirtyqr.png",
-                        )),
-                  ),
-                ),
+                    // TODO some sort of clip for aiming the scanner
+                    child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: MobileScanner(
+                      // controller: controller,
+                      allowDuplicates: false,
+                      onDetect: onDetect,
+                      fit: BoxFit.cover),
+                )),
                 const SizedBox(height: 16),
                 AutoPasteTextField(
                   controller: textController,
@@ -50,10 +61,10 @@ class SetupJoin extends ConsumerWidget {
                     onTap: () async {
                       var newText = textController.text;
 
-                      await codeProviderNotifier.update(newText);
-                      context.go("/");
-
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
+                      await codeProviderNotifier.update(newText).then((_) {
+                        context.go("/");
+                      });
                     })
               ],
             ),

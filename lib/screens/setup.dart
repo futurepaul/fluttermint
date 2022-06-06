@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/textured.dart';
+import 'package:rive/rive.dart';
 
 class Setup extends StatelessWidget {
   const Setup({Key? key}) : super(key: key);
@@ -20,9 +21,10 @@ class Setup extends StatelessWidget {
               children: [
                 const Spacer(),
                 const SizedBox(
-                    width: 295,
-                    height: 295,
-                    child: Image(image: AssetImage("images/fed-graphic.png"))),
+                  width: 295,
+                  height: 295,
+                  child: RiveAnimation.asset("assets/spinny_globe.riv"),
+                ),
                 const SizedBox(height: 32),
                 const Text("Fedimint\nis a private\nlightning wallet",
                     textAlign: TextAlign.center,

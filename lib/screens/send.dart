@@ -18,20 +18,20 @@ class SendScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // MobileScannerController? controller;
     final sendNotifier = ref.read(sendProvider.notifier);
-
     // TODO is it right that I'm defining the function in here?
     void onDetect(Barcode barcode, MobileScannerArguments? arguments) async {
       final data = barcode.rawValue;
       if (data != null) {
         debugPrint('Barcode found! $data');
         // TODO use rust to figure out if it's a valid bolt11
-        await sendNotifier.createSend(Send(
-            description: "This is a test", amountSats: 42069, invoice: data));
-
-        // if (mounted) {
-        // TODO "mounted"
-        context.go("/send/confirm");
-        // }
+        await sendNotifier
+            .createSend(Send(
+                description: "This is a test",
+                amountSats: 42069,
+                invoice: data))
+            .then((_) {
+          context.go("/send/confirm");
+        });
       }
     }
 
