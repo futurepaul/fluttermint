@@ -48,7 +48,6 @@ class Home extends StatelessWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Send",
-                            disabled: true,
                             onTap: () {
                               context.go("/send");
                             }),

@@ -10,7 +10,7 @@ class OutlineGradientButton extends StatelessWidget {
   final double strokeWidth;
   final Radius radius;
   final Gradient gradient;
-  final GestureTapCallback? onTap;
+  final GestureTapCallback onTap;
   final GestureLongPressCallback? onLongPress;
   final String? tooltip;
   final bool primary;
@@ -25,7 +25,7 @@ class OutlineGradientButton extends StatelessWidget {
           colors: [Color(0xfff1f1f1), Color(0xffA0A0A0)]),
       this.radius = const Radius.circular(30),
       this.disabled = false,
-      this.onTap,
+      required this.onTap,
       this.onLongPress,
       this.tooltip,
       this.primary = false})
@@ -54,7 +54,11 @@ class OutlineGradientButton extends StatelessWidget {
           splashColor:
               primary ? black.withOpacity(0.1) : white.withOpacity(0.1),
           borderRadius: br,
-          onTap: onTap,
+          onTap: () {
+            if (!disabled) {
+              onTap();
+            }
+          },
           onLongPress: onLongPress,
           child: CustomPaint(
             painter: primary
