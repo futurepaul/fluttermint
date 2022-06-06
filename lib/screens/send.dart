@@ -24,14 +24,19 @@ class SendScreen extends ConsumerWidget {
       if (data != null) {
         debugPrint('Barcode found! $data');
         // TODO use rust to figure out if it's a valid bolt11
-        await sendNotifier
-            .createSend(Send(
-                description: "This is a test",
-                amountSats: 42069,
-                invoice: data))
-            .then((_) {
-          context.go("/send/confirm");
-        });
+        try {
+          throw Exception("yeeeehaw");
+          await sendNotifier
+              .createSend(Send(
+                  description: "This is a test",
+                  amountSats: 42069,
+                  invoice: data))
+              .then((_) {
+            context.go("/send/confirm");
+          });
+        } catch (err) {
+          context.go("/errormodal", extra: err);
+        }
       }
     }
 

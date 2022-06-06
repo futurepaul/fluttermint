@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/receive.dart';
+import 'package:fluttermint/screens/error_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -106,6 +107,14 @@ class RouterNotifier extends ChangeNotifier {
                   builder: (context, state) => const ReceiveConfirm(),
                 ),
               ]),
+          GoRoute(
+              path: "errormodal",
+              pageBuilder: (context, state) {
+                var reason = state.extra as Exception;
+                return MaterialPage(
+                    fullscreenDialog: true,
+                    child: ErrorPage(errorReason: reason.toString()));
+              })
         ]),
       ];
 }

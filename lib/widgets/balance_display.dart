@@ -18,7 +18,7 @@ class BalanceDisplay extends ConsumerWidget {
           onTap: () async {
             await balanceNotifier.createBalance();
           },
-          child: Text(balance != null ? "${balance.amountSats}" : "hey",
+          child: Text(balance != null ? "${balance.amountSats}" : "???",
               style: Theme.of(context).textTheme.headline1),
         ),
         Text("SATS", style: Theme.of(context).textTheme.headline2),
