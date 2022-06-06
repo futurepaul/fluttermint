@@ -101,6 +101,33 @@ pub extern "C" fn wire_pay(port_: i64, bolt11: *mut wire_uint_8_list) {
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_invoice(port_: i64, amount: u64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "invoice",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_amount = amount.wire2api();
+            move |task_callback| invoice(api_amount)
+        },
+    )
+}
+
+#[no_mangle]
+pub extern "C" fn wire_claim_incoming_contract(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "claim_incoming_contract",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| claim_incoming_contract(),
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]
@@ -148,6 +175,12 @@ impl Wire2Api<String> for *mut wire_uint_8_list {
     fn wire2api(self) -> String {
         let vec: Vec<u8> = self.wire2api();
         String::from_utf8_lossy(&vec).into_owned()
+    }
+}
+
+impl Wire2Api<u64> for u64 {
+    fn wire2api(self) -> u64 {
+        self
     }
 }
 

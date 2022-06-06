@@ -23,6 +23,10 @@ abstract class MinimintBridge {
   Future<String> pegout({required String address, dynamic hint});
 
   Future<String> pay({required String bolt11, dynamic hint});
+
+  Future<String> invoice({required int amount, dynamic hint});
+
+  Future<void> claimIncomingContract({dynamic hint});
 }
 
 class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
@@ -102,9 +106,37 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
+  Future<String> invoice({required int amount, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_invoice(port_, _api2wire_u64(amount)),
+        parseSuccessData: _wire2api_String,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "invoice",
+          argNames: ["amount"],
+        ),
+        argValues: [amount],
+        hint: hint,
+      ));
+
+  Future<void> claimIncomingContract({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_claim_incoming_contract(port_),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "claim_incoming_contract",
+          argNames: [],
+        ),
+        argValues: [],
+        hint: hint,
+      ));
+
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
+  }
+
+  int _api2wire_u64(int raw) {
+    return raw;
   }
 
   int _api2wire_u8(int raw) {
@@ -255,6 +287,36 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
               ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_pay');
   late final _wire_pay = _wire_payPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_invoice(
+    int port_,
+    int amount,
+  ) {
+    return _wire_invoice(
+      port_,
+      amount,
+    );
+  }
+
+  late final _wire_invoicePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Uint64)>>(
+          'wire_invoice');
+  late final _wire_invoice =
+      _wire_invoicePtr.asFunction<void Function(int, int)>();
+
+  void wire_claim_incoming_contract(
+    int port_,
+  ) {
+    return _wire_claim_incoming_contract(
+      port_,
+    );
+  }
+
+  late final _wire_claim_incoming_contractPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_claim_incoming_contract');
+  late final _wire_claim_incoming_contract =
+      _wire_claim_incoming_contractPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,
