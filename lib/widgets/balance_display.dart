@@ -12,15 +12,13 @@ class BalanceDisplay extends ConsumerWidget {
     final balance = ref.watch(balanceProvider);
     final balanceNotifier = ref.watch(balanceProvider.notifier);
 
+    // Fetch initial balance. Is there a better way?
+    balanceNotifier.createBalance();
+
     return Column(
       children: [
-        GestureDetector(
-          onTap: () async {
-            await balanceNotifier.createBalance();
-          },
-          child: Text(balance != null ? "${balance.amountSats}" : "???",
-              style: Theme.of(context).textTheme.headline1),
-        ),
+        Text(balance != null ? "${balance.amountSats}" : "???",
+            style: Theme.of(context).textTheme.headline1),
         Text("SATS", style: Theme.of(context).textTheme.headline2),
       ],
     );
