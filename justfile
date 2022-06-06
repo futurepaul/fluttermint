@@ -1,3 +1,5 @@
+default: gen
+
 gen:
     flutter_rust_bridge_codegen \
         -r minimint-bridge/src/api.rs \
