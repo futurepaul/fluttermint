@@ -33,6 +33,8 @@ void wire_pegout(int64_t port_, struct wire_uint_8_list *address);
 
 void wire_pay(int64_t port_, struct wire_uint_8_list *bolt11);
 
+void wire_decode_invoice(int64_t port_, struct wire_uint_8_list *bolt11);
+
 void wire_invoice(int64_t port_, uint64_t amount);
 
 void wire_poll(int64_t port_);
@@ -53,6 +55,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) wire_pegin);
     dummy_var ^= ((int64_t) (void*) wire_pegout);
     dummy_var ^= ((int64_t) (void*) wire_pay);
+    dummy_var ^= ((int64_t) (void*) wire_decode_invoice);
     dummy_var ^= ((int64_t) (void*) wire_invoice);
     dummy_var ^= ((int64_t) (void*) wire_poll);
     dummy_var ^= ((int64_t) (void*) new_uint_8_list);

@@ -49,6 +49,7 @@ class SetupJoin extends ConsumerWidget {
                         child: QRViewExample(onDetect: onDetect))),
                 const SizedBox(height: 16),
                 AutoPasteTextField(
+                  labelText: "Paste Federation Code",
                   controller: textController,
                   initialValue: codeProvider ?? "",
                 ),

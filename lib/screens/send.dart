@@ -10,34 +10,62 @@ import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+import '../ffi.dart';
+import '../widgets/autopaste_text_field.dart';
+
 // import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SendScreen extends ConsumerWidget {
   const SendScreen({Key? key}) : super(key: key);
 
-  // TODO error: MobileScanner: Called start() while already started!
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // MobileScannerController? controller;
+    final textController = TextEditingController();
     final sendNotifier = ref.read(sendProvider.notifier);
+
+    Future<Send?> decode(String maybeAnInvoice) async {
+      try {
+        debugPrint("decoding: $maybeAnInvoice");
+        var decoded = await api.decodeInvoice(bolt11: maybeAnInvoice);
+        debugPrint("after decoded");
+        debugPrint("amount: ${decoded.amount}");
+        return Send(
+            description: decoded.description,
+            amountSats: (decoded.amount != null) ? decoded.amount! : 0,
+            invoice: decoded.invoice);
+      } catch (err) {
+        debugPrint("Not an invoice!");
+        return null;
+      }
+    }
+
+    Future<void> tryDecode(String data) async {
+      try {
+        debugPrint("decoding: $data");
+        var decoded = await api.decodeInvoice(bolt11: data);
+        debugPrint("after decoded");
+        debugPrint("amount: ${decoded.amount}");
+        var send = Send(
+            description: decoded.description,
+            amountSats: (decoded.amount != null) ? decoded.amount! : 0,
+            invoice: decoded.invoice);
+
+        if (send != null) {
+          debugPrint("Decoded was not null");
+          await sendNotifier.createSend(send).then((_) {
+            context.go("/send/confirm");
+          });
+        }
+      } catch (err) {
+        context.go("/errormodal", extra: err);
+      }
+    }
+
     // TODO is it right that I'm defining the function in here?
     void onDetect(Barcode barcode) async {
       final data = barcode.code;
       if (data != null) {
         debugPrint('Barcode found! $data');
-        // TODO use rust to figure out if it's a valid bolt11
-        try {
-          await sendNotifier
-              .createSend(Send(
-                  description: "This is a test",
-                  amountSats: 42069,
-                  invoice: data))
-              .then((_) {
-            context.go("/send/confirm");
-          });
-        } catch (err) {
-          context.go("/errormodal", extra: err);
-        }
       }
     }
 
@@ -52,29 +80,32 @@ class SendScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Expanded(
-                //     // TODO some sort of clip for aiming the scanner
-                //     child: ClipRRect(
-                //   borderRadius: BorderRadius.circular(8.0),
-                //   child: MobileScanner(
-                //       // controller: controller,
-                //       allowDuplicates: false,
-                //       onDetect: onDetect,
-                //       fit: BoxFit.cover),
-                // )),
                 Expanded(
-                  // TODO some sort of clip for aiming the scanner
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
                       child: QRViewExample(onDetect: onDetect)),
                 ),
                 const SizedBox(
-                  height: 32,
+                  height: 16,
+                ),
+                AutoPasteTextField(
+                  labelText: "Paste Lightning Invoice",
+                  controller: textController,
+                  initialValue: "",
+                ),
+                const SizedBox(
+                  height: 16,
                 ),
                 OutlineGradientButton(
-                    disabled: true,
+                    disabled: textController.text != "",
                     text: "Continue",
-                    onTap: () => context.go("/send/confirm"))
+                    onTap: () async {
+                      // var newText = textController.text;
+                      var invoice =
+                          "lnbcrt2n1p3fa59gsp55gx5flut7kvk7w5vq8vq4w0x4xjd78rgr35wsn6carnwz7kfqhdqpp5wx347a07kwydgyc9adkvuhn4nymdpujeynuqzj7j20rrdzxa62fsdq8w3jhxaqxqyjw5qcqp29qyysgqnfl6dt4h2wvn05crjrtpfm2kr6ah7zzwhl5w5nw8dja3yl7k6x3qnk6slfzatvgdfl3e2fj9glzfl9tjepasjhwqxl79t7kgm5nd99cpryu0w8";
+                      var notInvoice = "heyo";
+                      await tryDecode(invoice.trim());
+                    })
               ],
             ),
           )),

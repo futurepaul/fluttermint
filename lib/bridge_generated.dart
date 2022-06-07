@@ -29,9 +29,23 @@ abstract class MinimintBridge {
 
   Future<String> pay({required String bolt11, dynamic hint});
 
+  Future<MyInvoice> decodeInvoice({required String bolt11, dynamic hint});
+
   Future<String> invoice({required int amount, dynamic hint});
 
   Future<void> poll({dynamic hint});
+}
+
+class MyInvoice {
+  final int? amount;
+  final String description;
+  final String invoice;
+
+  MyInvoice({
+    this.amount,
+    required this.description,
+    required this.invoice,
+  });
 }
 
 class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
@@ -136,6 +150,19 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
+  Future<MyInvoice> decodeInvoice({required String bolt11, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) =>
+            inner.wire_decode_invoice(port_, _api2wire_String(bolt11)),
+        parseSuccessData: _wire2api_my_invoice,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "decode_invoice",
+          argNames: ["bolt11"],
+        ),
+        argValues: [bolt11],
+        hint: hint,
+      ));
+
   Future<String> invoice({required int amount, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) => inner.wire_invoice(port_, _api2wire_u64(amount)),
@@ -185,6 +212,25 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
 // Section: wire2api
 String _wire2api_String(dynamic raw) {
   return raw as String;
+}
+
+int _wire2api_box_autoadd_u64(dynamic raw) {
+  return raw as int;
+}
+
+MyInvoice _wire2api_my_invoice(dynamic raw) {
+  final arr = raw as List<dynamic>;
+  if (arr.length != 3)
+    throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+  return MyInvoice(
+    amount: _wire2api_opt_box_autoadd_u64(arr[0]),
+    description: _wire2api_String(arr[1]),
+    invoice: _wire2api_String(arr[2]),
+  );
+}
+
+int? _wire2api_opt_box_autoadd_u64(dynamic raw) {
+  return raw == null ? null : _wire2api_box_autoadd_u64(raw);
 }
 
 int _wire2api_u64(dynamic raw) {
@@ -346,6 +392,23 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
           ffi.Void Function(
               ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_pay');
   late final _wire_pay = _wire_payPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_decode_invoice(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> bolt11,
+  ) {
+    return _wire_decode_invoice(
+      port_,
+      bolt11,
+    );
+  }
+
+  late final _wire_decode_invoicePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_decode_invoice');
+  late final _wire_decode_invoice = _wire_decode_invoicePtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_invoice(

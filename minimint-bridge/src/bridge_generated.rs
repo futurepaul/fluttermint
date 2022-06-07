@@ -129,6 +129,21 @@ pub extern "C" fn wire_pay(port_: i64, bolt11: *mut wire_uint_8_list) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_decode_invoice(port_: i64, bolt11: *mut wire_uint_8_list) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "decode_invoice",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_bolt11 = bolt11.wire2api();
+            move |task_callback| decode_invoice(api_bolt11)
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_invoice(port_: i64, amount: u64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -239,6 +254,18 @@ impl<T> NewWithNullPtr for *mut T {
 }
 
 // Section: impl IntoDart
+
+impl support::IntoDart for MyInvoice {
+    fn into_dart(self) -> support::DartCObject {
+        vec![
+            self.amount.into_dart(),
+            self.description.into_dart(),
+            self.invoice.into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl support::IntoDartExceptPrimitive for MyInvoice {}
 
 // Section: executor
 

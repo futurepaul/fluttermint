@@ -56,8 +56,8 @@ class SendConfirm extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text("SEND", style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),
-                    const SmallBalanceDisplay(
-                      amountSats: 12345,
+                    SmallBalanceDisplay(
+                      amountSats: send.amountSats,
                     ),
                     const SizedBox(height: 8),
                     Text(desc, style: Theme.of(context).textTheme.bodyText2),

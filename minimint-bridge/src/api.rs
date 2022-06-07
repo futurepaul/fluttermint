@@ -15,6 +15,7 @@ use bitcoin::{Address, Amount, Txid};
 use bitcoincore_rpc::{Auth, RpcApi};
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
+use tracing::info;
 
 lazy_static! {
     static ref CLIENT: Mutex<Option<UserClient>> = Mutex::new(None);
@@ -313,6 +314,30 @@ pub async fn pay(bolt11: String) -> Result<String> {
         .unwrap();
 
     return Ok(format!("{:?}", r));
+}
+
+pub struct MyInvoice {
+    pub amount: Option<u64>,
+    pub description: String,
+    pub invoice: String,
+}
+
+#[tokio::main(flavor = "current_thread")]
+pub async fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
+
+    tracing::info!("rust decoding: {}", bolt11);
+    let bolt11: Invoice = bolt11.parse()?;
+
+    let amount = bolt11.amount_milli_satoshis();
+    // let description = bolt11.to_string();
+    let invoice = bolt11.to_string();
+
+    return Ok(MyInvoice {
+        amount: amount,
+        description: "Testing".to_string(),
+        // description: bolt11.description().to_owned().to_string(),
+        invoice,
+    });
 }
 
 #[tokio::main(flavor = "current_thread")]
