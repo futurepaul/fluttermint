@@ -15,9 +15,9 @@ abstract class MinimintBridge {
   Future<String> address({dynamic hint});
 
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
-  Future<void> init({required String path, dynamic hint});
+  Future<bool> init({required String path, dynamic hint});
 
-  Future<void> joinFederation({required String cfg, dynamic hint});
+  Future<void> joinFederation({required String configUrl, dynamic hint});
 
   Future<void> leaveFederation({dynamic hint});
 
@@ -66,10 +66,10 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
-  Future<void> init({required String path, dynamic hint}) =>
+  Future<bool> init({required String path, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) => inner.wire_init(port_, _api2wire_String(path)),
-        parseSuccessData: _wire2api_unit,
+        parseSuccessData: _wire2api_bool,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "init",
           argNames: ["path"],
@@ -78,16 +78,16 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
-  Future<void> joinFederation({required String cfg, dynamic hint}) =>
+  Future<void> joinFederation({required String configUrl, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) =>
-            inner.wire_join_federation(port_, _api2wire_String(cfg)),
+            inner.wire_join_federation(port_, _api2wire_String(configUrl)),
         parseSuccessData: _wire2api_unit,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "join_federation",
-          argNames: ["cfg"],
+          argNames: ["configUrl"],
         ),
-        argValues: [cfg],
+        argValues: [configUrl],
         hint: hint,
       ));
 
@@ -214,6 +214,10 @@ String _wire2api_String(dynamic raw) {
   return raw as String;
 }
 
+bool _wire2api_bool(dynamic raw) {
+  return raw as bool;
+}
+
 int _wire2api_box_autoadd_u64(dynamic raw) {
   return raw as int;
 }
@@ -302,11 +306,11 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
 
   void wire_join_federation(
     int port_,
-    ffi.Pointer<wire_uint_8_list> cfg,
+    ffi.Pointer<wire_uint_8_list> config_url,
   ) {
     return _wire_join_federation(
       port_,
-      cfg,
+      config_url,
     );
   }
 
