@@ -10,6 +10,8 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+
+import '../ffi.dart';
 // import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SetupJoin extends ConsumerWidget {
@@ -21,13 +23,17 @@ class SetupJoin extends ConsumerWidget {
     final codeProviderNotifier = ref.read(prefProvider.notifier);
     final textController = TextEditingController();
 
+    void joinFederation(String cfg) async {
+      await api.joinFederation(configUrl: cfg);
+      await codeProviderNotifier.update(cfg);
+      context.go("/");
+    }
+
     void onDetect(Barcode barcode) async {
       final data = barcode.code;
       if (data != null) {
         debugPrint('Barcode found! $data');
-        await codeProviderNotifier.update(data).then((_) {
-          context.go("/");
-        });
+        joinFederation(data);
       }
     }
 
@@ -60,9 +66,8 @@ class SetupJoin extends ConsumerWidget {
                       var newText = textController.text;
 
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
-                      await codeProviderNotifier.update(newText).then((_) {
-                        context.go("/");
-                      });
+                      // TODO: error if this isn't valid
+                      joinFederation(newText);
                     })
               ],
             ),

@@ -21,7 +21,7 @@ void wire_address(int64_t port_);
 
 void wire_init(int64_t port_, struct wire_uint_8_list *path);
 
-void wire_join_federation(int64_t port_, struct wire_uint_8_list *cfg);
+void wire_join_federation(int64_t port_, struct wire_uint_8_list *config_url);
 
 void wire_leave_federation(int64_t port_);
 

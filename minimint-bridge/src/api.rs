@@ -8,6 +8,7 @@ use minimint::config::load_from_file;
 use minimint::modules::ln::contracts::ContractId;
 use minimint::modules::wallet::txoproof::TxOutProof;
 use minimint_api::{encoding::Decodable, OutPoint};
+use mint_client::clients::gateway::GatewayClient;
 use mint_client::{ClientAndGatewayConfig, UserClient};
 
 use anyhow::{anyhow, Result};
@@ -24,6 +25,10 @@ lazy_static! {
 lazy_static! {
     // TODO: make this a Vec so we can have more than 1 live invoice at-a-time
     static ref PAYMENTS: Mutex<Vec<(KeyPair, Invoice)>> = Mutex::new(vec![]);
+}
+
+lazy_static! {
+    static ref CFG: Mutex<Option<ClientAndGatewayConfig>> = Mutex::new(None);
 }
 
 fn write_to_file(contents: String, path: PathBuf) -> Result<()> {
@@ -168,11 +173,12 @@ pub async fn address() -> Result<String> {
 
 /// If this returns Some, user has joined a federation. Otherwise they haven't.
 #[tokio::main(flavor = "current_thread")]
-pub async fn init(path: String) -> Result<()> {
-    // TODO: load this from disk. If there is no federation config, return None
+pub async fn init(path: String) -> Result<bool> {
+    // Load federation config from disk and create a federation client
     let mut client = CLIENT.lock().await;
     *client = Some(create_client(&path)?);
 
+    // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
     #[cfg(target_os = "android")]
@@ -198,12 +204,16 @@ pub async fn init(path: String) -> Result<()> {
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
-    Ok(())
+    Ok(true)
 }
 
 #[tokio::main(flavor = "current_thread")]
-pub async fn join_federation(cfg: String) -> Result<()> {
-    // turn the string into ClientAndGatewayConfig
+pub async fn join_federation(config_url: String) -> Result<()> {
+    let cfg: ClientAndGatewayConfig = reqwest::get(config_url).await?.json().await?;
+    tracing::info!("parsed config {:?}\n\n\n", cfg);
+    let mut global_cfg = CFG.lock().await;
+    *global_cfg = Some(cfg);
+
     Ok(())
 }
 

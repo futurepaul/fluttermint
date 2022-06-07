@@ -45,7 +45,7 @@ pub extern "C" fn wire_init(port_: i64, path: *mut wire_uint_8_list) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_join_federation(port_: i64, cfg: *mut wire_uint_8_list) {
+pub extern "C" fn wire_join_federation(port_: i64, config_url: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "join_federation",
@@ -53,8 +53,8 @@ pub extern "C" fn wire_join_federation(port_: i64, cfg: *mut wire_uint_8_list) {
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_cfg = cfg.wire2api();
-            move |task_callback| join_federation(api_cfg)
+            let api_config_url = config_url.wire2api();
+            move |task_callback| join_federation(api_config_url)
         },
     )
 }
