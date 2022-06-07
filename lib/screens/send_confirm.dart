@@ -74,14 +74,9 @@ class SendConfirm extends ConsumerWidget {
                                   12.0,
                           color: white,
                         ),
-                        const SizedBox(height: 16),
-                        const Text("THIS IS FAKE DATA"),
-                        const SizedBox(height: 16),
-                        const Text("Fee is ~3 – 11 sats"),
                         const SizedBox(height: 8),
-                        const Text("Expires in 1440 min"),
-                        const SizedBox(height: 8),
-                        EllipsableText(text: invoice, style: null),
+                        // EllipsabltextText(text: invoice, style: null),
+                        Text(invoice)
                       ]),
                     )
                   ],

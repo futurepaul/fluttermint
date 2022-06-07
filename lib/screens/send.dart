@@ -23,22 +23,6 @@ class SendScreen extends ConsumerWidget {
     final textController = TextEditingController();
     final sendNotifier = ref.read(sendProvider.notifier);
 
-    Future<Send?> decode(String maybeAnInvoice) async {
-      try {
-        debugPrint("decoding: $maybeAnInvoice");
-        var decoded = await api.decodeInvoice(bolt11: maybeAnInvoice);
-        debugPrint("after decoded");
-        debugPrint("amount: ${decoded.amount}");
-        return Send(
-            description: decoded.description,
-            amountSats: (decoded.amount != null) ? decoded.amount! : 0,
-            invoice: decoded.invoice);
-      } catch (err) {
-        debugPrint("Not an invoice!");
-        return null;
-      }
-    }
-
     Future<void> tryDecode(String data) async {
       try {
         debugPrint("decoding: $data");
@@ -50,12 +34,10 @@ class SendScreen extends ConsumerWidget {
             amountSats: (decoded.amount != null) ? decoded.amount! : 0,
             invoice: decoded.invoice);
 
-        if (send != null) {
-          debugPrint("Decoded was not null");
-          await sendNotifier.createSend(send).then((_) {
-            context.go("/send/confirm");
-          });
-        }
+        debugPrint("Decoded was not null");
+        await sendNotifier.createSend(send).then((_) {
+          context.go("/send/confirm");
+        });
       } catch (err) {
         context.go("/errormodal", extra: err);
       }
@@ -66,6 +48,7 @@ class SendScreen extends ConsumerWidget {
       final data = barcode.code;
       if (data != null) {
         debugPrint('Barcode found! $data');
+        await tryDecode(data.trim());
       }
     }
 
@@ -100,11 +83,10 @@ class SendScreen extends ConsumerWidget {
                     disabled: textController.text != "",
                     text: "Continue",
                     onTap: () async {
-                      // var newText = textController.text;
-                      var invoice =
-                          "lnbcrt2n1p3fa59gsp55gx5flut7kvk7w5vq8vq4w0x4xjd78rgr35wsn6carnwz7kfqhdqpp5wx347a07kwydgyc9adkvuhn4nymdpujeynuqzj7j20rrdzxa62fsdq8w3jhxaqxqyjw5qcqp29qyysgqnfl6dt4h2wvn05crjrtpfm2kr6ah7zzwhl5w5nw8dja3yl7k6x3qnk6slfzatvgdfl3e2fj9glzfl9tjepasjhwqxl79t7kgm5nd99cpryu0w8";
-                      var notInvoice = "heyo";
-                      await tryDecode(invoice.trim());
+                      var maybeInvoice = textController.text;
+                      // var invoice =
+                      // "lnbcrt2n1p3fa59gsp55gx5flut7kvk7w5vq8vq4w0x4xjd78rgr35wsn6carnwz7kfqhdqpp5wx347a07kwydgyc9adkvuhn4nymdpujeynuqzj7j20rrdzxa62fsdq8w3jhxaqxqyjw5qcqp29qyysgqnfl6dt4h2wvn05crjrtpfm2kr6ah7zzwhl5w5nw8dja3yl7k6x3qnk6slfzatvgdfl3e2fj9glzfl9tjepasjhwqxl79t7kgm5nd99cpryu0w8";
+                      await tryDecode(maybeInvoice.trim());
                     })
               ],
             ),

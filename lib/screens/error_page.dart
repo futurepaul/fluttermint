@@ -16,6 +16,9 @@ class ErrorPage extends StatelessWidget {
               closeAction: () => context.go("/"),
             ),
             backgroundColor: Colors.transparent,
-            body: Center(child: Text(errorReason))));
+            body: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(child: Text(errorReason)),
+            )));
   }
 }
