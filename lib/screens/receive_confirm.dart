@@ -17,8 +17,6 @@ import 'package:fluttermint/widgets/ellipsable_text.dart';
 
 import 'package:share_plus/share_plus.dart';
 
-import '../ffi.dart';
-
 class ReceiveConfirm extends ConsumerWidget {
   const ReceiveConfirm({Key? key}) : super(key: key);
 
@@ -95,23 +93,17 @@ class ReceiveConfirm extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlineGradientButton(
-                        text: "Copy",
-                        onTap: () =>
-                            Clipboard.setData(ClipboardData(text: invoice)),
+                        text: "Share",
+                        onTap: () => Share.share(lightningUri),
                       ),
                     ),
                     const SizedBox(width: 20),
-                    // Expanded(
-                    //   child: OutlineGradientButton(
-                    //     text: "Copy",
-                    //     onTap: () =>
-                    //         Clipboard.setData(ClipboardData(text: invoice)),
-                    //   ),
                     Expanded(
-                      child: OutlineGradientButton(
-                          text: "Check",
-                          onTap: () async => await api.claimIncomingContract()),
-                    )
+                        child: OutlineGradientButton(
+                      text: "Copy",
+                      onTap: () =>
+                          Clipboard.setData(ClipboardData(text: invoice)),
+                    )),
                   ],
                 )
               ],

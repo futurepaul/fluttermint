@@ -14,7 +14,12 @@ import 'dart:ffi' as ffi;
 abstract class MinimintBridge {
   Future<String> address({dynamic hint});
 
+  /// If this returns Some, user has joined a federation. Otherwise they haven't.
   Future<void> init({required String path, dynamic hint});
+
+  Future<void> joinFederation({required String cfg, dynamic hint});
+
+  Future<void> leaveFederation({dynamic hint});
 
   Future<int> balance({dynamic hint});
 
@@ -26,7 +31,7 @@ abstract class MinimintBridge {
 
   Future<String> invoice({required int amount, dynamic hint});
 
-  Future<void> claimIncomingContract({dynamic hint});
+  Future<void> poll({dynamic hint});
 }
 
 class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
@@ -56,6 +61,31 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
           argNames: ["path"],
         ),
         argValues: [path],
+        hint: hint,
+      ));
+
+  Future<void> joinFederation({required String cfg, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) =>
+            inner.wire_join_federation(port_, _api2wire_String(cfg)),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "join_federation",
+          argNames: ["cfg"],
+        ),
+        argValues: [cfg],
+        hint: hint,
+      ));
+
+  Future<void> leaveFederation({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_leave_federation(port_),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "leave_federation",
+          argNames: [],
+        ),
+        argValues: [],
         hint: hint,
       ));
 
@@ -118,12 +148,11 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
-  Future<void> claimIncomingContract({dynamic hint}) =>
-      executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_claim_incoming_contract(port_),
+  Future<void> poll({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_poll(port_),
         parseSuccessData: _wire2api_unit,
         constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "claim_incoming_contract",
+          debugName: "poll",
           argNames: [],
         ),
         argValues: [],
@@ -225,6 +254,37 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   late final _wire_init = _wire_initPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
+  void wire_join_federation(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> cfg,
+  ) {
+    return _wire_join_federation(
+      port_,
+      cfg,
+    );
+  }
+
+  late final _wire_join_federationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_join_federation');
+  late final _wire_join_federation = _wire_join_federationPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_leave_federation(
+    int port_,
+  ) {
+    return _wire_leave_federation(
+      port_,
+    );
+  }
+
+  late final _wire_leave_federationPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_leave_federation');
+  late final _wire_leave_federation =
+      _wire_leave_federationPtr.asFunction<void Function(int)>();
+
   void wire_balance(
     int port_,
   ) {
@@ -304,19 +364,17 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   late final _wire_invoice =
       _wire_invoicePtr.asFunction<void Function(int, int)>();
 
-  void wire_claim_incoming_contract(
+  void wire_poll(
     int port_,
   ) {
-    return _wire_claim_incoming_contract(
+    return _wire_poll(
       port_,
     );
   }
 
-  late final _wire_claim_incoming_contractPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_claim_incoming_contract');
-  late final _wire_claim_incoming_contract =
-      _wire_claim_incoming_contractPtr.asFunction<void Function(int)>();
+  late final _wire_pollPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_poll');
+  late final _wire_poll = _wire_pollPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,

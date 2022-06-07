@@ -34,7 +34,6 @@ class SendNotifier extends StateNotifier<Send?> {
     if (send.invoice != null) {
       await api.pay(bolt11: send.invoice!);
     }
-    // state = send.copyWith(invoice: invoice);
   }
 
   clear() {

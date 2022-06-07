@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/data/send.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -89,7 +90,13 @@ class SendConfirm extends ConsumerWidget {
                     text: "Send $amount SATS",
                     onTap: () async {
                       try {
-                        sendNotifier.pay(send).then((_) => context.go("/"));
+                        await sendNotifier.pay(send);
+                        await ref
+                            .read(balanceProvider.notifier)
+                            .createBalance()
+                            .then((_) async {
+                          context.go("/");
+                        });
                       } catch (err) {
                         context.go("/errormodal", extra: err);
                       }

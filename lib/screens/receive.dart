@@ -81,7 +81,6 @@ class ReceiveScreen extends ConsumerWidget {
                         // TODO figure out the right way to do this async without the mounted flag
                         context.go("/receive/confirm");
                       } catch (err) {
-                        print("observed error $err");
                         context.go("/errormodal", extra: err);
                       }
                     })

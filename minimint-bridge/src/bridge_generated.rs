@@ -45,6 +45,33 @@ pub extern "C" fn wire_init(port_: i64, path: *mut wire_uint_8_list) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_join_federation(port_: i64, cfg: *mut wire_uint_8_list) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "join_federation",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_cfg = cfg.wire2api();
+            move |task_callback| join_federation(api_cfg)
+        },
+    )
+}
+
+#[no_mangle]
+pub extern "C" fn wire_leave_federation(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "leave_federation",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| leave_federation(),
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_balance(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -117,14 +144,14 @@ pub extern "C" fn wire_invoice(port_: i64, amount: u64) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_claim_incoming_contract(port_: i64) {
+pub extern "C" fn wire_poll(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "claim_incoming_contract",
+            debug_name: "poll",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| claim_incoming_contract(),
+        move || move |task_callback| poll(),
     )
 }
 

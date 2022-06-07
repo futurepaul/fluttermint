@@ -19,8 +19,11 @@ Future<void> main() async {
 
   prefs = await SharedPreferences.getInstance();
 
+  // FIXME: callback hell
   getApplicationDocumentsDirectory().then((directory) {
-    api.init(path: directory.path);
+    api.init(path: directory.path).then((_) {
+      api.poll();
+    });
   });
 
   runApp(const ProviderScope(child: App()));

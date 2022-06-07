@@ -1,8 +1,10 @@
+use std::path::PathBuf;
 use std::time::Duration;
 use std::{io::Cursor, path::Path, str::FromStr};
 
 use bitcoin::secp256k1::schnorrsig::KeyPair;
 use lightning_invoice::Invoice;
+use minimint::config::load_from_file;
 use minimint::modules::ln::contracts::ContractId;
 use minimint::modules::wallet::txoproof::TxOutProof;
 use minimint_api::{encoding::Decodable, OutPoint};
@@ -19,7 +21,14 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref PAYMENT: Mutex<Option<(KeyPair, Invoice)>> = Mutex::new(None);
+    // TODO: make this a Vec so we can have more than 1 live invoice at-a-time
+    static ref PAYMENTS: Mutex<Vec<(KeyPair, Invoice)>> = Mutex::new(vec![]);
+}
+
+fn write_to_file(contents: String, path: PathBuf) -> Result<()> {
+    let writer = std::fs::File::create(path)?;
+    serde_json::to_writer_pretty(writer, &contents).unwrap();
+    Ok(())
 }
 
 fn get_host() -> String {
@@ -156,8 +165,13 @@ pub async fn address() -> Result<String> {
     Ok(addr.to_string())
 }
 
+/// If this returns Some, user has joined a federation. Otherwise they haven't.
 #[tokio::main(flavor = "current_thread")]
 pub async fn init(path: String) -> Result<()> {
+    // TODO: load this from disk. If there is no federation config, return None
+    let mut client = CLIENT.lock().await;
+    *client = Some(create_client(&path)?);
+
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
     #[cfg(target_os = "android")]
@@ -183,8 +197,19 @@ pub async fn init(path: String) -> Result<()> {
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
-    let mut client = CLIENT.lock().await;
-    *client = Some(create_client(&path)?);
+    Ok(())
+}
+
+#[tokio::main(flavor = "current_thread")]
+pub async fn join_federation(cfg: String) -> Result<()> {
+    // turn the string into ClientAndGatewayConfig
+    Ok(())
+}
+
+#[tokio::main(flavor = "current_thread")]
+pub async fn leave_federation() -> Result<()> {
+    // delete the database (their ecash tokens will disappear ... this shouldn't be done lightly ...)
+    // set CLIENT to None
     Ok(())
 }
 
@@ -304,45 +329,66 @@ pub async fn invoice(amount: u64) -> Result<String> {
         .await
         .expect("Couldn't create invoice");
 
-    // we can only receive 1 lightning invoice at-a-time
-    let mut payment_guard = PAYMENT.lock().await;
-    *payment_guard = Some((keypair, invoice.clone()));
+    // Append payment to global list
+    let mut payments_guard = PAYMENTS.lock().await;
+    let mut payments = payments_guard
+        .clone()
+        .into_iter()
+        .collect::<Vec<(KeyPair, Invoice)>>();
+    payments.push((keypair, invoice.clone()));
+    *payments_guard = payments;
 
     Ok(invoice.to_string())
 }
 
+// TODO: make this a "stream" that can send events to flutter;
 #[tokio::main(flavor = "current_thread")]
-pub async fn claim_incoming_contract() -> Result<()> {
-    let rng = rand::rngs::OsRng::new()?;
-    let client_guard = CLIENT.lock().await;
-    let client = client_guard.as_ref().ok_or(anyhow!("No client"))?;
-    let mut payment_guard = PAYMENT.lock().await;
-    let (keypair, invoice) = payment_guard.as_ref().ok_or(anyhow!("No payment"))?;
+pub async fn poll() -> Result<()> {
+    // Spawn a thread to check balances and claim incoming contracts
+    loop {
+        tracing::info!("polling...");
+        let rng = rand::rngs::OsRng::new()?;
+        let client_guard = CLIENT.lock().await;
+        let client = client_guard.as_ref().ok_or(anyhow!("No client"))?;
 
-    tracing::info!(
-        "fetching incoming contract {:?} {:?}",
-        invoice.payment_hash(),
-        keypair.clone()
-    );
-    client
-        .claim_incoming_contract(
-            ContractId::from_hash(invoice.payment_hash().clone()),
-            keypair.clone(),
-            rng,
-        )
-        .await?;
+        // Complete incoming payments
+        let mut payments_guard = PAYMENTS.lock().await;
+        let mut new_payments = vec![];
+        for (keypair, invoice) in payments_guard.iter() {
+            tracing::info!(
+                "fetching incoming contract {:?} {:?}",
+                invoice.payment_hash(),
+                keypair.clone()
+            );
+            let result = client
+                .claim_incoming_contract(
+                    ContractId::from_hash(invoice.payment_hash().clone()),
+                    keypair.clone(),
+                    rng.clone(),
+                )
+                .await;
+            if let Err(_) = result {
+                // TODO: filter out expired invoices
+                tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
+                new_payments.push((keypair.clone(), invoice.clone()));
+            } else {
+                tracing::info!("completed payment: {:?}", invoice.payment_hash());
+            }
+        }
 
-    let balance = client.coins().amount();
-    tracing::info!("fetching coins (balance = {:?}", balance.milli_sat);
+        // Fetch balance
+        // let initial_balance = client.coins().amount();
+        // client.fetch_all_coins().await.unwrap();
+        // let balance = client.coins().amount();
+        // tracing::info!(
+        //     "fetched coins {} -> {}",
+        //     initial_balance.milli_sat,
+        //     balance.milli_sat
+        // );
 
-    // Ecash tokens have been transferred from gateway to user
-    client.fetch_all_coins().await.unwrap();
+        // Reset hacky payment info
+        *payments_guard = new_payments;
 
-    let balance = client.coins().amount();
-    tracing::info!("fetched coins (balance = {:?}", balance.milli_sat);
-
-    // Reset hacky payment info
-    *payment_guard = None;
-
-    Ok(())
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    }
 }
