@@ -99,12 +99,11 @@ class ReceiveConfirm extends ConsumerWidget {
                     ),
                     const SizedBox(width: 20),
                     Expanded(
-                      child: OutlineGradientButton(
-                        text: "Copy",
-                        onTap: () =>
-                            Clipboard.setData(ClipboardData(text: invoice)),
-                      ),
-                    )
+                        child: OutlineGradientButton(
+                      text: "Copy",
+                      onTap: () =>
+                          Clipboard.setData(ClipboardData(text: invoice)),
+                    )),
                   ],
                 )
               ],

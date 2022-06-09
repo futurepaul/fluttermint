@@ -4,9 +4,13 @@ import 'package:fluttermint/utils/constants.dart';
 
 class AutoPasteTextField extends StatelessWidget {
   const AutoPasteTextField(
-      {Key? key, this.initialValue, required this.controller})
+      {Key? key,
+      this.initialValue,
+      required this.controller,
+      required this.labelText})
       : super(key: key);
 
+  final String labelText;
   final String? initialValue;
   final TextEditingController controller;
 
@@ -36,7 +40,7 @@ class AutoPasteTextField extends StatelessWidget {
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
-                labelText: "Paste federation code",
+                labelText: labelText,
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(width: 1, color: white)),

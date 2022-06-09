@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/data/send.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -11,6 +12,7 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
+import '../ffi.dart';
 import '../widgets/chill_info_card.dart';
 import '../widgets/small_balance_display.dart';
 
@@ -20,7 +22,7 @@ class SendConfirm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final send = ref.read(sendProvider)!;
-    // final sendNotifier = ref.read(sendProvider.notifier);
+    final sendNotifier = ref.read(sendProvider.notifier);
 
     final invoice = send.invoice!;
     // final lightningUri = "lightning:$invoice";
@@ -54,8 +56,8 @@ class SendConfirm extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text("SEND", style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),
-                    const SmallBalanceDisplay(
-                      amountSats: 12345,
+                    SmallBalanceDisplay(
+                      amountSats: send.amountSats,
                     ),
                     const SizedBox(height: 8),
                     Text(desc, style: Theme.of(context).textTheme.bodyText2),
@@ -72,21 +74,28 @@ class SendConfirm extends ConsumerWidget {
                                   12.0,
                           color: white,
                         ),
-                        const SizedBox(height: 16),
-                        const Text("THIS IS FAKE DATA"),
-                        const SizedBox(height: 16),
-                        const Text("Fee is ~3 – 11 sats"),
                         const SizedBox(height: 8),
-                        const Text("Expires in 1440 min"),
-                        const SizedBox(height: 8),
-                        EllipsableText(text: invoice, style: null),
+                        // EllipsabltextText(text: invoice, style: null),
+                        Text(invoice)
                       ]),
                     )
                   ],
                 )),
                 OutlineGradientButton(
                     text: "Send $amount SATS",
-                    onTap: () => context.go("/send/finish"))
+                    onTap: () async {
+                      try {
+                        await sendNotifier.pay(send);
+                        await ref
+                            .read(balanceProvider.notifier)
+                            .createBalance()
+                            .then((_) async {
+                          context.go("/");
+                        });
+                      } catch (err) {
+                        context.go("/errormodal", extra: err);
+                      }
+                    })
               ],
             ),
           )),

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/prefs.dart';
 import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import './ffi.dart';
 
 late SharedPreferences prefs;
 
@@ -16,6 +18,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   prefs = await SharedPreferences.getInstance();
+
+  // FIXME: callback hell
+  getApplicationDocumentsDirectory().then((directory) {
+    api.init(path: directory.path).then((_) {
+      api.poll();
+    });
+  });
 
   runApp(const ProviderScope(child: App()));
 }
