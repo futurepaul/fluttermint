@@ -1,25 +1,5 @@
 # fluttermint
 
-A new Flutter project.
+A fedimint wallet in Dart + Rust.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-# Updating rust:
-
-```
-flutter_rust_bridge_codegen \
-    -r minimint-bridge/src/api.rs \
-    -d lib/bridge_generated.dart \
-    -c ios/Runner/bridge_generated.h
-```
+![Frame 67 (2)](https://user-images.githubusercontent.com/543668/172901667-df3eb020-db13-40b1-8aa5-8041a9782e5a.png)
