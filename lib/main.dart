@@ -21,9 +21,7 @@ Future<void> main() async {
 
   // FIXME: callback hell
   getApplicationDocumentsDirectory().then((directory) {
-    api.init(path: directory.path).then((_) {
-      api.poll();
-    });
+    api.init();
   });
 
   runApp(const ProviderScope(child: App()));
