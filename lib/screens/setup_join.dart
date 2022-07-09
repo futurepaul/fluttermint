@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import '../ffi.dart';
@@ -24,7 +25,7 @@ class SetupJoin extends ConsumerWidget {
     final textController = TextEditingController();
 
     void joinFederation(String cfg) async {
-      await api.joinFederation(configUrl: cfg);
+      await api.joinFederation(configUrl: cfg, userDir: await getApplicationDocumentsDirectory());
       await codeProviderNotifier.update(cfg);
       context.go("/");
     }
