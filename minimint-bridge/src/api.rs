@@ -95,7 +95,7 @@ pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
         let cfg = reqwest::get(config_url).await?.text().await?;
         let filename = Path::new(&user_dir).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
-        let client = Arc::new(Client::new(Box::new(db), &cfg)?);
+        let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
         global_client::set(client.clone());
         // TODO: kill the poll task on leave
         tokio::spawn(async move { client.poll().await });

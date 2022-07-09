@@ -3,7 +3,7 @@
 use std::{io::Cursor, str::FromStr, time::Duration};
 
 use anyhow::anyhow;
-use bitcoin::{secp256k1::schnorrsig::KeyPair, Address, Amount, Txid};
+use bitcoin::{Address, Amount, Txid};
 use bitcoincore_rpc::{Auth, RpcApi};
 use lightning_invoice::Invoice;
 use minimint::modules::{ln::contracts::ContractId, wallet::txoproof::TxOutProof};
@@ -14,15 +14,15 @@ use tokio::sync::Mutex;
 pub struct Client {
     client: UserClient,
     gateway_cfg: LightningGateway,
-    payments: Mutex<Vec<(KeyPair, Invoice)>>,
+    payments: Mutex<Vec<Invoice>>,
 }
 
 impl Client {
-    pub fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
+    pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
         let cfg: ClientAndGatewayConfig = serde_json::from_str(cfg_json)?;
         tracing::info!("parsed config {:?}\n\n\n", cfg);
         Ok(Self {
-            client: UserClient::new(cfg.client, db, Default::default()),
+            client: UserClient::new(cfg.client, db, Default::default()).await,
             gateway_cfg: cfg.gateway,
             payments: Mutex::new(Vec::new()),
         })
@@ -61,7 +61,7 @@ impl Client {
 
             match result {
                 Ok(()) => return Ok("ok".to_string()), // FIXME
-                Err(err) if err.is_retryable_fetch_coins() => {
+                Err(err) if err.is_retryable() => {
                     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
                     continue;
                 }
@@ -88,14 +88,14 @@ impl Client {
         let http = reqwest::Client::new();
         let bolt11: Invoice = bolt11.parse()?;
 
-        let contract_id = self
+        let (contract_id, outpoint) = self
             .client
             .fund_outgoing_ln_contract(&self.gateway_cfg, bolt11, &mut rng)
             .await
             .expect("Not enough coins");
 
         self.client
-            .wait_contract_timeout(contract_id, Duration::from_secs(10))
+            .await_outgoing_contract_acceptance(outpoint)
             .await
             .expect("Contract wasn't accepted in time");
 
@@ -110,24 +110,25 @@ impl Client {
         Ok(format!("{:?}", r))
     }
 
-    pub async fn invoice(&mut self, amount: u64) -> anyhow::Result<String> {
+    pub async fn invoice(&self, amount: u64) -> anyhow::Result<String> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
 
         // Save the keys and invoice for later polling`
         let amt = minimint_api::Amount::from_sat(amount);
-        let (keypair, invoice) = self
+        let confirmed_invoice = self
             .client
-            .create_invoice_and_offer(amt, &self.gateway_cfg, &mut rng)
+            .generate_invoice(
+                amt,
+                "TODO: description".to_string(),
+                &self.gateway_cfg,
+                &mut rng,
+            )
             .await
             .expect("Couldn't create invoice");
 
-        let mut payments_guard = self.payments.lock().await;
-        let mut payments = payments_guard
-            .clone()
-            .into_iter()
-            .collect::<Vec<(KeyPair, Invoice)>>();
-        payments.push((keypair, invoice.clone()));
-        *payments_guard = payments;
+        let invoice = confirmed_invoice.invoice;
+
+        self.payments.lock().await.push(invoice.clone());
 
         Ok(invoice.to_string())
     }
@@ -141,24 +142,19 @@ impl Client {
             // Complete incoming payments
             let mut payments_guard = self.payments.lock().await;
             let mut new_payments = vec![];
-            for (keypair, invoice) in payments_guard.iter() {
-                tracing::info!(
-                    "fetching incoming contract {:?} {:?}",
-                    invoice.payment_hash(),
-                    keypair.clone()
-                );
+            for invoice in payments_guard.iter() {
+                tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
                 let result = self
                     .client
                     .claim_incoming_contract(
                         ContractId::from_hash(invoice.payment_hash().clone()),
-                        keypair.clone(),
                         rng.clone(),
                     )
                     .await;
                 if let Err(_) = result {
                     // TODO: filter out expired invoices
                     tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
-                    new_payments.push((keypair.clone(), invoice.clone()));
+                    new_payments.push(invoice.clone());
                 } else {
                     tracing::info!("completed payment: {:?}", invoice.payment_hash());
                 }

@@ -11,22 +11,22 @@ crate-type = ["staticlib"]
 anyhow = "1"
 flutter_rust_bridge = "1"
 
-mint-client = { git = "https://github.com/justinmoon/minimint", branch = "plugin" }
-minimint-api = { git = "https://github.com/justinmoon/minimint", branch = "plugin" }
-minimint = { git = "https://github.com/justinmoon/minimint", branch = "plugin" }
+mint-client = { git = "https://github.com/fedimint/minimint" }
+minimint-api = { git = "https://github.com/fedimint/minimint" }
+minimint = { git = "https://github.com/fedimint/minimint" }
 
 serde_json = "1.0.61"
 # secp256k1-zkp = { git = "https://github.com/elsirion/rust-secp256k1-zkp", branch = "minimint", features = [ "serde", "bitcoin_hashes" ] }
 rand = "0.6.5"
 tokio = {version = "1.0", features = ["full"]}
 sled = "0.34.6"
-bitcoincore-rpc = "0.14.0"
-bitcoin = "0.27.0"
+bitcoincore-rpc = "0.15.0"
+bitcoin = "0.28.1"
 # hex = "0.4.3"
 # log = "0.4.16"
 lazy_static = "1.4.0"
 reqwest = { version = "0.11.0", features = [ "json" ], default-features = false }
-lightning-invoice = "0.14.0"
+lightning-invoice = "0.17.0"
 # lightning = "0.0.106"
 
 tracing = "0.1.26"
@@ -40,4 +40,4 @@ paranoid-android = { git = "https://github.com/justinmoon/paranoid-android", bra
 
 [patch.crates-io]
 bitcoin_hashes = { version = "0.10.0", git = 'https://github.com/fedimint/bitcoin_hashes', branch = 'minimint' }
-secp256k1 = { git = "https://github.com/fedimint/rust-secp256k1/", branch = "minimint" }
+secp256k1-zkp = { git = "https://github.com/fedimint/rust-secp256k1-zkp/", branch = "sanket-pr" }
