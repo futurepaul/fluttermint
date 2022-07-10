@@ -59,8 +59,7 @@ pub fn address() -> Result<String> {
 }
 
 /// If this returns Some, user has joined a federation. Otherwise they haven't.
-#[tokio::main(flavor = "current_thread")]
-pub async fn init() -> Result<bool> {
+pub fn init() -> Result<bool> {
     // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
@@ -96,7 +95,7 @@ pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
         let filename = Path::new(&user_dir).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
-        global_client::set(client.clone());
+        global_client::set(client.clone()).await;
         // TODO: kill the poll task on leave
         tokio::spawn(async move { client.poll().await });
         Ok(())
@@ -131,8 +130,7 @@ pub struct MyInvoice {
     pub invoice: String,
 }
 
-#[tokio::main(flavor = "current_thread")]
-pub async fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
+pub fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
     tracing::info!("rust decoding: {}", bolt11);
     let bolt11: Invoice = bolt11.parse()?;
 
