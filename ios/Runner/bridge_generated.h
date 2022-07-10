@@ -19,9 +19,11 @@ typedef bool (*DartPostCObjectFnType)(DartPort port_id, void *message);
 
 void wire_address(int64_t port_);
 
-void wire_init(int64_t port_, struct wire_uint_8_list *path);
+void wire_init(int64_t port_);
 
-void wire_join_federation(int64_t port_, struct wire_uint_8_list *config_url);
+void wire_join_federation(int64_t port_,
+                          struct wire_uint_8_list *user_dir,
+                          struct wire_uint_8_list *config_url);
 
 void wire_leave_federation(int64_t port_);
 
@@ -36,8 +38,6 @@ void wire_pay(int64_t port_, struct wire_uint_8_list *bolt11);
 void wire_decode_invoice(int64_t port_, struct wire_uint_8_list *bolt11);
 
 void wire_invoice(int64_t port_, uint64_t amount);
-
-void wire_poll(int64_t port_);
 
 struct wire_uint_8_list *new_uint_8_list(int32_t len);
 
@@ -57,7 +57,6 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) wire_pay);
     dummy_var ^= ((int64_t) (void*) wire_decode_invoice);
     dummy_var ^= ((int64_t) (void*) wire_invoice);
-    dummy_var ^= ((int64_t) (void*) wire_poll);
     dummy_var ^= ((int64_t) (void*) new_uint_8_list);
     dummy_var ^= ((int64_t) (void*) free_WireSyncReturnStruct);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);
