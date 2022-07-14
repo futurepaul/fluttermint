@@ -8,7 +8,7 @@ use bitcoincore_rpc::{Auth, RpcApi};
 use lightning_invoice::Invoice;
 use minimint::modules::{ln::contracts::ContractId, wallet::txoproof::TxOutProof};
 use minimint_api::{db::Database, encoding::Decodable, OutPoint};
-use mint_client::{ln::gateway::LightningGateway, ClientAndGatewayConfig, UserClient};
+use mint_client::{ln::gateway::LightningGateway, UserClient, UserClientConfig};
 use tokio::sync::Mutex;
 
 pub struct Client {
@@ -19,10 +19,10 @@ pub struct Client {
 
 impl Client {
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
-        let cfg: ClientAndGatewayConfig = serde_json::from_str(cfg_json)?;
+        let cfg: UserClientConfig = serde_json::from_str(cfg_json)?;
         tracing::info!("parsed config {:?}\n\n\n", cfg);
         Ok(Self {
-            client: UserClient::new(cfg.client, db, Default::default()).await,
+            client: UserClient::new(cfg.clone(), db, Default::default()).await,
             gateway_cfg: cfg.gateway,
             payments: Mutex::new(Vec::new()),
         })
