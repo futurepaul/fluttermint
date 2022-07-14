@@ -18,18 +18,6 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_address(port_: i64) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "address",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || move |task_callback| address(),
-    )
-}
-
-#[no_mangle]
 pub extern "C" fn wire_init(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -82,36 +70,6 @@ pub extern "C" fn wire_balance(port_: i64) {
             mode: FfiCallMode::Normal,
         },
         move || move |task_callback| balance(),
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_pegin(port_: i64, txid: *mut wire_uint_8_list) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "pegin",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || {
-            let api_txid = txid.wire2api();
-            move |task_callback| pegin(api_txid)
-        },
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_pegout(port_: i64, address: *mut wire_uint_8_list) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "pegout",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || {
-            let api_address = address.wire2api();
-            move |task_callback| pegout(api_address)
-        },
     )
 }
 

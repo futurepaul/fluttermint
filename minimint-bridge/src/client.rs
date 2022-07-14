@@ -1,13 +1,10 @@
 //! Minimint client with simpler types
 
-use std::{io::Cursor, str::FromStr, time::Duration};
+use std::time::Duration;
 
-use anyhow::anyhow;
-use bitcoin::{Address, Amount, Txid};
-use bitcoincore_rpc::{Auth, RpcApi};
 use lightning_invoice::Invoice;
-use minimint::modules::{ln::contracts::ContractId, wallet::txoproof::TxOutProof};
-use minimint_api::{db::Database, encoding::Decodable, OutPoint};
+use minimint::modules::ln::contracts::ContractId;
+use minimint_api::db::Database;
 use mint_client::{ln::gateway::LightningGateway, UserClient, UserClientConfig};
 use tokio::sync::Mutex;
 
@@ -28,59 +25,8 @@ impl Client {
         })
     }
 
-    pub fn address(&self) -> String {
-        let mut rng = rand::rngs::OsRng::new().unwrap();
-        self.client.get_new_pegin_address(&mut rng).to_string()
-    }
-
     pub async fn balance(&self) -> u64 {
         self.client.coins().amount().milli_sat
-    }
-
-    pub async fn pegin(&self, txid: &str, host: &str) -> anyhow::Result<String> {
-        let txid: Txid = txid.parse()?;
-        let mut rng = rand::rngs::OsRng::new().unwrap();
-        let url = format!("http://{}:18443/wallet/default", host);
-        let auth = Auth::UserPass("bitcoin".into(), "bitcoin".into());
-        let rpc_client = bitcoincore_rpc::Client::new(&url, auth)?;
-
-        let tx = rpc_client.get_raw_transaction(&txid, None)?;
-        let _txout_proof = rpc_client.get_tx_out_proof(&[txid], None)?;
-        let txout_proof = TxOutProof::consensus_decode(Cursor::new(_txout_proof))
-            .map_err(|e| anyhow!("{:?}", e))?;
-
-        let id = self.client.peg_in(txout_proof, tx, &mut rng).await?;
-
-        let outpoint = OutPoint {
-            txid: id,
-            out_idx: 0,
-        };
-
-        loop {
-            let result = self.client.fetch_coins(outpoint).await;
-
-            match result {
-                Ok(()) => return Ok("ok".to_string()), // FIXME
-                Err(err) if err.is_retryable() => {
-                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                    continue;
-                }
-                Err(err) => Err(err)?,
-            };
-        }
-    }
-
-    pub async fn pegout(&self, address: &str) -> anyhow::Result<String> {
-        let mut rng = rand::rngs::OsRng::new().unwrap();
-        let txid = self
-            .client
-            .peg_out(
-                Amount::from_sat(1_000),
-                Address::from_str(&address)?,
-                &mut rng,
-            )
-            .await?;
-        Ok(format!("{:?}", txid))
     }
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<String> {

@@ -51,13 +51,6 @@ mod global_client {
     }
 }
 
-pub fn address() -> Result<String> {
-    RUNTIME.block_on(async {
-        let client = global_client::get().await?;
-        Ok(client.address())
-    })
-}
-
 /// If this returns Some, user has joined a federation. Otherwise they haven't.
 pub fn init() -> Result<bool> {
     // Configure logging
@@ -110,14 +103,6 @@ pub fn leave_federation() -> Result<()> {
 
 pub fn balance() -> Result<u64> {
     RUNTIME.block_on(async { Ok(global_client::get().await?.balance().await) })
-}
-
-pub fn pegin(txid: String) -> Result<String> {
-    RUNTIME.block_on(async { global_client::get().await?.pegin(&txid, &get_host()).await })
-}
-
-pub fn pegout(address: String) -> Result<String> {
-    RUNTIME.block_on(async { global_client::get().await?.pegout(&address).await })
 }
 
 pub fn pay(bolt11: String) -> Result<String> {

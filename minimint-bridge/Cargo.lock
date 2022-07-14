@@ -196,7 +196,6 @@ checksum = "05bba324e6baf655b882df672453dbbc527bc938cadd27750ae510aaccc3a66a"
 dependencies = [
  "bech32",
  "bitcoin_hashes",
- "bitcoinconsensus",
  "secp256k1",
  "serde",
 ]
@@ -207,16 +206,6 @@ version = "0.10.0"
 source = "git+https://github.com/fedimint/bitcoin_hashes?branch=minimint#fb2be02f95fac4d21cc8822f4bf63166c7aa8d47"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "bitcoinconsensus"
-version = "0.19.0-3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a8aa43b5cd02f856cb126a9af819e77b8910fdd74dd1407be649f2f5fe3a1b5"
-dependencies = [
- "cc",
- "libc",
 ]
 
 [[package]]
@@ -366,9 +355,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.8"
+version = "3.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "190814073e85d238f31ff738fcb0bf6910cedeb73376c87cd69291028966fd83"
+checksum = "d646c7ade5eb07c4aa20e907a922750df0c448892513714fd3e4acbc7130829f"
 dependencies = [
  "atty",
  "bitflags",
@@ -654,9 +643,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge"
-version = "1.37.1"
+version = "1.37.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85dfb10a95f372aaa9c4d8b1eb5da0cd5c80bff4c93e78be2d71d0e36b063036"
+checksum = "042a22dc69e3e8471f4045da5f75b7e662282de2bd307478382c0fab60a7af14"
 dependencies = [
  "allo-isolate",
  "anyhow",
@@ -668,9 +657,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge_macros"
-version = "1.37.1"
+version = "1.37.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4de679e33aa344bcd8d6d50492295eaae9ba06b17f4b0296ef19cac648129df1"
+checksum = "4b78a1a69afcf28951d0801e9be838b236734c8827a0eadbb71fb651aa2e9fed"
 
 [[package]]
 name = "fnv"
@@ -1452,14 +1441,14 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "minimint"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-trait",
  "bincode",
  "bitcoin",
  "bytes",
- "clap 3.2.8",
+ "clap 3.2.11",
  "futures",
  "hbbft",
  "hex",
@@ -1488,7 +1477,7 @@ dependencies = [
 [[package]]
 name = "minimint-api"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -1540,7 +1529,7 @@ dependencies = [
 [[package]]
 name = "minimint-core"
 version = "0.0.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1566,7 +1555,7 @@ dependencies = [
 [[package]]
 name = "minimint-derive"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "heck 0.3.3",
  "proc-macro2 1.0.40",
@@ -1577,7 +1566,7 @@ dependencies = [
 [[package]]
 name = "minimint-ln"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1599,7 +1588,7 @@ dependencies = [
 [[package]]
 name = "minimint-mint"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1619,7 +1608,7 @@ dependencies = [
 [[package]]
 name = "minimint-wallet"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1661,7 +1650,7 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2311,7 +2300,7 @@ dependencies = [
  "libm",
  "parking_lot 0.11.2",
  "smallvec",
- "spin 0.9.3",
+ "spin 0.9.4",
 ]
 
 [[package]]
@@ -2538,18 +2527,18 @@ checksum = "f638d531eccd6e23b980caf34876660d38e265409d8e99b397ab71eb3612fad0"
 
 [[package]]
 name = "serde"
-version = "1.0.138"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1578c6245786b9d168c5447eeacfb96856573ca56c9d68fdcf394be134882a47"
+checksum = "0171ebb889e45aa68b44aee0859b3eede84c6f5f5c228e6f140c0b2a0a46cad6"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.138"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "023e9b1467aef8a10fb88f25611870ada9800ef7e22afce356bb0d2387b6f27c"
+checksum = "dc1d3230c1de7932af58ad8ffbe1d784bd55efd5a9d84ac24f69c72d83543dfb"
 dependencies = [
  "proc-macro2 1.0.40",
  "quote 1.0.20",
@@ -2689,9 +2678,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "spin"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c530c2b0d0bf8b69304b39fe2001993e267461948b890cd037d8ad4293fa1a0d"
+checksum = "7f6002a767bff9e83f8eeecf883ecb8011875a21ae8da43bffb817a57e78cc09"
 
 [[package]]
 name = "strsim"
@@ -2774,7 +2763,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#d88a08f8a3aa6812114f2b427e5580536b03a67a"
+source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "bls12_381",
  "ff 0.11.1",
@@ -2922,10 +2911,11 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.19.2"
+version = "1.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c51a52ed6686dd62c320f9b89299e9dfb46f730c7a48e635c19f21d116cb1439"
+checksum = "57aec3cfa4c296db7255446efb4928a6be304b431a806216105542a67b6ca82e"
 dependencies = [
+ "autocfg 1.1.0",
  "bytes",
  "libc",
  "memchr",
