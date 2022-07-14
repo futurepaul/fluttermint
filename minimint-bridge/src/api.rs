@@ -51,16 +51,8 @@ mod global_client {
     }
 }
 
-pub fn address() -> Result<String> {
-    RUNTIME.block_on(async {
-        let client = global_client::get().await?;
-        Ok(client.address())
-    })
-}
-
 /// If this returns Some, user has joined a federation. Otherwise they haven't.
-#[tokio::main(flavor = "current_thread")]
-pub async fn init() -> Result<bool> {
+pub fn init() -> Result<bool> {
     // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
@@ -95,8 +87,8 @@ pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
         let cfg = reqwest::get(config_url).await?.text().await?;
         let filename = Path::new(&user_dir).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
-        let client = Arc::new(Client::new(Box::new(db), &cfg)?);
-        global_client::set(client.clone());
+        let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
+        global_client::set(client.clone()).await;
         // TODO: kill the poll task on leave
         tokio::spawn(async move { client.poll().await });
         Ok(())
@@ -113,14 +105,6 @@ pub fn balance() -> Result<u64> {
     RUNTIME.block_on(async { Ok(global_client::get().await?.balance().await) })
 }
 
-pub fn pegin(txid: String) -> Result<String> {
-    RUNTIME.block_on(async { global_client::get().await?.pegin(&txid, &get_host()).await })
-}
-
-pub fn pegout(address: String) -> Result<String> {
-    RUNTIME.block_on(async { global_client::get().await?.pegout(&address).await })
-}
-
 pub fn pay(bolt11: String) -> Result<String> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
@@ -131,8 +115,7 @@ pub struct MyInvoice {
     pub invoice: String,
 }
 
-#[tokio::main(flavor = "current_thread")]
-pub async fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
+pub fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
     tracing::info!("rust decoding: {}", bolt11);
     let bolt11: Invoice = bolt11.parse()?;
 

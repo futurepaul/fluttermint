@@ -12,28 +12,21 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'dart:ffi' as ffi;
 
 abstract class MinimintBridge {
-  Future<String> address({dynamic hint});
-
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
-  Future<bool> init({required String path, dynamic hint});
+  Future<bool> init({dynamic hint});
 
-  Future<void> joinFederation({required String configUrl, dynamic hint});
+  Future<void> joinFederation(
+      {required String userDir, required String configUrl, dynamic hint});
 
   Future<void> leaveFederation({dynamic hint});
 
   Future<int> balance({dynamic hint});
-
-  Future<String> pegin({required String txid, dynamic hint});
-
-  Future<String> pegout({required String address, dynamic hint});
 
   Future<String> pay({required String bolt11, dynamic hint});
 
   Future<MyInvoice> decodeInvoice({required String bolt11, dynamic hint});
 
   Future<String> invoice({required int amount, dynamic hint});
-
-  Future<void> poll({dynamic hint});
 }
 
 class MyInvoice {
@@ -55,39 +48,28 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
 
   MinimintBridgeImpl.raw(MinimintBridgeWire inner) : super(inner);
 
-  Future<String> address({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_address(port_),
-        parseSuccessData: _wire2api_String,
+  Future<bool> init({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_init(port_),
+        parseSuccessData: _wire2api_bool,
         constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "address",
+          debugName: "init",
           argNames: [],
         ),
         argValues: [],
         hint: hint,
       ));
 
-  Future<bool> init({required String path, dynamic hint}) =>
+  Future<void> joinFederation(
+          {required String userDir, required String configUrl, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_init(port_, _api2wire_String(path)),
-        parseSuccessData: _wire2api_bool,
-        constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "init",
-          argNames: ["path"],
-        ),
-        argValues: [path],
-        hint: hint,
-      ));
-
-  Future<void> joinFederation({required String configUrl, dynamic hint}) =>
-      executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) =>
-            inner.wire_join_federation(port_, _api2wire_String(configUrl)),
+        callFfi: (port_) => inner.wire_join_federation(
+            port_, _api2wire_String(userDir), _api2wire_String(configUrl)),
         parseSuccessData: _wire2api_unit,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "join_federation",
-          argNames: ["configUrl"],
+          argNames: ["userDir", "configUrl"],
         ),
-        argValues: [configUrl],
+        argValues: [userDir, configUrl],
         hint: hint,
       ));
 
@@ -111,30 +93,6 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
           argNames: [],
         ),
         argValues: [],
-        hint: hint,
-      ));
-
-  Future<String> pegin({required String txid, dynamic hint}) =>
-      executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_pegin(port_, _api2wire_String(txid)),
-        parseSuccessData: _wire2api_String,
-        constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "pegin",
-          argNames: ["txid"],
-        ),
-        argValues: [txid],
-        hint: hint,
-      ));
-
-  Future<String> pegout({required String address, dynamic hint}) =>
-      executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_pegout(port_, _api2wire_String(address)),
-        parseSuccessData: _wire2api_String,
-        constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "pegout",
-          argNames: ["address"],
-        ),
-        argValues: [address],
         hint: hint,
       ));
 
@@ -172,17 +130,6 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
           argNames: ["amount"],
         ),
         argValues: [amount],
-        hint: hint,
-      ));
-
-  Future<void> poll({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_poll(port_),
-        parseSuccessData: _wire2api_unit,
-        constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "poll",
-          argNames: [],
-        ),
-        argValues: [],
         hint: hint,
       ));
 
@@ -275,51 +222,37 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
           lookup)
       : _lookup = lookup;
 
-  void wire_address(
-    int port_,
-  ) {
-    return _wire_address(
-      port_,
-    );
-  }
-
-  late final _wire_addressPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_address');
-  late final _wire_address = _wire_addressPtr.asFunction<void Function(int)>();
-
   void wire_init(
     int port_,
-    ffi.Pointer<wire_uint_8_list> path,
   ) {
     return _wire_init(
       port_,
-      path,
     );
   }
 
-  late final _wire_initPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_init');
-  late final _wire_init = _wire_initPtr
-      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+  late final _wire_initPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_init');
+  late final _wire_init = _wire_initPtr.asFunction<void Function(int)>();
 
   void wire_join_federation(
     int port_,
+    ffi.Pointer<wire_uint_8_list> user_dir,
     ffi.Pointer<wire_uint_8_list> config_url,
   ) {
     return _wire_join_federation(
       port_,
+      user_dir,
       config_url,
     );
   }
 
   late final _wire_join_federationPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64,
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
               ffi.Pointer<wire_uint_8_list>)>>('wire_join_federation');
-  late final _wire_join_federation = _wire_join_federationPtr
-      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+  late final _wire_join_federation = _wire_join_federationPtr.asFunction<
+      void Function(
+          int, ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_leave_federation(
     int port_,
@@ -346,40 +279,6 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   late final _wire_balancePtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_balance');
   late final _wire_balance = _wire_balancePtr.asFunction<void Function(int)>();
-
-  void wire_pegin(
-    int port_,
-    ffi.Pointer<wire_uint_8_list> txid,
-  ) {
-    return _wire_pegin(
-      port_,
-      txid,
-    );
-  }
-
-  late final _wire_peginPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_pegin');
-  late final _wire_pegin = _wire_peginPtr
-      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
-
-  void wire_pegout(
-    int port_,
-    ffi.Pointer<wire_uint_8_list> address,
-  ) {
-    return _wire_pegout(
-      port_,
-      address,
-    );
-  }
-
-  late final _wire_pegoutPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_pegout');
-  late final _wire_pegout = _wire_pegoutPtr
-      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_pay(
     int port_,
@@ -430,18 +329,6 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
           'wire_invoice');
   late final _wire_invoice =
       _wire_invoicePtr.asFunction<void Function(int, int)>();
-
-  void wire_poll(
-    int port_,
-  ) {
-    return _wire_poll(
-      port_,
-    );
-  }
-
-  late final _wire_pollPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_poll');
-  late final _wire_poll = _wire_pollPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,

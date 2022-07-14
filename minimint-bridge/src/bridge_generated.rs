@@ -18,34 +18,23 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_address(port_: i64) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "address",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || move |task_callback| address(),
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_init(port_: i64, path: *mut wire_uint_8_list) {
+pub extern "C" fn wire_init(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "init",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || {
-            let api_path = path.wire2api();
-            move |task_callback| init(api_path)
-        },
+        move || move |task_callback| init(),
     )
 }
 
 #[no_mangle]
-pub extern "C" fn wire_join_federation(port_: i64, config_url: *mut wire_uint_8_list) {
+pub extern "C" fn wire_join_federation(
+    port_: i64,
+    user_dir: *mut wire_uint_8_list,
+    config_url: *mut wire_uint_8_list,
+) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "join_federation",
@@ -53,8 +42,9 @@ pub extern "C" fn wire_join_federation(port_: i64, config_url: *mut wire_uint_8_
             mode: FfiCallMode::Normal,
         },
         move || {
+            let api_user_dir = user_dir.wire2api();
             let api_config_url = config_url.wire2api();
-            move |task_callback| join_federation(api_config_url)
+            move |task_callback| join_federation(api_user_dir, api_config_url)
         },
     )
 }
@@ -80,36 +70,6 @@ pub extern "C" fn wire_balance(port_: i64) {
             mode: FfiCallMode::Normal,
         },
         move || move |task_callback| balance(),
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_pegin(port_: i64, txid: *mut wire_uint_8_list) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "pegin",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || {
-            let api_txid = txid.wire2api();
-            move |task_callback| pegin(api_txid)
-        },
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_pegout(port_: i64, address: *mut wire_uint_8_list) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "pegout",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || {
-            let api_address = address.wire2api();
-            move |task_callback| pegout(api_address)
-        },
     )
 }
 
@@ -155,18 +115,6 @@ pub extern "C" fn wire_invoice(port_: i64, amount: u64) {
             let api_amount = amount.wire2api();
             move |task_callback| invoice(api_amount)
         },
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_poll(port_: i64) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "poll",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || move |task_callback| poll(),
     )
 }
 
