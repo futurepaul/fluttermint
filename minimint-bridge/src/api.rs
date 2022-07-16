@@ -5,6 +5,9 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
+use minimint_api::PeerId;
+use mint_client::api::{WsFederationApi, WsFederationApiSer};
+use mint_client::UserClientConfig;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -17,7 +20,7 @@ lazy_static! {
         .expect("failed to build runtime");
 }
 
-fn write_to_file(contents: String, path: PathBuf) -> Result<()> {
+fn _write_to_file(contents: String, path: PathBuf) -> Result<()> {
     let writer = std::fs::File::create(path)?;
     serde_json::to_writer_pretty(writer, &contents).unwrap();
     Ok(())
@@ -72,9 +75,9 @@ pub fn init() -> Result<bool> {
         .with(
             tracing_oslog::OsLogger::new(
                 "com.example.flutter_rust_bridge_template",
-                "INFO", // I don't know what this does ...
+                "TRACE", // I don't know what this does ...
             )
-            .with_filter(tracing_subscriber::filter::LevelFilter::DEBUG),
+            .with_filter(tracing_subscriber::filter::LevelFilter::TRACE),
         )
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
@@ -82,9 +85,20 @@ pub fn init() -> Result<bool> {
     Ok(true)
 }
 
+// FIXME: rename config_url
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
-        let cfg = reqwest::get(config_url).await?.text().await?;
+        tracing::trace!("trace???");
+        // let config_url = config_url.replace("127.0.0.1", &get_host());
+        // let ser: WsFederationApiSer = serde_json::from_str(&config_url).unwrap(); // FIXME: unwrap
+        // let api = WsFederationApi::new(ser.max_evil, ser.members).await;
+
+        let max_evil = 0;
+        let members = vec![(PeerId::from(0 as u16), "ws://localhost:5000".into())];
+        let api = WsFederationApi::new(max_evil, members).await;
+
+        let cfg: UserClientConfig = api.request("/config", ()).await?;
+        // let cfg = reqwest::get(config_url).await?.text().await?;
         let filename = Path::new(&user_dir).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         let client = Arc::new(Client::new(Box::new(db), &cfg).await?);

@@ -1,26 +1,19 @@
 //! Minimint client with simpler types
-
-use std::time::Duration;
-
 use lightning_invoice::Invoice;
 use minimint::modules::ln::contracts::ContractId;
 use minimint_api::db::Database;
-use mint_client::{ln::gateway::LightningGateway, UserClient, UserClientConfig};
+use mint_client::{UserClient, UserClientConfig};
 use tokio::sync::Mutex;
 
 pub struct Client {
     client: UserClient,
-    gateway_cfg: LightningGateway,
     payments: Mutex<Vec<Invoice>>,
 }
 
 impl Client {
-    pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
-        let cfg: UserClientConfig = serde_json::from_str(cfg_json)?;
-        tracing::info!("parsed config {:?}\n\n\n", cfg);
+    pub async fn new(db: Box<dyn Database>, cfg: &UserClientConfig) -> anyhow::Result<Self> {
         Ok(Self {
             client: UserClient::new(cfg.clone(), db, Default::default()).await,
-            gateway_cfg: cfg.gateway,
             payments: Mutex::new(Vec::new()),
         })
     }
@@ -31,12 +24,11 @@ impl Client {
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<String> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
-        let http = reqwest::Client::new();
         let bolt11: Invoice = bolt11.parse()?;
 
         let (contract_id, outpoint) = self
             .client
-            .fund_outgoing_ln_contract(&self.gateway_cfg, bolt11, &mut rng)
+            .fund_outgoing_ln_contract(bolt11, &mut rng)
             .await
             .expect("Not enough coins");
 
@@ -45,13 +37,10 @@ impl Client {
             .await
             .expect("Contract wasn't accepted in time");
 
-        let r = http
-            .post(&format!("{}/pay_invoice", self.gateway_cfg.api))
-            .json(&contract_id)
-            .timeout(Duration::from_secs(15))
-            .send()
-            .await
-            .unwrap();
+        let r = self
+            .client
+            .await_outgoing_contract_execution(contract_id)
+            .await?;
 
         Ok(format!("{:?}", r))
     }
@@ -63,12 +52,7 @@ impl Client {
         let amt = minimint_api::Amount::from_sat(amount);
         let confirmed_invoice = self
             .client
-            .generate_invoice(
-                amt,
-                "TODO: description".to_string(),
-                &self.gateway_cfg,
-                &mut rng,
-            )
+            .generate_invoice(amt, "TODO: description".to_string(), &mut rng)
             .await
             .expect("Couldn't create invoice");
 

@@ -1441,7 +1441,6 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "minimint"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1477,7 +1476,6 @@ dependencies = [
 [[package]]
 name = "minimint-api"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -1529,7 +1527,6 @@ dependencies = [
 [[package]]
 name = "minimint-core"
 version = "0.0.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1555,7 +1552,6 @@ dependencies = [
 [[package]]
 name = "minimint-derive"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "heck 0.3.3",
  "proc-macro2 1.0.40",
@@ -1566,7 +1562,6 @@ dependencies = [
 [[package]]
 name = "minimint-ln"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1588,7 +1583,6 @@ dependencies = [
 [[package]]
 name = "minimint-mint"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1608,7 +1602,6 @@ dependencies = [
 [[package]]
 name = "minimint-wallet"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1650,7 +1643,6 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1670,6 +1662,7 @@ dependencies = [
  "minimint-core",
  "miniscript",
  "rand 0.6.5",
+ "reqwest",
  "secp256k1-zkp",
  "serde",
  "serde_json",
@@ -2763,7 +2756,6 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/minimint#1e186b8ca6bbc1212bfabbebf7c32b90f302d688"
 dependencies = [
  "bls12_381",
  "ff 0.11.1",
