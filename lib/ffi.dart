@@ -9,7 +9,7 @@ import 'client.dart';
 import 'bridge_generated.dart';
 import 'dart:io' as io;
 
-const _base = 'minimint-bridge';
+const _base = 'minimint_bridge';
 
 // On MacOS, the dynamic library is not bundled with the binary,
 // but rather directly **linked** against the binary.
@@ -24,14 +24,13 @@ class MinimintClientImpl implements MinimintClient {
           : DynamicLibrary.open(_dylib));
 
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
-  Future<bool> init() {
-    return api.init();
+  Future<bool> init({required String path}) {
+    return api.init(path: path);
   }
 
-  Future<void> joinFederation({required String configUrl}) async {
-    await api.joinFederation(
-        userDir: (await getApplicationDocumentsDirectory()).path,
-        configUrl: configUrl);
+  Future<void> joinFederation(
+      {required String configUrl, required String userDir}) async {
+    await api.joinFederation(configUrl: configUrl, userDir: userDir);
   }
 
   Future<void> leaveFederation() {
@@ -42,7 +41,7 @@ class MinimintClientImpl implements MinimintClient {
     return api.balance();
   }
 
-  Future<String> pay({required String bolt11}) {
+  Future<void> pay({required String bolt11}) {
     return api.pay(bolt11: bolt11);
   }
 
@@ -50,7 +49,7 @@ class MinimintClientImpl implements MinimintClient {
     return api.decodeInvoice(bolt11: bolt11);
   }
 
-  Future<String> invoice({required int amount}) {
-    return api.invoice(amount: amount);
+  Future<String> invoice({required int amount, required String description}) {
+    return api.invoice(amount: amount, description: description);
   }
 }

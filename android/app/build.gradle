@@ -26,7 +26,9 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion flutter.compileSdkVersion
+    // qr_code_scanner only works with v32
+    compileSdkVersion 32
+    // compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -43,11 +45,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.fluttermint"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        // qr_code_scanner only works with v20
+        minSdkVersion 20
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -68,4 +68,26 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+
+// http://cjycode.com/flutter_rust_bridge/integrate/android_tasks.html?highlight=Tuple2#hooking-onto-tasks
+[
+    new Tuple2('Debug', ''),
+    new Tuple2('Profile', '--release'),
+    new Tuple2('Release', '--release')
+].each {
+    def taskPostfix = it.first
+    def profileMode = it.second
+    tasks.whenTaskAdded { task ->
+        if (task.name == "javaPreCompile$taskPostfix") {
+            task.dependsOn "cargoBuild$taskPostfix"
+        }
+    }
+    tasks.register("cargoBuild$taskPostfix", Exec) {
+        // Without this, android was looking in the wrong place for clang to build secp256k1-zkp
+        commandLine 'sh', '-c', """cd ../../minimint-bridge && \
+        ANDROID_NDK_HOME="$ANDROID_NDK" cargo ndk \
+            -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 \
+            -o ../android/app/src/main/jniLibs build $profileMode"""
+    }
 }
