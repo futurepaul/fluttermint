@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
+use minimint_api::db::mem_impl::MemDatabase;
 use minimint_api::PeerId;
 use mint_client::api::{WsFederationApi, WsFederationApiSer};
 use mint_client::UserClientConfig;
@@ -75,32 +76,32 @@ pub fn init() -> Result<bool> {
         .with(
             tracing_oslog::OsLogger::new(
                 "com.example.flutter_rust_bridge_template",
-                "TRACE", // I don't know what this does ...
+                "INFO", // I don't know what this does ...
             )
-            .with_filter(tracing_subscriber::filter::LevelFilter::TRACE),
+            .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
         )
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
+    tracing::info!("initialized");
     Ok(true)
 }
 
 // FIXME: rename config_url
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
-        tracing::trace!("trace???");
+        tracing::info!("config: {:?}", config_url);
+        // For Real
         // let config_url = config_url.replace("127.0.0.1", &get_host());
-        // let ser: WsFederationApiSer = serde_json::from_str(&config_url).unwrap(); // FIXME: unwrap
-        // let api = WsFederationApi::new(ser.max_evil, ser.members).await;
-
-        let max_evil = 0;
-        let members = vec![(PeerId::from(0 as u16), "ws://localhost:5000".into())];
-        let api = WsFederationApi::new(max_evil, members).await;
-
+        let ser: WsFederationApiSer = serde_json::from_str(&config_url).unwrap(); // FIXME: unwrap
+        let api = WsFederationApi::new(ser.max_evil, ser.members).await;
         let cfg: UserClientConfig = api.request("/config", ()).await?;
-        // let cfg = reqwest::get(config_url).await?.text().await?;
-        let filename = Path::new(&user_dir).join("client.db");
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
+        println!("config {:?}", cfg);
+
+        // TODO: getting "read only filesystem" error ...
+        // let filename = Path::new(&user_dir).join("client.db");
+        // let db = sled::open(&filename)?.open_tree("mint-client")?;
+        let db = MemDatabase::new();
         let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
         global_client::set(client.clone()).await;
         // TODO: kill the poll task on leave

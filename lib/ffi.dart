@@ -9,7 +9,7 @@ import 'bridge_generated.dart';
 export 'bridge_generated.dart';
 import 'dart:io' as io;
 
-const _base = 'minimint-bridge';
+const _base = 'minimint_bridge';
 
 // On MacOS, the dynamic library is not bundled with the binary,
 // but rather directly **linked** against the binary.
