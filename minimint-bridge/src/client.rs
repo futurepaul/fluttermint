@@ -79,6 +79,8 @@ impl Client {
             .await
             .unwrap();
 
+        self.client.fetch_all_coins().await;
+
         Ok(format!("{:?}", r))
     }
 
