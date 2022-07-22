@@ -42,6 +42,8 @@ impl Client {
             .await_outgoing_contract_execution(contract_id)
             .await?;
 
+        self.client.fetch_all_coins().await?;
+
         Ok(format!("{:?}", r))
     }
 
