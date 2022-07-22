@@ -26,7 +26,8 @@ abstract class MinimintBridge {
 
   Future<MyInvoice> decodeInvoice({required String bolt11, dynamic hint});
 
-  Future<String> invoice({required int amount, dynamic hint});
+  Future<String> invoice(
+      {required int amount, required String description, dynamic hint});
 }
 
 class MyInvoice {
@@ -121,15 +122,17 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
-  Future<String> invoice({required int amount, dynamic hint}) =>
+  Future<String> invoice(
+          {required int amount, required String description, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_invoice(port_, _api2wire_u64(amount)),
+        callFfi: (port_) => inner.wire_invoice(
+            port_, _api2wire_u64(amount), _api2wire_String(description)),
         parseSuccessData: _wire2api_String,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "invoice",
-          argNames: ["amount"],
+          argNames: ["amount", "description"],
         ),
-        argValues: [amount],
+        argValues: [amount, description],
         hint: hint,
       ));
 
@@ -317,18 +320,21 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   void wire_invoice(
     int port_,
     int amount,
+    ffi.Pointer<wire_uint_8_list> description,
   ) {
     return _wire_invoice(
       port_,
       amount,
+      description,
     );
   }
 
-  late final _wire_invoicePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64, ffi.Uint64)>>(
-          'wire_invoice');
-  late final _wire_invoice =
-      _wire_invoicePtr.asFunction<void Function(int, int)>();
+  late final _wire_invoicePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64, ffi.Uint64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_invoice');
+  late final _wire_invoice = _wire_invoicePtr
+      .asFunction<void Function(int, int, ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,

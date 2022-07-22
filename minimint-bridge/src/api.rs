@@ -146,6 +146,11 @@ pub fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
     });
 }
 
-pub fn invoice(amount: u64) -> Result<String> {
-    RUNTIME.block_on(async { global_client::get().await?.invoice(amount).await })
+pub fn invoice(amount: u64, description: String) -> Result<String> {
+    RUNTIME.block_on(async {
+        global_client::get()
+            .await?
+            .invoice(amount, description)
+            .await
+    })
 }

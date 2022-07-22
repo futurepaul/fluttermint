@@ -31,7 +31,7 @@ void wire_pay(int64_t port_, struct wire_uint_8_list *bolt11);
 
 void wire_decode_invoice(int64_t port_, struct wire_uint_8_list *bolt11);
 
-void wire_invoice(int64_t port_, uint64_t amount);
+void wire_invoice(int64_t port_, uint64_t amount, struct wire_uint_8_list *description);
 
 struct wire_uint_8_list *new_uint_8_list(int32_t len);
 

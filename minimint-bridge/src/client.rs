@@ -47,14 +47,14 @@ impl Client {
         Ok(format!("{:?}", r))
     }
 
-    pub async fn invoice(&self, amount: u64) -> anyhow::Result<String> {
+    pub async fn invoice(&self, amount: u64, description: String) -> anyhow::Result<String> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
 
         // Save the keys and invoice for later polling`
         let amt = minimint_api::Amount::from_sat(amount);
         let confirmed_invoice = self
             .client
-            .generate_invoice(amt, "TODO: description".to_string(), &mut rng)
+            .generate_invoice(amt, description, &mut rng)
             .await
             .expect("Couldn't create invoice");
 
@@ -69,8 +69,6 @@ impl Client {
         let rng = rand::rngs::OsRng::new().unwrap();
         // Spawn a thread to check balances and claim incoming contracts
         loop {
-            tracing::info!("polling...");
-
             // Complete incoming payments
             let mut payments_guard = self.payments.lock().await;
             let mut new_payments = vec![];
@@ -85,7 +83,6 @@ impl Client {
                     )
                     .await;
                 if let Err(_) = result {
-                    // TODO: filter out expired invoices
                     tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
                     new_payments.push(invoice.clone());
                     if invoice.is_expired() {
@@ -105,16 +102,6 @@ impl Client {
             for index in completed_payments.into_iter() {
                 new_payments.remove(index);
             }
-
-            // Fetch balance
-            // let initial_balance = client.coins().amount();
-            // client.fetch_all_coins().await.unwrap();
-            // let balance = client.coins().amount();
-            // tracing::info!(
-            //     "fetched coins {} -> {}",
-            //     initial_balance.milli_sat,
-            //     balance.milli_sat
-            // );
 
             // Reset hacky payment info
             *payments_guard = new_payments;
