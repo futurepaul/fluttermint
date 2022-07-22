@@ -91,6 +91,10 @@ impl Client {
                     }
                 } else {
                     tracing::info!("completed payment: {:?}", invoice.payment_hash());
+                    self.client
+                        .fetch_all_coins()
+                        .await
+                        .expect("couldn't fetch coins"); // FIXME
                     completed_payments.push(index);
                 }
             }
