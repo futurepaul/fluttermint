@@ -19,7 +19,7 @@ impl Client {
     }
 
     pub async fn balance(&self) -> u64 {
-        self.client.coins().amount().milli_sat
+        (self.client.coins().amount().milli_sat as f64 / 1000 as f64).round() as u64
     }
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<String> {

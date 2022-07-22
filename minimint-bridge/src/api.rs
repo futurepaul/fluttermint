@@ -125,23 +125,31 @@ pub fn pay(bolt11: String) -> Result<String> {
 }
 
 pub struct MyInvoice {
-    pub amount: Option<u64>,
+    pub amount: u64,
     pub description: String,
     pub invoice: String,
 }
 
 pub fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
-    tracing::info!("rust decoding: {}", bolt11);
     let bolt11: Invoice = bolt11.parse()?;
 
-    let amount = bolt11.amount_milli_satoshis();
-    // let description = bolt11.to_string();
+    let amount = bolt11
+        .amount_milli_satoshis()
+        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
+        .ok_or(anyhow!("Invoice missing amount"))?;
+
+    let description = bolt11
+        .clone()
+        .into_signed_raw()
+        .description()
+        .map(|d| d.clone().into_inner())
+        .unwrap_or_default();
+
     let invoice = bolt11.to_string();
 
     return Ok(MyInvoice {
-        amount: amount,
-        description: "Testing".to_string(),
-        // description: bolt11.description().to_owned().to_string(),
+        amount,
+        description,
         invoice,
     });
 }

@@ -31,12 +31,12 @@ abstract class MinimintBridge {
 }
 
 class MyInvoice {
-  final int? amount;
+  final int amount;
   final String description;
   final String invoice;
 
   MyInvoice({
-    this.amount,
+    required this.amount,
     required this.description,
     required this.invoice,
   });
@@ -168,23 +168,15 @@ bool _wire2api_bool(dynamic raw) {
   return raw as bool;
 }
 
-int _wire2api_box_autoadd_u64(dynamic raw) {
-  return raw as int;
-}
-
 MyInvoice _wire2api_my_invoice(dynamic raw) {
   final arr = raw as List<dynamic>;
   if (arr.length != 3)
     throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
   return MyInvoice(
-    amount: _wire2api_opt_box_autoadd_u64(arr[0]),
+    amount: _wire2api_u64(arr[0]),
     description: _wire2api_String(arr[1]),
     invoice: _wire2api_String(arr[2]),
   );
-}
-
-int? _wire2api_opt_box_autoadd_u64(dynamic raw) {
-  return raw == null ? null : _wire2api_box_autoadd_u64(raw);
 }
 
 int _wire2api_u64(dynamic raw) {

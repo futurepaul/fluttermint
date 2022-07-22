@@ -27,11 +27,9 @@ class SendScreen extends ConsumerWidget {
       try {
         debugPrint("decoding: $data");
         var decoded = await api.decodeInvoice(bolt11: data);
-        debugPrint("after decoded");
-        debugPrint("amount: ${decoded.amount}");
         var send = Send(
             description: decoded.description,
-            amountSats: (decoded.amount != null) ? decoded.amount! : 0,
+            amountSats: decoded.amount,
             invoice: decoded.invoice);
 
         debugPrint("Decoded was not null");
