@@ -72,7 +72,8 @@ impl Client {
             // Complete incoming payments
             let mut payments_guard = self.payments.lock().await;
             let mut new_payments = vec![];
-            for invoice in payments_guard.iter() {
+            let mut completed_payments = vec![];
+            for (index, invoice) in payments_guard.iter().enumerate() {
                 tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
                 let result = self
                     .client
@@ -85,9 +86,18 @@ impl Client {
                     // TODO: filter out expired invoices
                     tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
                     new_payments.push(invoice.clone());
+                    if invoice.is_expired() {
+                        completed_payments.push(index);
+                    }
                 } else {
                     tracing::info!("completed payment: {:?}", invoice.payment_hash());
+                    completed_payments.push(index);
                 }
+            }
+
+            // Remove completed or expired invoices
+            for index in completed_payments.into_iter() {
+                new_payments.remove(index);
             }
 
             // Fetch balance
