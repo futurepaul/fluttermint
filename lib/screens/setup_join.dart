@@ -27,8 +27,8 @@ class SetupJoin extends ConsumerWidget {
     void joinFederation(String cfg) async {
       await api.joinFederation(
           configUrl: cfg,
-          userDir: await getApplicationDocumentsDirectory()
-              .then((dir) => dir.toString()));
+          userDir:
+              await getApplicationDocumentsDirectory().then((dir) => dir.path));
       await codeProviderNotifier.update(cfg);
       context.go("/");
     }

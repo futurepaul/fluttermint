@@ -12,8 +12,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'dart:ffi' as ffi;
 
 abstract class MinimintBridge {
-  /// If this returns Some, user has joined a federation. Otherwise they haven't.
-  Future<bool> init({dynamic hint});
+  /// If this returns true, user has joined a federation. Otherwise they haven't.
+  Future<bool> init({required String path, dynamic hint});
 
   Future<void> joinFederation(
       {required String userDir, required String configUrl, dynamic hint});
@@ -49,14 +49,15 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
 
   MinimintBridgeImpl.raw(MinimintBridgeWire inner) : super(inner);
 
-  Future<bool> init({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_init(port_),
+  Future<bool> init({required String path, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_init(port_, _api2wire_String(path)),
         parseSuccessData: _wire2api_bool,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "init",
-          argNames: [],
+          argNames: ["path"],
         ),
-        argValues: [],
+        argValues: [path],
         hint: hint,
       ));
 
@@ -219,15 +220,20 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
 
   void wire_init(
     int port_,
+    ffi.Pointer<wire_uint_8_list> path,
   ) {
     return _wire_init(
       port_,
+      path,
     );
   }
 
-  late final _wire_initPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_init');
-  late final _wire_init = _wire_initPtr.asFunction<void Function(int)>();
+  late final _wire_initPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_init');
+  late final _wire_init = _wire_initPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_join_federation(
     int port_,

@@ -53,12 +53,12 @@ class ReceiveConfirm extends ConsumerWidget {
                     child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(
-                        width: 32,
-                        height: 32,
-                        child:
-                            Image(image: AssetImage("images/bolt-circle.png"))),
-                    const SizedBox(height: 8),
+                    // const SizedBox(
+                    //     width: 32,
+                    //     height: 32,
+                    //     child:
+                    //         Image(image: AssetImage("images/bolt-circle.png"))),
+                    // const SizedBox(height: 8),
                     Text("RECEIVE",
                         style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),

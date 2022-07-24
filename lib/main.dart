@@ -21,7 +21,7 @@ Future<void> main() async {
 
   // FIXME: callback hell
   getApplicationDocumentsDirectory().then((directory) {
-    api.init();
+    api.init(directory.path);
   });
 
   runApp(const ProviderScope(child: App()));

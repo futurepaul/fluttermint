@@ -1,14 +1,12 @@
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
-use minimint_api::db::mem_impl::MemDatabase;
-use minimint_api::PeerId;
 use mint_client::api::{WsFederationApi, WsFederationApiSer};
 use mint_client::UserClientConfig;
+use serde::de::DeserializeOwned;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -21,13 +19,20 @@ lazy_static! {
         .expect("failed to build runtime");
 }
 
+// FIXME: contents needs to be generic
 fn _write_to_file(contents: String, path: PathBuf) -> Result<()> {
     let writer = std::fs::File::create(path)?;
     serde_json::to_writer_pretty(writer, &contents).unwrap();
     Ok(())
 }
 
-fn get_host() -> String {
+fn load_from_file<T: DeserializeOwned>(path: PathBuf) -> T {
+    let file = std::fs::File::open(path).expect("Can't read cfg file.");
+    serde_json::from_reader(file).expect("Could not parse cfg file.")
+}
+
+/// Map 127.0.0.1 to appropriate hostname for android / ios simulators
+fn get_simulator_host() -> String {
     #[cfg(not(target_os = "android"))]
     let host = "localhost";
     #[cfg(target_os = "android")]
@@ -55,8 +60,18 @@ mod global_client {
     }
 }
 
-/// If this returns Some, user has joined a federation. Otherwise they haven't.
-pub fn init() -> Result<bool> {
+async fn set_client_from_config(path: String) -> Result<()> {
+    let config_path = Path::new(&path).join("client.db");
+    let cfg: UserClientConfig = load_from_file(&config_path);
+    let filename = Path::new(&path).join("client.db");
+    let db = sled::open(&filename)?.open_tree("mint-client")?;
+    let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
+    global_client::set(client.clone()).await;
+    Ok(())
+}
+
+/// If this returns true, user has joined a federation. Otherwise they haven't.
+pub fn init(path: String) -> Result<bool> {
     // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
@@ -84,26 +99,33 @@ pub fn init() -> Result<bool> {
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
     tracing::info!("initialized");
-    Ok(true)
+
+    // Attempt to load a client from the filesystem config
+    RUNTIME.block_on(async {
+        match set_client_from_config(path).await {
+            Ok(_) => Ok(true),
+            Err(_) => Ok(false),
+        }
+    })
 }
 
 // FIXME: rename config_url
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
-        tracing::info!("config: {:?}", config_url);
-        // For Real
-        // let config_url = config_url.replace("127.0.0.1", &get_host());
+        let config_url = config_url.replace("127.0.0.1", &get_simulator_host());
         let ser: WsFederationApiSer = serde_json::from_str(&config_url).unwrap(); // FIXME: unwrap
         let api = WsFederationApi::new(ser.max_evil, ser.members).await;
         let cfg: UserClientConfig = api.request("/config", ()).await?;
-        println!("config {:?}", cfg);
+        let filename = Path::new(&user_dir).join("client.json");
+        let writer = std::fs::File::create(user_dir)?;
+        serde_json::to_writer_pretty(writer, &cfg).expect("couldn't write config");
 
-        // TODO: getting "read only filesystem" error ...
-        // let filename = Path::new(&user_dir).join("client.db");
-        // let db = sled::open(&filename)?.open_tree("mint-client")?;
-        let db = MemDatabase::new();
+        let filename = Path::new(&user_dir).join("client.db");
+        let db = sled::open(&filename)?.open_tree("mint-client")?;
+
         let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
         global_client::set(client.clone()).await;
+
         // TODO: kill the poll task on leave
         tokio::spawn(async move { client.poll().await });
         Ok(())
