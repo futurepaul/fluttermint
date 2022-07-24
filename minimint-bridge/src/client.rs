@@ -3,10 +3,10 @@
 use std::time::Duration;
 
 use lightning_invoice::Invoice;
-use minimint::modules::ln::contracts::ContractId;
+use minimint_core::modules::ln::contracts::ContractId;
 use minimint_api::db::Database;
 use mint_client::{ln::gateway::LightningGateway, UserClient, UserClientConfig};
-use tokio::sync::Mutex;
+use futures::lock::Mutex;
 
 pub struct Client {
     client: UserClient,
@@ -48,7 +48,7 @@ impl Client {
         let r = http
             .post(&format!("{}/pay_invoice", self.gateway_cfg.api))
             .json(&contract_id)
-            .timeout(Duration::from_secs(15))
+            // .timeout(Duration::from_secs(15)) // TODO: add timeout
             .send()
             .await
             .unwrap();
@@ -119,7 +119,7 @@ impl Client {
             // Reset hacky payment info
             *payments_guard = new_payments;
 
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+            minimint_api::task::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
 }
