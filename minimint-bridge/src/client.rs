@@ -3,14 +3,15 @@
 use std::{mem, time::Duration};
 
 use futures::{stream::FuturesUnordered, StreamExt};
+use futures::lock::Mutex;
 use lightning_invoice::Invoice;
 use minimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
 };
-use minimint::modules::ln::contracts::ContractId;
+use minimint_core::modules::ln::contracts::ContractId;
 use mint_client::{UserClient, UserClientConfig};
-use tokio::sync::Mutex;
+use serde_json::json;
 
 pub struct Client {
     client: UserClient,
@@ -74,7 +75,7 @@ impl Client {
         let r = http
             .post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
-            .timeout(Duration::from_secs(15))
+            // .timeout(Duration::from_secs(15)) // TODO: add timeout
             .send()
             .await
             .unwrap();
@@ -158,7 +159,22 @@ impl Client {
             // Re-add old payments
             self.payments.lock().await.extend(pending_payments);
 
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+            minimint_api::task::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
+}
+
+pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
+    tracing::info!("rust decoding: {}", bolt11);
+    let bolt11: Invoice = bolt11.parse()?;
+
+    let amount = bolt11.amount_milli_satoshis();
+    let invoice = bolt11.to_string();
+    let json = json!({
+        "amount": amount,
+        "description": "Testing".to_string(),
+        // "description": bolt11.description().to_owned().to_string(),
+        "invoice": invoice,
+    });
+    Ok(serde_json::to_string(&json)?)
 }
