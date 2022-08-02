@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
-use mint_client::api::{WsFederationApi, WsFederationApiSer};
+use mint_client::api::{WsFederationApi, WsFederationConnect};
 use mint_client::UserClientConfig;
 use serde::de::DeserializeOwned;
 use tokio::runtime;
@@ -62,7 +62,7 @@ mod global_client {
 
 async fn set_client_from_config(path: String) -> Result<()> {
     let config_path = Path::new(&path).join("client.db");
-    let cfg: UserClientConfig = load_from_file(&config_path);
+    let cfg: UserClientConfig = load_from_file(config_path);
     let filename = Path::new(&path).join("client.db");
     let db = sled::open(&filename)?.open_tree("mint-client")?;
     let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
@@ -112,12 +112,11 @@ pub fn init(path: String) -> Result<bool> {
 // FIXME: rename config_url
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
-        let config_url = config_url.replace("127.0.0.1", &get_simulator_host());
-        let ser: WsFederationApiSer = serde_json::from_str(&config_url).unwrap(); // FIXME: unwrap
+        let ser: WsFederationConnect = serde_json::from_str(&config_url).unwrap(); // FIXME: unwrap
         let api = WsFederationApi::new(ser.max_evil, ser.members).await;
         let cfg: UserClientConfig = api.request("/config", ()).await?;
         let filename = Path::new(&user_dir).join("client.json");
-        let writer = std::fs::File::create(user_dir)?;
+        let writer = std::fs::File::create(&filename)?;
         serde_json::to_writer_pretty(writer, &cfg).expect("couldn't write config");
 
         let filename = Path::new(&user_dir).join("client.db");

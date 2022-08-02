@@ -42,7 +42,7 @@ impl Client {
             .await_outgoing_contract_execution(contract_id)
             .await?;
 
-        self.client.fetch_all_coins().await?;
+        self.client.fetch_all_coins().await; // FIXME: this ignores results inside returned vec
 
         Ok(format!("{:?}", r))
     }
@@ -90,10 +90,7 @@ impl Client {
                     }
                 } else {
                     tracing::info!("completed payment: {:?}", invoice.payment_hash());
-                    self.client
-                        .fetch_all_coins()
-                        .await
-                        .expect("couldn't fetch coins"); // FIXME
+                    self.client.fetch_all_coins().await; // FIXME: ignores results inside returned vec
                     completed_payments.push(index);
                 }
             }
