@@ -134,7 +134,7 @@ pub struct wire_uint_8_list {
 // Section: allocate functions
 
 #[no_mangle]
-pub extern "C" fn new_uint_8_list(len: i32) -> *mut wire_uint_8_list {
+pub extern "C" fn new_uint_8_list_0(len: i32) -> *mut wire_uint_8_list {
     let ans = wire_uint_8_list {
         ptr: support::new_leak_vec_ptr(Default::default(), len),
         len,
@@ -202,18 +202,6 @@ impl<T> NewWithNullPtr for *mut T {
 }
 
 // Section: impl IntoDart
-
-impl support::IntoDart for MyInvoice {
-    fn into_dart(self) -> support::DartCObject {
-        vec![
-            self.amount.into_dart(),
-            self.description.into_dart(),
-            self.invoice.into_dart(),
-        ]
-        .into_dart()
-    }
-}
-impl support::IntoDartExceptPrimitive for MyInvoice {}
 
 // Section: executor
 

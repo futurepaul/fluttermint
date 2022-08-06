@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
+use serde_json::json;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -109,26 +110,19 @@ pub fn pay(bolt11: String) -> Result<String> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
 
-pub struct MyInvoice {
-    pub amount: Option<u64>,
-    pub description: String,
-    pub invoice: String,
-}
-
-pub fn decode_invoice(bolt11: String) -> Result<MyInvoice> {
+pub fn decode_invoice(bolt11: String) -> Result<String> {
     tracing::info!("rust decoding: {}", bolt11);
     let bolt11: Invoice = bolt11.parse()?;
 
     let amount = bolt11.amount_milli_satoshis();
-    // let description = bolt11.to_string();
     let invoice = bolt11.to_string();
-
-    return Ok(MyInvoice {
-        amount: amount,
-        description: "Testing".to_string(),
-        // description: bolt11.description().to_owned().to_string(),
-        invoice,
+    let json = json!({
+        "amount": amount,
+        "description": "Testing".to_string(),
+        // "description": bolt11.description().to_owned().to_string(),
+        "invoice": invoice,
     });
+    Ok(serde_json::to_string(&json)?)
 }
 
 pub fn invoice(amount: u64) -> Result<String> {
