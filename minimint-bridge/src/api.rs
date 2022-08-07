@@ -51,8 +51,8 @@ mod global_client {
     }
 }
 
-/// If this returns Some, user has joined a federation. Otherwise they haven't.
-pub fn init() -> Result<bool> {
+/// If this returns true, user has joined a federation. Otherwise they haven't.
+pub fn init(user_dir: String) -> Result<bool> {
     // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
@@ -79,7 +79,13 @@ pub fn init() -> Result<bool> {
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
-    Ok(true)
+    let filename = Path::new(&user_dir).join("client.db");
+    let db = sled::open(&filename)?.open_tree("mint-client")?;
+    if let Some(client) = Client::try_load(Box::new(db)).await? {
+        global_client::set(Arc::new(client)).await;
+        return Ok(true)
+    }
+    Ok(false)
 }
 
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
