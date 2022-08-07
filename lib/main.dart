@@ -6,7 +6,7 @@ import 'package:fluttermint/data/prefs.dart';
 import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import './ffi.dart';
+import './client.dart';
 
 late SharedPreferences prefs;
 
@@ -19,10 +19,7 @@ Future<void> main() async {
 
   prefs = await SharedPreferences.getInstance();
 
-  // FIXME: callback hell
-  getApplicationDocumentsDirectory().then((directory) {
-    api.init();
-  });
+  api.init();
 
   runApp(const ProviderScope(child: App()));
 }

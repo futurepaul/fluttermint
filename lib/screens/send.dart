@@ -12,7 +12,7 @@ import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import '../ffi.dart';
+import '../client.dart';
 import '../widgets/autopaste_text_field.dart';
 
 // import 'package:mobile_scanner/mobile_scanner.dart';

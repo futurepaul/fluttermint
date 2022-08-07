@@ -12,7 +12,7 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
-import '../ffi.dart';
+import '../client.dart';
 import '../widgets/chill_info_card.dart';
 import '../widgets/small_balance_display.dart';
 

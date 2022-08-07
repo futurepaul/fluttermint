@@ -12,7 +12,7 @@ import 'package:fluttermint/widgets/textured.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import '../ffi.dart';
+import '../client.dart';
 // import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SetupJoin extends ConsumerWidget {
@@ -25,10 +25,7 @@ class SetupJoin extends ConsumerWidget {
     final textController = TextEditingController();
 
     void joinFederation(String cfg) async {
-      await api.joinFederation(
-          configUrl: cfg,
-          userDir: await getApplicationDocumentsDirectory()
-              .then((dir) => dir.toString()));
+      await api.joinFederation(configUrl: cfg);
       await codeProviderNotifier.update(cfg);
       context.go("/");
     }
