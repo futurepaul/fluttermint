@@ -18,14 +18,17 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_init(port_: i64) {
+pub extern "C" fn wire_init(port_: i64, user_dir: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "init",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| init(),
+        move || {
+            let api_user_dir = user_dir.wire2api();
+            move |task_callback| init(api_user_dir)
+        },
     )
 }
 

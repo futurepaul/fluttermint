@@ -17,7 +17,7 @@ typedef int64_t DartPort;
 
 typedef bool (*DartPostCObjectFnType)(DartPort port_id, void *message);
 
-void wire_init(int64_t port_);
+void wire_init(int64_t port_, struct wire_uint_8_list *user_dir);
 
 void wire_join_federation(int64_t port_,
                           struct wire_uint_8_list *user_dir,

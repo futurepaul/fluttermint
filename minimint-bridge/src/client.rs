@@ -3,8 +3,11 @@
 use std::time::Duration;
 
 use lightning_invoice::Invoice;
+use minimint_api::{
+    db::{Database, DatabaseKeyPrefixConst},
+    encoding::{Decodable, Encodable},
+};
 use minimint::modules::ln::contracts::ContractId;
-use minimint_api::db::Database;
 use mint_client::{ln::gateway::LightningGateway, UserClient, UserClientConfig};
 use tokio::sync::Mutex;
 
@@ -14,10 +17,33 @@ pub struct Client {
     payments: Mutex<Vec<Invoice>>,
 }
 
+#[derive(Debug, Clone, Encodable, Decodable)]
+struct ConfigKey;
+const CONFIG_KEY_PREFIX: u8 = 0x50;
+
+impl DatabaseKeyPrefixConst for ConfigKey {
+    const DB_PREFIX: u8 = CONFIG_KEY_PREFIX;
+    type Key = Self;
+
+    type Value = String;
+}
+
 impl Client {
+    pub async fn try_load(db: Box<dyn Database>) -> anyhow::Result<Option<Self>> {
+        if let Some(cfg_json) = db.get_value(&ConfigKey).expect("db error") {
+            Ok(Some(Self::new(db, &cfg_json).await?))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
         let cfg: UserClientConfig = serde_json::from_str(cfg_json)?;
         tracing::info!("parsed config {:?}\n\n\n", cfg);
+
+        db.insert_entry(&ConfigKey, &cfg_json.to_string())
+            .expect("db error");
+
         Ok(Self {
             client: UserClient::new(cfg.clone(), db, Default::default()).await,
             gateway_cfg: cfg.gateway,
