@@ -80,7 +80,8 @@ class ReceiveConfirm extends ConsumerWidget {
                             data: lightningUri,
                             version: QrVersions.auto,
                             // Screen width minus 40.0 for container and 48.0 for app padding
-                            size: MediaQuery.of(context).size.width - 88.0),
+                            // limit to 300 px
+                            size: (MediaQuery.of(context).size.width - 88.0).clamp(0, 300.0)),
                         const SizedBox(height: 16),
                         EllipsableText(
                             text: invoice,
