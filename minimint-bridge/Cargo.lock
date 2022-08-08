@@ -1443,6 +1443,7 @@ dependencies = [
  "bitcoin",
  "bitcoincore-rpc",
  "flutter_rust_bridge",
+ "futures",
  "lazy_static",
  "lightning-invoice",
  "minimint",

@@ -1,7 +1,8 @@
 //! Minimint client with simpler types
 
-use std::time::Duration;
+use std::{mem, time::Duration};
 
+use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::Invoice;
 use minimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
@@ -105,24 +106,40 @@ impl Client {
         loop {
             tracing::info!("polling...");
 
-            // Complete incoming payments
-            let mut payments_guard = self.payments.lock().await;
-            let mut new_payments = vec![];
-            for invoice in payments_guard.iter() {
-                tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
-                let result = self
-                    .client
-                    .claim_incoming_contract(
-                        ContractId::from_hash(invoice.payment_hash().clone()),
-                        rng.clone(),
-                    )
-                    .await;
-                if let Err(_) = result {
-                    // TODO: filter out expired invoices
-                    tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
-                    new_payments.push(invoice.clone());
-                } else {
-                    tracing::info!("completed payment: {:?}", invoice.payment_hash());
+            // steal old payments
+            let payments = mem::take(&mut *(self.payments.lock().await));
+
+            let mut payment_requests = payments
+                .into_iter()
+                .map(|invoice| async {
+                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
+                    let result = self
+                        .client
+                        .claim_incoming_contract(
+                            ContractId::from_hash(invoice.payment_hash().clone()),
+                            rng.clone(),
+                        )
+                        .await;
+                    if let Err(_) = result {
+                        // TODO: filter out expired invoices
+                        tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
+                        if invoice.is_expired() {
+                            None
+                        } else {
+                            Some(invoice)
+                        }
+                    } else {
+                        tracing::info!("completed payment: {:?}", invoice.payment_hash());
+                        self.client.fetch_all_coins().await;
+                        None
+                    }
+                })
+                .collect::<FuturesUnordered<_>>();
+
+            let mut pending_payments = Vec::new();
+            while let Some(payment) = payment_requests.next().await {
+                if let Some(pending_payment) = payment {
+                    pending_payments.push(pending_payment);
                 }
             }
 
@@ -136,8 +153,8 @@ impl Client {
             //     balance.milli_sat
             // );
 
-            // Reset hacky payment info
-            *payments_guard = new_payments;
+            // Re-add old payments
+            self.payments.lock().await.extend(pending_payments);
 
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         }
