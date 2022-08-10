@@ -15,7 +15,7 @@ use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 use serde_json::json;
 
 pub struct Client {
-    client: UserClient,
+    pub(crate) client: UserClient,
     payments: Mutex<Vec<Invoice>>,
 }
 

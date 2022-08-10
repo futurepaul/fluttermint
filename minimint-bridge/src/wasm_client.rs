@@ -42,6 +42,19 @@ impl WasmClient {
     }
 
     #[wasm_bindgen]
+    pub fn info(&self) {
+        let coins = self.0.client.coins();
+        tracing::info!(
+            "We own {} coins with a total value of {}",
+            coins.coin_count(),
+            coins.amount()
+        );
+        for (amount, coins) in coins.coins {
+            tracing::info!("We own {} coins of denomination {}", coins.len(), amount);
+        }
+    }
+
+    #[wasm_bindgen]
     pub fn leave_federation(self) -> Result<()> {
         // delete the database (their ecash tokens will disappear ... this shouldn't be done lightly ...)
         // set CLIENT to None
