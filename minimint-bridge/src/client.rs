@@ -135,7 +135,8 @@ impl Client {
                     if let Err(_) = result {
                         // TODO: filter out expired invoices
                         tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
-                        if invoice.is_expired() {
+                        // FIXME: is_expired doesn't work on wasm
+                        if cfg!(not(target_family = "wasm")) && invoice.is_expired() {
                             None
                         } else {
                             Some(invoice)
