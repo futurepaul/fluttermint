@@ -8,9 +8,10 @@ use lightning_invoice::Invoice;
 use minimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
+    PeerId,
 };
 use minimint_core::modules::ln::contracts::ContractId;
-use mint_client::{UserClient, UserClientConfig};
+use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 use serde_json::json;
 
 pub struct Client {
@@ -39,8 +40,16 @@ impl Client {
     }
 
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
-        let cfg: UserClientConfig = serde_json::from_str(cfg_json)?;
-        tracing::info!("parsed config {:?}\n\n\n", cfg);
+        #[derive(serde::Deserialize)]
+        struct ConnectCfg {
+            members: Vec<(PeerId, String)>,
+            max_evil: usize,
+        }
+
+        let connect_cfg: ConnectCfg = serde_json::from_str(cfg_json)?;
+        let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
+        let cfg: UserClientConfig = api.request("/config", ()).await?;
+        tracing::debug!(?cfg, "got config");
 
         db.insert_entry(&ConfigKey, &cfg_json.to_string())
             .expect("db error");
@@ -115,7 +124,7 @@ impl Client {
             let mut payment_requests = payments
                 .into_iter()
                 .map(|invoice| async {
-                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
+                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash());
                     let result = self
                         .client
                         .claim_incoming_contract(
