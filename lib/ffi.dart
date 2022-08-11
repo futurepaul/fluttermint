@@ -3,10 +3,10 @@
 
 import 'dart:ffi';
 
-import 'bridge_generated.dart';
+import 'package:path_provider/path_provider.dart';
 
-// Re-export the bridge so it is only necessary to import this file.
-export 'bridge_generated.dart';
+import 'client.dart';
+import 'bridge_generated.dart';
 import 'dart:io' as io;
 
 const _base = 'minimint-bridge';
@@ -15,9 +15,42 @@ const _base = 'minimint-bridge';
 // but rather directly **linked** against the binary.
 final _dylib = io.Platform.isWindows ? '$_base.dll' : 'lib$_base.so';
 
-// The late modifier delays initializing the value until it is actually needed,
-// leaving precious little time for the program to quickly start up.
-late final MinimintBridge api = MinimintBridgeImpl(
-    io.Platform.isIOS || io.Platform.isMacOS
-        ? DynamicLibrary.executable()
-        : DynamicLibrary.open(_dylib));
+class MinimintClientImpl implements MinimintClient {
+  // The late modifier delays initializing the value until it is actually needed,
+  // leaving precious little time for the program to quickly start up.
+  late final MinimintBridge api = MinimintBridgeImpl(
+      io.Platform.isIOS || io.Platform.isMacOS
+          ? DynamicLibrary.executable()
+          : DynamicLibrary.open(_dylib));
+
+  /// If this returns Some, user has joined a federation. Otherwise they haven't.
+  Future<bool> init() {
+    return api.init();
+  }
+
+  Future<void> joinFederation({required String configUrl}) async {
+    await api.joinFederation(
+        userDir: (await getApplicationDocumentsDirectory()).path,
+        configUrl: configUrl);
+  }
+
+  Future<void> leaveFederation() {
+    return api.leaveFederation();
+  }
+
+  Future<int> balance() {
+    return api.balance();
+  }
+
+  Future<String> pay({required String bolt11}) {
+    return api.pay(bolt11: bolt11);
+  }
+
+  Future<String> decodeInvoice({required String bolt11}) {
+    return api.decodeInvoice(bolt11: bolt11);
+  }
+
+  Future<String> invoice({required int amount}) {
+    return api.invoice(amount: amount);
+  }
+}

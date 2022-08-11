@@ -2,18 +2,21 @@
 
 use std::{mem, time::Duration};
 
+use anyhow::anyhow;
 use futures::{stream::FuturesUnordered, StreamExt};
+use futures::lock::Mutex;
 use lightning_invoice::Invoice;
 use minimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
+    PeerId,
 };
-use minimint::modules::ln::contracts::ContractId;
-use mint_client::{UserClient, UserClientConfig};
-use tokio::sync::Mutex;
+use minimint_core::modules::ln::contracts::ContractId;
+use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
+use serde_json::json;
 
 pub struct Client {
-    client: UserClient,
+    pub(crate) client: UserClient,
     payments: Mutex<Vec<Invoice>>,
 }
 
@@ -38,8 +41,16 @@ impl Client {
     }
 
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
-        let cfg: UserClientConfig = serde_json::from_str(cfg_json)?;
-        tracing::info!("parsed config {:?}\n\n\n", cfg);
+        #[derive(serde::Deserialize)]
+        struct ConnectCfg {
+            members: Vec<(PeerId, String)>,
+            max_evil: usize,
+        }
+
+        let connect_cfg: ConnectCfg = serde_json::from_str(cfg_json)?;
+        let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
+        let cfg: UserClientConfig = api.request("/config", ()).await?;
+        tracing::debug!(?cfg, "got config");
 
         db.insert_entry(&ConfigKey, &cfg_json.to_string())
             .expect("db error");
@@ -51,7 +62,7 @@ impl Client {
     }
 
     pub async fn balance(&self) -> u64 {
-        self.client.coins().amount().milli_sat
+        (self.client.coins().amount().milli_sat as f64 / 1000.) as u64
     }
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<String> {
@@ -74,7 +85,7 @@ impl Client {
         let r = http
             .post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
-            .timeout(Duration::from_secs(15))
+            // .timeout(Duration::from_secs(15)) // TODO: add timeout
             .send()
             .await
             .unwrap();
@@ -114,7 +125,7 @@ impl Client {
             let mut payment_requests = payments
                 .into_iter()
                 .map(|invoice| async {
-                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
+                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash());
                     let result = self
                         .client
                         .claim_incoming_contract(
@@ -125,7 +136,8 @@ impl Client {
                     if let Err(_) = result {
                         // TODO: filter out expired invoices
                         tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
-                        if invoice.is_expired() {
+                        // FIXME: is_expired doesn't work on wasm
+                        if cfg!(not(target_family = "wasm")) && invoice.is_expired() {
                             None
                         } else {
                             Some(invoice)
@@ -158,7 +170,27 @@ impl Client {
             // Re-add old payments
             self.payments.lock().await.extend(pending_payments);
 
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+            minimint_api::task::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
+}
+
+pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
+    tracing::info!("rust decoding: {}", bolt11);
+    let bolt11: Invoice = bolt11.parse()?;
+
+
+    let amount = bolt11
+        .amount_milli_satoshis()
+        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
+        .ok_or(anyhow!("Invoice missing amount"))?;
+
+    let invoice = bolt11.to_string();
+    let json = json!({
+        "amount": amount,
+        "description": "Testing".to_string(),
+        // "description": bolt11.description().to_owned().to_string(),
+        "invoice": invoice,
+    });
+    Ok(serde_json::to_string(&json)?)
 }
