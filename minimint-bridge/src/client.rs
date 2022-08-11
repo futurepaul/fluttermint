@@ -1,26 +1,51 @@
 //! Minimint client with simpler types
 
-use std::time::Duration;
+use std::{mem, time::Duration};
 
+use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::Invoice;
+use minimint_api::{
+    db::{Database, DatabaseKeyPrefixConst},
+    encoding::{Decodable, Encodable},
+};
 use minimint::modules::ln::contracts::ContractId;
-use minimint_api::db::Database;
-use mint_client::{ln::gateway::LightningGateway, UserClient, UserClientConfig};
+use mint_client::{UserClient, UserClientConfig};
 use tokio::sync::Mutex;
 
 pub struct Client {
     client: UserClient,
-    gateway_cfg: LightningGateway,
     payments: Mutex<Vec<Invoice>>,
 }
 
+#[derive(Debug, Clone, Encodable, Decodable)]
+struct ConfigKey;
+const CONFIG_KEY_PREFIX: u8 = 0x50;
+
+impl DatabaseKeyPrefixConst for ConfigKey {
+    const DB_PREFIX: u8 = CONFIG_KEY_PREFIX;
+    type Key = Self;
+
+    type Value = String;
+}
+
 impl Client {
+    pub async fn try_load(db: Box<dyn Database>) -> anyhow::Result<Option<Self>> {
+        if let Some(cfg_json) = db.get_value(&ConfigKey).expect("db error") {
+            Ok(Some(Self::new(db, &cfg_json).await?))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
         let cfg: UserClientConfig = serde_json::from_str(cfg_json)?;
         tracing::info!("parsed config {:?}\n\n\n", cfg);
+
+        db.insert_entry(&ConfigKey, &cfg_json.to_string())
+            .expect("db error");
+
         Ok(Self {
-            client: UserClient::new(cfg.clone(), db, Default::default()).await,
-            gateway_cfg: cfg.gateway,
+            client: UserClient::new(cfg.clone(), db, Default::default()),
             payments: Mutex::new(Vec::new()),
         })
     }
@@ -36,7 +61,7 @@ impl Client {
 
         let (contract_id, outpoint) = self
             .client
-            .fund_outgoing_ln_contract(&self.gateway_cfg, bolt11, &mut rng)
+            .fund_outgoing_ln_contract(bolt11, &mut rng)
             .await
             .expect("Not enough coins");
 
@@ -45,13 +70,16 @@ impl Client {
             .await
             .expect("Contract wasn't accepted in time");
 
+        let gw = self.client.fetch_gateway().await?;
         let r = http
-            .post(&format!("{}/pay_invoice", self.gateway_cfg.api))
+            .post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
             .timeout(Duration::from_secs(15))
             .send()
             .await
             .unwrap();
+
+        self.client.fetch_all_coins().await;
 
         Ok(format!("{:?}", r))
     }
@@ -63,12 +91,7 @@ impl Client {
         let amt = minimint_api::Amount::from_sat(amount);
         let confirmed_invoice = self
             .client
-            .generate_invoice(
-                amt,
-                "TODO: description".to_string(),
-                &self.gateway_cfg,
-                &mut rng,
-            )
+            .generate_invoice(amt, "TODO: description".to_string(), &mut rng)
             .await
             .expect("Couldn't create invoice");
 
@@ -85,24 +108,40 @@ impl Client {
         loop {
             tracing::info!("polling...");
 
-            // Complete incoming payments
-            let mut payments_guard = self.payments.lock().await;
-            let mut new_payments = vec![];
-            for invoice in payments_guard.iter() {
-                tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
-                let result = self
-                    .client
-                    .claim_incoming_contract(
-                        ContractId::from_hash(invoice.payment_hash().clone()),
-                        rng.clone(),
-                    )
-                    .await;
-                if let Err(_) = result {
-                    // TODO: filter out expired invoices
-                    tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
-                    new_payments.push(invoice.clone());
-                } else {
-                    tracing::info!("completed payment: {:?}", invoice.payment_hash());
+            // steal old payments
+            let payments = mem::take(&mut *(self.payments.lock().await));
+
+            let mut payment_requests = payments
+                .into_iter()
+                .map(|invoice| async {
+                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash(),);
+                    let result = self
+                        .client
+                        .claim_incoming_contract(
+                            ContractId::from_hash(invoice.payment_hash().clone()),
+                            rng.clone(),
+                        )
+                        .await;
+                    if let Err(_) = result {
+                        // TODO: filter out expired invoices
+                        tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
+                        if invoice.is_expired() {
+                            None
+                        } else {
+                            Some(invoice)
+                        }
+                    } else {
+                        tracing::info!("completed payment: {:?}", invoice.payment_hash());
+                        self.client.fetch_all_coins().await;
+                        None
+                    }
+                })
+                .collect::<FuturesUnordered<_>>();
+
+            let mut pending_payments = Vec::new();
+            while let Some(payment) = payment_requests.next().await {
+                if let Some(pending_payment) = payment {
+                    pending_payments.push(pending_payment);
                 }
             }
 
@@ -116,8 +155,8 @@ impl Client {
             //     balance.milli_sat
             // );
 
-            // Reset hacky payment info
-            *payments_guard = new_payments;
+            // Re-add old payments
+            self.payments.lock().await.extend(pending_payments);
 
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         }
