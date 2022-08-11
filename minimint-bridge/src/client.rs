@@ -2,6 +2,7 @@
 
 use std::{mem, time::Duration};
 
+use anyhow::anyhow;
 use futures::{stream::FuturesUnordered, StreamExt};
 use futures::lock::Mutex;
 use lightning_invoice::Invoice;
@@ -61,7 +62,7 @@ impl Client {
     }
 
     pub async fn balance(&self) -> u64 {
-        self.client.coins().amount().milli_sat
+        (self.client.coins().amount().milli_sat as f64 / 1000.) as u64
     }
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<String> {
@@ -178,7 +179,12 @@ pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
     tracing::info!("rust decoding: {}", bolt11);
     let bolt11: Invoice = bolt11.parse()?;
 
-    let amount = bolt11.amount_milli_satoshis();
+
+    let amount = bolt11
+        .amount_milli_satoshis()
+        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
+        .ok_or(anyhow!("Invoice missing amount"))?;
+
     let invoice = bolt11.to_string();
     let json = json!({
         "amount": amount,
