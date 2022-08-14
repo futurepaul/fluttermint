@@ -4,6 +4,26 @@ A fedimint wallet in Flutter + Rust. Powered by [Minimint](https://github.com/fe
 
 ![Frame 67 (2)](https://user-images.githubusercontent.com/543668/172901667-df3eb020-db13-40b1-8aa5-8041a9782e5a.png)
 
+## Building for WASM
+
+### Prerequisites
+
+1. [wasm-pack](https://rustwasm.github.io/wasm-pack/)
+2. Typescript
+3. [dart_js_facade_gen](https://github.com/dart-lang/js_facade_gen)
+
+For debug build:
+
+```sh
+just wasm --dev
+```
+
+For release build:
+
+```sh
+just wasm
+```
+
 # Contributing
 
 Contributions are very welcome, just open an issue or PR if you see something to improve!
