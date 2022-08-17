@@ -28,7 +28,8 @@ class ReceiveNotifier extends StateNotifier<Receive?> {
 
   createReceive(Receive receive) async {
     state = receive.copyWith(
-        invoice: await api.invoice(amount: receive.amountSats));
+        invoice: await api.invoice(
+            amount: receive.amountSats, description: receive.description));
   }
 
   clear() {

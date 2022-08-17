@@ -9,25 +9,23 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
 anyhow = "1"
-mint-client = { git = "https://github.com/fedimint/minimint" }
-minimint-api = { git = "https://github.com/fedimint/minimint" }
-minimint-core = { git = "https://github.com/fedimint/minimint" }
 futures = "0.3"
 
-serde_json = "1.0.61"
-# secp256k1-zkp = { git = "https://github.com/elsirion/rust-secp256k1-zkp", branch = "minimint", features = [ "serde", "bitcoin_hashes" ] }
+mint-client = { git = "https://github.com/justinmoon/fedimint", branch = "connect" }
+minimint-api = { git = "https://github.com/justinmoon/fedimint", branch = "connect" }
+minimint-core = { git = "https://github.com/justinmoon/fedimint", branch = "connect" }
+# mint-client = { path = "../../minimint/client/client-lib/"}
+# minimint-api = { path = "../../minimint/minimint-api/" }
+# minimint-core = { path = "../../minimint/minimint-core/" }
+
+serde = { version = "1.0.142", features = [ "derive" ] }
+serde_json = "1.0.79"
 rand = { version = "0.6.5", features = ["wasm-bindgen"] }
-# bitcoincore-rpc = "0.15.0"
 bitcoin = "0.28.1"
-# hex = "0.4.3"
-# log = "0.4.16"
 lazy_static = "1.4.0"
 reqwest = { version = "0.11.0", features = [ "json" ], default-features = false }
 lightning-invoice = "0.17.0"
-# lightning = "0.0.106"
-
 tracing = "0.1.26"
-serde = { version = "1.0.143", features = ["derive"] }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 tracing-subscriber = { version = "0.3.1", features = [ "env-filter" ] }

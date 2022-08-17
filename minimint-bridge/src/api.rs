@@ -1,11 +1,8 @@
 use std::path::Path;
-use std::path::PathBuf;
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
-use lightning_invoice::Invoice;
-use serde_json::json;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -16,20 +13,6 @@ lazy_static! {
         .enable_all()
         .build()
         .expect("failed to build runtime");
-}
-
-fn write_to_file(contents: String, path: PathBuf) -> Result<()> {
-    let writer = std::fs::File::create(path)?;
-    serde_json::to_writer_pretty(writer, &contents).unwrap();
-    Ok(())
-}
-
-fn get_host() -> String {
-    #[cfg(not(target_os = "android"))]
-    let host = "localhost";
-    #[cfg(target_os = "android")]
-    let host = "10.0.2.2";
-    return host.into();
 }
 
 mod global_client {
@@ -53,7 +36,7 @@ mod global_client {
 }
 
 /// If this returns true, user has joined a federation. Otherwise they haven't.
-pub fn init(user_dir: String) -> Result<bool> {
+pub fn init(path: String) -> Result<bool> {
     // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
@@ -75,12 +58,12 @@ pub fn init(user_dir: String) -> Result<bool> {
                 "com.example.flutter_rust_bridge_template",
                 "INFO", // I don't know what this does ...
             )
-            .with_filter(tracing_subscriber::filter::LevelFilter::DEBUG),
+            .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
         )
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
-    let filename = Path::new(&user_dir).join("client.db");
+    let filename = Path::new(&path).join("client.db");
     let db = sled::open(&filename)?.open_tree("mint-client")?;
     RUNTIME.block_on(async {
         if let Some(client) = Client::try_load(Box::new(db)).await? {
@@ -93,10 +76,9 @@ pub fn init(user_dir: String) -> Result<bool> {
 
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
-        let cfg = reqwest::get(config_url).await?.text().await?;
         let filename = Path::new(&user_dir).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
-        let client = Arc::new(Client::new(Box::new(db), &cfg).await?);
+        let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
         global_client::set(client.clone()).await;
         // TODO: kill the poll task on leave
         tokio::spawn(async move { client.poll().await });
@@ -114,7 +96,7 @@ pub fn balance() -> Result<u64> {
     RUNTIME.block_on(async { Ok(global_client::get().await?.balance().await) })
 }
 
-pub fn pay(bolt11: String) -> Result<String> {
+pub fn pay(bolt11: String) -> Result<()> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
 
@@ -122,6 +104,11 @@ pub fn decode_invoice(bolt11: String) -> Result<String> {
     crate::client::decode_invoice(bolt11)
 }
 
-pub fn invoice(amount: u64) -> Result<String> {
-    RUNTIME.block_on(async { global_client::get().await?.invoice(amount).await })
+pub fn invoice(amount: u64, description: String) -> Result<String> {
+    RUNTIME.block_on(async {
+        global_client::get()
+            .await?
+            .invoice(amount, description)
+            .await
+    })
 }

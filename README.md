@@ -4,6 +4,16 @@ A fedimint wallet in Flutter + Rust. Powered by [Minimint](https://github.com/fe
 
 ![Frame 67 (2)](https://user-images.githubusercontent.com/543668/172901667-df3eb020-db13-40b1-8aa5-8041a9782e5a.png)
 
+## Justin's Notes
+
+- In order to run this on a hardware device and connect to federation running on desktop, you need to turn on "System Preferences > Sharing > Internet Sharing". Turn on all USB-related options.
+
+# Android
+
+```
+$ cat ~/.gradle/gradle.properties
+ANDROID_NDK=/Users/justin/Library/Android/sdk/ndk-bundle
+
 ## Building for WASM
 
 ### Prerequisites

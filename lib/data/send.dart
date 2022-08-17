@@ -6,11 +6,13 @@ import '../client.dart';
 @immutable
 class Send {
   const Send(
-      {required this.description, required this.amountSats, this.invoice});
+      {required this.description,
+      required this.amountSats,
+      required this.invoice});
 
   final String description;
   final int amountSats;
-  final String? invoice;
+  final String invoice;
 
   // Since Receive is immutable, we implement a method that allows cloning the
   // Receive with slightly different content.

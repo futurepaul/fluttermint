@@ -1,17 +1,18 @@
 //! Minimint client with simpler types
 
-use std::{mem, time::Duration};
+use std::mem;
 
 use anyhow::anyhow;
-use futures::{stream::FuturesUnordered, StreamExt};
 use futures::lock::Mutex;
+use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::Invoice;
 use minimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
-    PeerId,
 };
+use minimint_core::config::ClientConfig;
 use minimint_core::modules::ln::contracts::ContractId;
+use mint_client::api::WsFederationConnect;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 use serde_json::json;
 
@@ -41,22 +42,16 @@ impl Client {
     }
 
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
-        #[derive(serde::Deserialize)]
-        struct ConnectCfg {
-            members: Vec<(PeerId, String)>,
-            max_evil: usize,
-        }
-
-        let connect_cfg: ConnectCfg = serde_json::from_str(cfg_json)?;
+        let connect_cfg: WsFederationConnect = serde_json::from_str(cfg_json)?;
         let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
-        let cfg: UserClientConfig = api.request("/config", ()).await?;
-        tracing::debug!(?cfg, "got config");
+        let cfg: ClientConfig = api.request("/config", ()).await?;
 
+        // FIXME: this isn't the right thing to store
         db.insert_entry(&ConfigKey, &cfg_json.to_string())
             .expect("db error");
 
         Ok(Self {
-            client: UserClient::new(cfg.clone(), db, Default::default()),
+            client: UserClient::new(UserClientConfig(cfg.clone()), db, Default::default()),
             payments: Mutex::new(Vec::new()),
         })
     }
@@ -65,7 +60,7 @@ impl Client {
         (self.client.coins().amount().milli_sat as f64 / 1000.) as u64
     }
 
-    pub async fn pay(&self, bolt11: String) -> anyhow::Result<String> {
+    pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
         let http = reqwest::Client::new();
         let bolt11: Invoice = bolt11.parse()?;
@@ -82,8 +77,7 @@ impl Client {
             .expect("Contract wasn't accepted in time");
 
         let gw = self.client.fetch_gateway().await?;
-        let r = http
-            .post(&format!("{}/pay_invoice", gw.api))
+        http.post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
             // .timeout(Duration::from_secs(15)) // TODO: add timeout
             .send()
@@ -92,22 +86,21 @@ impl Client {
 
         self.client.fetch_all_coins().await;
 
-        Ok(format!("{:?}", r))
+        Ok(())
     }
 
-    pub async fn invoice(&self, amount: u64) -> anyhow::Result<String> {
+    pub async fn invoice(&self, amount: u64, description: String) -> anyhow::Result<String> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
 
-        // Save the keys and invoice for later polling`
         let amt = minimint_api::Amount::from_sat(amount);
         let confirmed_invoice = self
             .client
-            .generate_invoice(amt, "TODO: description".to_string(), &mut rng)
+            .generate_invoice(amt, description, &mut rng)
             .await
             .expect("Couldn't create invoice");
-
         let invoice = confirmed_invoice.invoice;
 
+        // Save the keys and invoice for later polling`
         self.payments.lock().await.push(invoice.clone());
 
         Ok(invoice.to_string())
@@ -117,8 +110,6 @@ impl Client {
         let rng = rand::rngs::OsRng::new().unwrap();
         // Spawn a thread to check balances and claim incoming contracts
         loop {
-            tracing::info!("polling...");
-
             // steal old payments
             let payments = mem::take(&mut *(self.payments.lock().await));
 
@@ -157,16 +148,6 @@ impl Client {
                 }
             }
 
-            // Fetch balance
-            // let initial_balance = client.coins().amount();
-            // client.fetch_all_coins().await.unwrap();
-            // let balance = client.coins().amount();
-            // tracing::info!(
-            //     "fetched coins {} -> {}",
-            //     initial_balance.milli_sat,
-            //     balance.milli_sat
-            // );
-
             // Re-add old payments
             self.payments.lock().await.extend(pending_payments);
 
@@ -176,12 +157,11 @@ impl Client {
 }
 
 pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
-    tracing::info!("rust decoding: {}", bolt11);
     let bolt11: Invoice = bolt11.parse()?;
-
 
     let amount = bolt11
         .amount_milli_satoshis()
+        // FIXME:justin this is janky
         .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
         .ok_or(anyhow!("Invoice missing amount"))?;
 
@@ -189,6 +169,7 @@ pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
     let json = json!({
         "amount": amount,
         "description": "Testing".to_string(),
+        // FIXME: I assume this doesn't work in WASM
         // "description": bolt11.description().to_owned().to_string(),
         "invoice": invoice,
     });

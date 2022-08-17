@@ -57,6 +57,10 @@ class _QRViewExampleState extends State<QRViewExample> {
         widget.onDetect(scanData);
       });
     });
+
+    // FIXME: https://github.com/juliuscanute/qr_code_scanner/issues/560
+    controller.pauseCamera();
+    controller.resumeCamera();
   }
 
   @override

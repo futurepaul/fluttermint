@@ -18,7 +18,7 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_init(port_: i64, user_dir: *mut wire_uint_8_list) {
+pub extern "C" fn wire_init(port_: i64, path: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "init",
@@ -26,8 +26,8 @@ pub extern "C" fn wire_init(port_: i64, user_dir: *mut wire_uint_8_list) {
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_user_dir = user_dir.wire2api();
-            move |task_callback| init(api_user_dir)
+            let api_path = path.wire2api();
+            move |task_callback| init(api_path)
         },
     )
 }
@@ -107,7 +107,7 @@ pub extern "C" fn wire_decode_invoice(port_: i64, bolt11: *mut wire_uint_8_list)
 }
 
 #[no_mangle]
-pub extern "C" fn wire_invoice(port_: i64, amount: u64) {
+pub extern "C" fn wire_invoice(port_: i64, amount: u64, description: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "invoice",
@@ -116,7 +116,8 @@ pub extern "C" fn wire_invoice(port_: i64, amount: u64) {
         },
         move || {
             let api_amount = amount.wire2api();
-            move |task_callback| invoice(api_amount)
+            let api_description = description.wire2api();
+            move |task_callback| invoice(api_amount, api_description)
         },
     )
 }
@@ -137,7 +138,7 @@ pub struct wire_uint_8_list {
 // Section: allocate functions
 
 #[no_mangle]
-pub extern "C" fn new_uint_8_list_0(len: i32) -> *mut wire_uint_8_list {
+pub extern "C" fn new_uint_8_list(len: i32) -> *mut wire_uint_8_list {
     let ans = wire_uint_8_list {
         ptr: support::new_leak_vec_ptr(Default::default(), len),
         len,
