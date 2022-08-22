@@ -9,13 +9,16 @@ class WasmBridge {
   // @Ignore
   external get client;
   external set client(v);
+  external get db;
+  external set db(v);
   external String decodeInvoice(String invoice);
 }
 
 @JS("WasmBridge")
 abstract class _WasmBridge {
+  external Promise<void> JS$_init();
   external Promise<bool> init();
-  external Promise<void> joinFederation(String cfg);
+  external Promise<void> joinFederation(String configUrl);
   external Promise<void> leaveFederation();
   external Promise<num> balance();
   external Promise<String> invoice(num amount, String description);
@@ -23,16 +26,22 @@ abstract class _WasmBridge {
 }
 
 extension WasmBridgeExtensions on WasmBridge {
+  Future<void> JS$_init() {
+    final Object t = this;
+    final _WasmBridge tt = t as _WasmBridge;
+    return promiseToFuture(tt.JS$_init());
+  }
+
   Future<bool> init() {
     final Object t = this;
     final _WasmBridge tt = t as _WasmBridge;
     return promiseToFuture(tt.init());
   }
 
-  Future<void> joinFederation(String cfg) {
+  Future<void> joinFederation(String configUrl) {
     final Object t = this;
     final _WasmBridge tt = t as _WasmBridge;
-    return promiseToFuture(tt.joinFederation(cfg));
+    return promiseToFuture(tt.joinFederation(configUrl));
   }
 
   Future<void> leaveFederation() {
