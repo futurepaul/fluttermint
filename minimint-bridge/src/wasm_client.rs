@@ -28,7 +28,7 @@ fn anyhow_to_js(error: anyhow::Error) -> JsValue {
 #[wasm_bindgen]
 impl WasmClient {
     #[wasm_bindgen]
-    pub async fn join_federation(_dir: String, cfg: String) -> Result<WasmClient> {
+    pub async fn join_federation(cfg: String) -> Result<WasmClient> {
         let client = Client::new(Box::new(MemDatabase::new()), &cfg)
             .await
             .map_err(anyhow_to_js)?;
@@ -79,7 +79,7 @@ impl WasmClient {
 
     #[wasm_bindgen]
     // TODO: wasm doesn't like u64
-    pub fn invoice(&self, amount: u32, _description: String) -> Promise {
+    pub fn invoice(&self, amount: u32, description: String) -> Promise {
         let this = self.0.clone();
         future_to_promise(async move {
             Ok(JsValue::from(

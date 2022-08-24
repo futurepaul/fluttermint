@@ -9,7 +9,7 @@ class MinimintClientImpl implements MinimintClient {
     return wasmBridge.init();
   }
 
-  Future<void> joinFederation({required String userDir, required String configUrl}) {
+  Future<void> joinFederation({required String configUrl}) {
     return wasmBridge.joinFederation(configUrl);
   }
 
@@ -36,6 +36,6 @@ class MinimintClientImpl implements MinimintClient {
 
   @override
   Future<String> invoice({required int amount, required String description}) {
-    return wasmBridge.invoice(amount);
+    return wasmBridge.invoice(amount, description);
   }
 }

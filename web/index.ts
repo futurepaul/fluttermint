@@ -8,8 +8,8 @@ export class WasmBridge {
     return false;
   }
 
-  async joinFederation(userDir: string, cfg: string): Promise<void> {
-    this.client = await WasmClient.join_federation(userDir, cfg);
+  async joinFederation(cfg: string): Promise<void> {
+    this.client = await WasmClient.join_federation(cfg);
   }
 
   async leaveFederation(): Promise<void> {

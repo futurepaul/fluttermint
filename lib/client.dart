@@ -2,10 +2,9 @@ import 'ffi.dart' if (dart.library.html) 'wasm.dart';
 
 abstract class MinimintClient {
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
-  Future<bool> init({required String path});
+  Future<bool> init();
 
-  Future<void> joinFederation(
-      {required String userDir, required String configUrl});
+  Future<void> joinFederation({required String configUrl});
 
   Future<void> leaveFederation();
 

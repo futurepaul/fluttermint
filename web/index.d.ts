@@ -5,7 +5,7 @@ export declare class WasmBridge {
     leaveFederation(): Promise<void>;
     balance(): Promise<number>;
     decodeInvoice(invoice: string): string;
-    invoice(amount: number): Promise<string>;
+    invoice(amount: number, description: string): Promise<string>;
     pay(bolt11: string): Promise<string>;
 }
 export declare const wasmBridge: WasmBridge;
