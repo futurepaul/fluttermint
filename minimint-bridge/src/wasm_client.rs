@@ -2,7 +2,7 @@ use crate::client::Client;
 use std::sync::Arc;
 
 use js_sys::Promise;
-use minimint_api::db::mem_impl::MemDatabase;
+use fedimint_api::db::mem_impl::MemDatabase;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::future_to_promise;
@@ -28,7 +28,7 @@ fn anyhow_to_js(error: anyhow::Error) -> JsValue {
 #[wasm_bindgen]
 impl WasmClient {
     #[wasm_bindgen]
-    pub async fn join_federation(cfg: String) -> Result<WasmClient> {
+    pub async fn join_federation(_dir: String, cfg: String) -> Result<WasmClient> {
         let client = Client::new(Box::new(MemDatabase::new()), &cfg)
             .await
             .map_err(anyhow_to_js)?;
@@ -72,17 +72,18 @@ impl WasmClient {
     pub fn pay(&self, bolt11: String) -> Promise {
         let this = self.0.clone();
         future_to_promise(async move {
-            Ok(JsValue::from(this.pay(bolt11).await.map_err(anyhow_to_js)?))
+            this.pay(bolt11).await.map_err(anyhow_to_js)?;
+            Ok(JsValue::null())
         })
     }
 
     #[wasm_bindgen]
     // TODO: wasm doesn't like u64
-    pub fn invoice(&self, amount: u32) -> Promise {
+    pub fn invoice(&self, amount: u32, _description: String) -> Promise {
         let this = self.0.clone();
         future_to_promise(async move {
             Ok(JsValue::from(
-                this.invoice(amount as u64).await.map_err(anyhow_to_js)?,
+                this.invoice(amount as u64, "example".to_string()).await.map_err(anyhow_to_js)?,
             ))
         })
     }
