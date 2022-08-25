@@ -9,7 +9,8 @@ import Flutter
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     // http://cjycode.com/flutter_rust_bridge/integrate/ios_headers.html
-    dummy_method_to_enforce_bundling()
+    let dummy = dummy_method_to_enforce_bundling()
+    print(dummy)
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
