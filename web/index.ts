@@ -24,8 +24,8 @@ export class WasmBridge {
     return decode_invoice(invoice);
   }
 
-  async invoice(amount: number): Promise<string> {
-    return await this.client.invoice(amount);
+  async invoice(amount: number, description: string): Promise<string> {
+    return await this.client.invoice(amount, description);
   }
 
   async pay(bolt11: string): Promise<string> {

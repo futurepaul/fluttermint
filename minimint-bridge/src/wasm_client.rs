@@ -2,7 +2,7 @@ use crate::client::Client;
 use std::sync::Arc;
 
 use js_sys::Promise;
-use minimint_api::db::mem_impl::MemDatabase;
+use fedimint_api::db::mem_impl::MemDatabase;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::future_to_promise;
@@ -72,17 +72,18 @@ impl WasmClient {
     pub fn pay(&self, bolt11: String) -> Promise {
         let this = self.0.clone();
         future_to_promise(async move {
-            Ok(JsValue::from(this.pay(bolt11).await.map_err(anyhow_to_js)?))
+            this.pay(bolt11).await.map_err(anyhow_to_js)?;
+            Ok(JsValue::null())
         })
     }
 
     #[wasm_bindgen]
     // TODO: wasm doesn't like u64
-    pub fn invoice(&self, amount: u32) -> Promise {
+    pub fn invoice(&self, amount: u32, description: String) -> Promise {
         let this = self.0.clone();
         future_to_promise(async move {
             Ok(JsValue::from(
-                this.invoice(amount as u64).await.map_err(anyhow_to_js)?,
+                this.invoice(amount as u64, description).await.map_err(anyhow_to_js)?,
             ))
         })
     }

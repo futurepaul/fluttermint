@@ -19,9 +19,7 @@ Future<void> main() async {
 
   prefs = await SharedPreferences.getInstance();
 
-  getApplicationDocumentsDirectory().then((directory) {
-    api.init(path: directory.path);
-  });
+  api.init();
 
   runApp(const ProviderScope(child: App()));
 }

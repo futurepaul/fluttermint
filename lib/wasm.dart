@@ -35,7 +35,7 @@ class MinimintClientImpl implements MinimintClient {
   }
 
   @override
-  Future<String> invoice({required int amount}) {
-    return wasmBridge.invoice(amount);
+  Future<String> invoice({required int amount, required String description}) {
+    return wasmBridge.invoice(amount, description);
   }
 }

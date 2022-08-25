@@ -25,10 +25,7 @@ class SetupJoin extends ConsumerWidget {
     final textController = TextEditingController();
 
     void joinFederation(String cfg) async {
-      await api.joinFederation(
-          configUrl: cfg,
-          userDir:
-              await getApplicationDocumentsDirectory().then((dir) => dir.path));
+      await api.joinFederation(configUrl: cfg);
       await codeProviderNotifier.update(cfg);
       context.go("/");
     }

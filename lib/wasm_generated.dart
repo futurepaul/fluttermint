@@ -18,7 +18,7 @@ abstract class _WasmBridge {
   external Promise<void> joinFederation(String cfg);
   external Promise<void> leaveFederation();
   external Promise<num> balance();
-  external Promise<String> invoice(num amount);
+  external Promise<String> invoice(num amount, String description);
   external Promise<String> pay(String bolt11);
 }
 
@@ -47,10 +47,10 @@ extension WasmBridgeExtensions on WasmBridge {
     return promiseToFuture(tt.balance());
   }
 
-  Future<String> invoice(num amount) {
+  Future<String> invoice(num amount, String description) {
     final Object t = this;
     final _WasmBridge tt = t as _WasmBridge;
-    return promiseToFuture(tt.invoice(amount));
+    return promiseToFuture(tt.invoice(amount, description));
   }
 
   Future<String> pay(String bolt11) {
