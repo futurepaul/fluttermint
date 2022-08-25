@@ -83,7 +83,7 @@ impl WasmClient {
         let this = self.0.clone();
         future_to_promise(async move {
             Ok(JsValue::from(
-                this.invoice(amount as u64, "example".to_string()).await.map_err(anyhow_to_js)?,
+                this.invoice(amount as u64, description).await.map_err(anyhow_to_js)?,
             ))
         })
     }
