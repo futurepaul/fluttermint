@@ -68,10 +68,13 @@ class SetupJoin extends ConsumerWidget {
                     text: "Continue",
                     onTap: () async {
                       var newText = textController.text;
-
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
                       // TODO: error if this isn't valid
-                      joinFederation(newText);
+                      try {
+                        joinFederation(newText);
+                      } catch (err) {
+                        context.go("/errormodal", extra: err);
+                      }
                     })
               ],
             ),
