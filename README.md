@@ -34,6 +34,17 @@ For release build:
 just wasm
 ```
 
+# Testflight
+
+Build the IPA:
+
+```
+flutter build ipa
+```
+
+Uploaded it using transport app.
+
+
 # Contributing
 
 Contributions are very welcome, just open an issue or PR if you see something to improve!
