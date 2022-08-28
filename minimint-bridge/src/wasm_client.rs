@@ -1,13 +1,16 @@
 use crate::client::Client;
 use std::sync::Arc;
 
-use js_sys::{Promise, Uint8Array};
+use fedimint_api::db::batch::DbBatch;
 use fedimint_api::db::mem_impl::MemDatabase;
 use fedimint_api::db::Database;
+use fedimint_api::db::PrefixIter;
+use js_sys::{Promise, Uint8Array};
 use rexie::Rexie;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen_futures::spawn_local;
 
 #[wasm_bindgen]
 pub struct WasmClient(Arc<Client>);
@@ -28,10 +31,7 @@ pub fn start() {
 // wasm doesn't like init function
 #[wasm_bindgen]
 pub async fn init_(db: WasmDb) -> Result<Option<WasmClient>> {
-    if let Some(client) = Client::try_load(Box::new(db.mem_db))
-        .await
-        .map_err(anyhow_to_js)?
-    {
+    if let Some(client) = Client::try_load(Box::new(db)).await.map_err(anyhow_to_js)? {
         let client = Arc::new(client);
         let client_poll = client.clone();
         wasm_bindgen_futures::spawn_local(async move {
@@ -53,7 +53,7 @@ fn anyhow_to_js(error: anyhow::Error) -> JsValue {
 impl WasmClient {
     #[wasm_bindgen]
     pub async fn join_federation(db: WasmDb, cfg: String) -> Result<WasmClient> {
-        let client = Client::new(Box::new(db.mem_db), &cfg)
+        let client = Client::new(Box::new(db), &cfg)
             .await
             .map_err(anyhow_to_js)?;
 
@@ -107,7 +107,9 @@ impl WasmClient {
         let this = self.0.clone();
         future_to_promise(async move {
             Ok(JsValue::from(
-                this.invoice(amount as u64, description).await.map_err(anyhow_to_js)?,
+                this.invoice(amount as u64, description)
+                    .await
+                    .map_err(anyhow_to_js)?,
             ))
         })
     }
@@ -117,6 +119,34 @@ impl WasmClient {
 pub struct WasmDb {
     idb_name: String,
     mem_db: MemDatabase,
+}
+
+impl Database for WasmDb {
+    fn raw_insert_entry(&self, key: &[u8], value: Vec<u8>) -> anyhow::Result<Option<Vec<u8>>> {
+        let result = self.mem_db.raw_insert_entry(key, value);
+        spawn_local(self.clone().save_inner());
+        result
+    }
+
+    fn raw_get_value(&self, key: &[u8]) -> anyhow::Result<Option<Vec<u8>>> {
+        self.mem_db.raw_get_value(key)
+    }
+
+    fn raw_remove_entry(&self, key: &[u8]) -> anyhow::Result<Option<Vec<u8>>> {
+        let result = self.mem_db.raw_remove_entry(key);
+        spawn_local(self.clone().save_inner());
+        result
+    }
+
+    fn raw_find_by_prefix(&self, key_prefix: &[u8]) -> PrefixIter<'_> {
+        self.mem_db.raw_find_by_prefix(key_prefix)
+    }
+
+    fn raw_apply_batch(&self, batch: DbBatch) -> anyhow::Result<()> {
+        let result = self.mem_db.raw_apply_batch(batch);
+        spawn_local(self.clone().save_inner());
+        result
+    }
 }
 
 const STORE_NAME: &str = "main";
@@ -144,8 +174,7 @@ impl WasmDb {
             .expect("db error")
         {
             // key is an `ArrayBuffer`
-            let k = Uint8Array::new(&k)
-                .to_vec();
+            let k = Uint8Array::new(&k).to_vec();
             let v = Uint8Array::try_from(v)
                 .expect("value must be uint8array")
                 .to_vec();
@@ -167,36 +196,40 @@ impl WasmDb {
         }
     }
 
+    async fn save_inner(self) {
+        tracing::info!("saving db");
+        let db = Rexie::builder(&self.idb_name)
+            .add_object_store(rexie::ObjectStore::new(STORE_NAME))
+            .build()
+            .await
+            .expect("db error");
+        let t = db
+            .transaction(&[STORE_NAME], rexie::TransactionMode::ReadWrite)
+            .expect("db error");
+
+        let store = t.store(STORE_NAME).expect("db error");
+        store.clear().await.expect("db error");
+
+        for kv in self.mem_db.raw_find_by_prefix(&[]) {
+            let (k, v) = kv.expect("db error");
+            // NOTE: we can't avoid copying here
+            let js_key = Uint8Array::from(&k[..]);
+            let js_val = Uint8Array::from(&v[..]);
+            store
+                // value-key order is correct here
+                .add(js_val.as_ref(), Some(js_key.as_ref()))
+                .await
+                .expect("db error");
+        }
+        t.commit().await.expect("db error");
+    }
+
     /// Save the database into indexed db.
     #[wasm_bindgen]
     pub fn save(&self) -> Promise {
         let this = self.clone();
-        tracing::info!("saving db");
         future_to_promise(async move {
-            let db = Rexie::builder(&this.idb_name)
-                .add_object_store(rexie::ObjectStore::new(STORE_NAME))
-                .build()
-                .await
-                .expect("db error");
-            let t = db
-                .transaction(&[STORE_NAME], rexie::TransactionMode::ReadWrite)
-                .expect("db error");
-
-            let store = t.store(STORE_NAME).expect("db error");
-            store.clear().await.expect("db error");
-
-            for kv in this.mem_db.raw_find_by_prefix(&[]) {
-                let (k, v) = kv.expect("db error");
-                // NOTE: we can't avoid copying here
-                let js_key = Uint8Array::from(&k[..]);
-                let js_val = Uint8Array::from(&v[..]);
-                store
-                    // value-key order is correct here
-                    .add(js_val.as_ref(), Some(js_key.as_ref()))
-                    .await
-                    .expect("db error");
-            }
-            t.commit().await.expect("db error");
+            this.save_inner().await;
             Ok(JsValue::UNDEFINED)
         })
     }
