@@ -1268,6 +1268,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bitcoin",
+ "console_error_panic_hook",
  "fedimint-api",
  "fedimint-core",
  "flutter_rust_bridge",

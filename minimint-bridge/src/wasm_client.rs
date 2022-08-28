@@ -13,16 +13,21 @@ use wasm_bindgen_futures::future_to_promise;
 pub struct WasmClient(Arc<Client>);
 type Result<T> = std::result::Result<T, JsValue>;
 
-/// If this returns Some, user has joined a federation. Otherwise they haven't.
-// wasm doesn't like init function
-#[wasm_bindgen]
-pub async fn init_(db: WasmDb) -> Result<Option<WasmClient>> {
+#[wasm_bindgen(start)]
+pub fn start() {
     tracing_wasm::set_as_global_default_with_config(
         tracing_wasm::WASMLayerConfigBuilder::default()
             .set_console_config(tracing_wasm::ConsoleConfig::ReportWithConsoleColor)
             .set_max_level(tracing::Level::INFO)
             .build(),
     );
+    console_error_panic_hook::set_once();
+}
+
+/// If this returns Some, user has joined a federation. Otherwise they haven't.
+// wasm doesn't like init function
+#[wasm_bindgen]
+pub async fn init_(db: WasmDb) -> Result<Option<WasmClient>> {
     if let Some(client) = Client::try_load(Box::new(db.mem_db))
         .await
         .map_err(anyhow_to_js)?
