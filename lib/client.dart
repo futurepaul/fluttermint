@@ -17,4 +17,4 @@ abstract class MinimintClient {
   Future<String> invoice({required int amount, required String description});
 }
 
-late final MinimintClient api = MinimintClientImpl();
+final MinimintClient api = MinimintClientImpl();

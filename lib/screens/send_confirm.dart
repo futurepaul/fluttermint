@@ -5,14 +5,12 @@ import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/data_expander.dart';
-import 'package:fluttermint/widgets/ellipsable_text.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
-import '../client.dart';
 import '../widgets/chill_info_card.dart';
 import '../widgets/small_balance_display.dart';
 
@@ -24,7 +22,7 @@ class SendConfirm extends ConsumerWidget {
     final send = ref.read(sendProvider)!;
     final sendNotifier = ref.read(sendProvider.notifier);
 
-    final invoice = send.invoice!;
+    final invoice = send.invoice;
     // final lightningUri = "lightning:$invoice";
     final desc = send.description;
     final amount = send.amountSats;

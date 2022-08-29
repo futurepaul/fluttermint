@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import '../client.dart';
@@ -66,7 +65,6 @@ class SetupJoin extends ConsumerWidget {
                     onTap: () async {
                       var newText = textController.text;
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
-                      // TODO: error if this isn't valid
                       try {
                         joinFederation(newText);
                       } catch (err) {

@@ -9,6 +9,7 @@ class MinimintClientImpl implements MinimintClient {
     return wasmBridge.init();
   }
 
+  @override
   Future<void> joinFederation({required String configUrl}) {
     return wasmBridge.joinFederation(configUrl);
   }

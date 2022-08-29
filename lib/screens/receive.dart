@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';

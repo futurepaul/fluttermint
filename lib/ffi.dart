@@ -24,32 +24,39 @@ class MinimintClientImpl implements MinimintClient {
           : DynamicLibrary.open(_dylib));
 
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
+  @override
   Future<bool> init() async {
     final userDir = await getApplicationDocumentsDirectory();
     return api.init(path: userDir.path);
   }
 
+  @override
   Future<void> joinFederation({required String configUrl}) async {
     final userDir = await getApplicationDocumentsDirectory();
     await api.joinFederation(configUrl: configUrl, userDir: userDir.path);
   }
 
+  @override
   Future<void> leaveFederation() {
     return api.leaveFederation();
   }
 
+  @override
   Future<int> balance() {
     return api.balance();
   }
 
+  @override
   Future<void> pay({required String bolt11}) {
     return api.pay(bolt11: bolt11);
   }
 
+  @override
   Future<String> decodeInvoice({required String bolt11}) {
     return api.decodeInvoice(bolt11: bolt11);
   }
 
+  @override
   Future<String> invoice({required int amount, required String description}) {
     return api.invoice(amount: amount, description: description);
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/prefs.dart';
@@ -19,6 +18,8 @@ Future<void> main() async {
 
   prefs = await SharedPreferences.getInstance();
 
+  // TODO: should we block until this completes?
+  //use boolean return value to decide where to route?
   api.init();
 
   runApp(const ProviderScope(child: App()));
