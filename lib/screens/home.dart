@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/fedi_tooltip.dart';
 
 import 'package:fluttermint/widgets/textured.dart';
+import 'package:fluttermint/widgets/transaction_list.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:fluttermint/widgets/balance_display.dart';
@@ -31,6 +32,7 @@ class Home extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const BalanceDisplay(),
+                const TransactionsList(),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
