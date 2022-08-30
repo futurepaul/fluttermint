@@ -15,6 +15,18 @@ abstract class MinimintClient {
   Future<String> decodeInvoice({required String bolt11});
 
   Future<String> invoice({required int amount, required String description});
+
+  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint});
+}
+
+class MyPayment {
+  final String invoice;
+  final bool paid;
+
+  MyPayment({
+    required this.invoice,
+    required this.paid,
+  });
 }
 
 final MinimintClient api = MinimintClientImpl();

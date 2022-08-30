@@ -10,8 +10,8 @@ use fedimint_core::modules::ln::contracts::ContractId;
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 use lightning_invoice::Invoice;
-use mint_client::api::WsFederationConnect;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
+use mint_client::{api::WsFederationConnect, Payment};
 use serde_json::json;
 
 pub struct Client {
@@ -49,7 +49,6 @@ impl Client {
 
         Ok(Self {
             client: UserClient::new(UserClientConfig(cfg.clone()), db, Default::default()),
-            // payments: Mutex::new(Vec::new()),
         })
     }
 
@@ -98,7 +97,9 @@ impl Client {
         let invoice = confirmed_invoice.invoice;
 
         // Save the keys and invoice for later polling`
-        self.client.ln_client().save_pending_invoice(&invoice);
+        self.client
+            .ln_client()
+            .save_payment(&Payment::new(invoice.clone()));
         tracing::info!("saved invoice to db");
 
         Ok(invoice.to_string())
@@ -110,25 +111,29 @@ impl Client {
             let mut requests = self
                 .client
                 .ln_client()
-                .list_pending_invoices()
+                .list_payments()
                 .into_iter()
-                .filter(|invoice| !invoice.is_expired())
-                .map(|invoice| async move {
+                .filter(|payment| !payment.paid && !payment.invoice.is_expired())
+                .map(|payment| async move {
                     // FIXME: don't create rng in here ...
                     let rng = rand::rngs::OsRng::new().unwrap();
-                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash());
+                    let payment_hash = payment.invoice.payment_hash();
+                    tracing::info!("fetching incoming contract {:?}", &payment_hash);
                     let result = self
                         .client
                         .claim_incoming_contract(
-                            ContractId::from_hash(invoice.payment_hash().clone()),
+                            ContractId::from_hash(payment_hash.clone()),
                             rng.clone(),
                         )
                         .await;
                     if let Err(_) = result {
-                        tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
+                        tracing::info!("couldn't complete payment: {:?}", &payment_hash);
                     } else {
-                        tracing::info!("completed payment: {:?}", invoice.payment_hash());
-                        // TODO: mark it paid in database
+                        tracing::info!("completed payment: {:?}", &payment_hash);
+                        self.client.ln_client().save_payment(&Payment {
+                            invoice: payment.invoice.clone(),
+                            paid: true,
+                        });
                         self.client.fetch_all_coins().await;
                     }
                 })

@@ -122,6 +122,21 @@ pub extern "C" fn wire_invoice(port_: i64, amount: u64, description: *mut wire_u
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_fetch_payment(port_: i64, payment_hash: *mut wire_uint_8_list) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "fetch_payment",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_payment_hash = payment_hash.wire2api();
+            move |task_callback| fetch_payment(api_payment_hash)
+        },
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]
@@ -206,6 +221,13 @@ impl<T> NewWithNullPtr for *mut T {
 }
 
 // Section: impl IntoDart
+
+impl support::IntoDart for MyPayment {
+    fn into_dart(self) -> support::DartCObject {
+        vec![self.invoice.into_dart(), self.paid.into_dart()].into_dart()
+    }
+}
+impl support::IntoDartExceptPrimitive for MyPayment {}
 
 // Section: executor
 

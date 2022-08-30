@@ -17,6 +17,8 @@ import 'package:fluttermint/widgets/ellipsable_text.dart';
 
 import 'package:share_plus/share_plus.dart';
 
+import '../client.dart';
+
 class ReceiveConfirm extends ConsumerWidget {
   const ReceiveConfirm({Key? key}) : super(key: key);
 
@@ -81,7 +83,8 @@ class ReceiveConfirm extends ConsumerWidget {
                             version: QrVersions.auto,
                             // Screen width minus 40.0 for container and 48.0 for app padding
                             // limit to 300 px
-                            size: (MediaQuery.of(context).size.width - 88.0).clamp(0, 300.0)),
+                            size: (MediaQuery.of(context).size.width - 88.0)
+                                .clamp(0, 300.0)),
                         const SizedBox(height: 16),
                         EllipsableText(
                             text: invoice,
