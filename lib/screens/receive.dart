@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
@@ -76,10 +74,12 @@ class ReceiveScreen extends ConsumerWidget {
                       var desc = descriptionController.text;
                       var amount = int.parse(amountController.text);
                       try {
-                        await receiveNotifier.createReceive(
-                            Receive(description: desc, amountSats: amount));
-                        // TODO figure out the right way to do this async without the mounted flag
-                        context.go("/receive/confirm");
+                        await receiveNotifier
+                            .createReceive(
+                                Receive(description: desc, amountSats: amount))
+                            .then((_) {
+                          context.go("/receive/confirm");
+                        });
                       } catch (err) {
                         context.go("/errormodal", extra: err);
                       }
