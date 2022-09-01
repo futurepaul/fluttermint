@@ -43,7 +43,7 @@ pub fn init(path: String) -> Result<bool> {
     #[cfg(target_os = "android")]
     tracing_subscriber::registry()
         .with(
-            paranoid_android::layer("com.example.flutter_rust_bridge_template")
+            paranoid_android::layer("com.justinmoon.fluttermint")
                 .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
         )
         .try_init()
@@ -55,7 +55,7 @@ pub fn init(path: String) -> Result<bool> {
     tracing_subscriber::registry()
         .with(
             tracing_oslog::OsLogger::new(
-                "com.example.flutter_rust_bridge_template",
+                "com.justinmoon.fluttermint",
                 "INFO", // I don't know what this does ...
             )
             .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
