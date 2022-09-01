@@ -165,6 +165,8 @@ pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
         // FIXME: I assume this doesn't work in WASM
         // "description": bolt11.description().to_owned().to_string(),
         "invoice": invoice,
+        "paymentHash": bolt11.payment_hash()
     });
+
     Ok(serde_json::to_string(&json)?)
 }
