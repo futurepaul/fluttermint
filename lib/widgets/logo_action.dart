@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../main.dart';
 import '../utils/constants.dart';
 
-class FedimintLogoAction extends ConsumerWidget {
-  const FedimintLogoAction({
+class FluttermintLogoAction extends ConsumerWidget {
+  const FluttermintLogoAction({
     Key? key,
   }) : super(key: key);
 
@@ -21,7 +21,7 @@ class FedimintLogoAction extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
           Text(
-            "Fedimint",
+            "Fluttermint",
             style: TextStyle(
                 fontFamily: "Archivo 125",
                 fontSize: 18,

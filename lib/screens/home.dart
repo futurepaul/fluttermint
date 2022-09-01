@@ -2,6 +2,7 @@ import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/fedi_tooltip.dart';
+import 'package:fluttermint/widgets/logo_action.dart';
 
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:fluttermint/widgets/transaction_list.dart';
@@ -9,7 +10,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
-import 'package:fluttermint/widgets/logo_action.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -24,7 +24,7 @@ class Home extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                FedimintLogoAction(),
+                FluttermintLogoAction(),
               ],
             ),
           ),

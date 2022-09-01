@@ -33,9 +33,7 @@ class SendNotifier extends StateNotifier<Send?> {
   }
 
   pay(Send send) async {
-    if (send.invoice != null) {
-      await api.pay(bolt11: send.invoice!);
-    }
+    await api.pay(bolt11: send.invoice);
   }
 
   clear() {
