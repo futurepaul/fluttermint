@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:fluttermint/client.dart';
 import 'package:riverpod/riverpod.dart';
 
 const FAKE_TX = Transaction(
@@ -35,13 +36,13 @@ class Transaction {
 class Transactions {
   const Transactions(
       [this.txs = const [
-        FAKE_TX_2,
-        FAKE_TX_2,
-        FAKE_TX,
-        FAKE_TX,
-        FAKE_TX,
-        FAKE_TX,
-        FAKE_TX_2,
+        // FAKE_TX_2,
+        // FAKE_TX_2,
+        // FAKE_TX,
+        // FAKE_TX,
+        // FAKE_TX,
+        // FAKE_TX,
+        // FAKE_TX_2,
       ]]);
 
   final List<Transaction> txs;
@@ -56,6 +57,14 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
 
   addTransaction(Transaction tx) async {
     state = state.append(tx);
+  }
+
+  fetchTransactions() async {
+    final payments = await api.fetchPayments();
+    for (var payment in payments) {
+      debugPrint(payment.toString());
+    }
+    // state = Balance(amountSats: await api.balance());
   }
 
   clear() {

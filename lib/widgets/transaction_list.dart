@@ -23,7 +23,10 @@ class TransactionsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(transactionsProvider);
-    // final transactionsNotifier = ref.watch(transactionsProvider.notifier);
+    final transactionsNotifier = ref.watch(transactionsProvider.notifier);
+
+    transactionsNotifier.fetchTransactions();
+    // transactionsNotifier.addTransaction(Transaction ())
     final showTransactions = ref.watch(showTransactionsProvider);
 
     return Expanded(

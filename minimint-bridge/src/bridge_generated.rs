@@ -137,6 +137,18 @@ pub extern "C" fn wire_fetch_payment(port_: i64, payment_hash: *mut wire_uint_8_
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_list_payments(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "list_payments",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| list_payments(),
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]

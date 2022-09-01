@@ -135,3 +135,22 @@ pub fn fetch_payment(payment_hash: String) -> Result<MyPayment> {
         })
     })
 }
+
+pub fn list_payments() -> Result<Vec<MyPayment>> {
+    RUNTIME.block_on(async {
+        let payments = global_client::get()
+            .await?
+            .client
+            .ln_client()
+            .list_payments()
+            .iter()
+            .map(|payment| MyPayment {
+                // FIXME: don't expect
+                invoice: decode_invoice(payment.invoice.to_string())
+                    .expect("couldn't decode invoice"),
+                paid: payment.paid,
+            })
+            .collect();
+        Ok(payments)
+    })
+}

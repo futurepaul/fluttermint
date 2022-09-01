@@ -60,4 +60,14 @@ class MinimintClientImpl implements MinimintClient {
   Future<String> invoice({required int amount, required String description}) {
     return api.invoice(amount: amount, description: description);
   }
+
+  @override
+  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint}) {
+    return api.fetchPayment(paymentHash: paymentHash);
+  }
+
+  @override
+  Future<List<MyPayment>> fetchPayments() {
+    return api.listPayments();
+  }
 }
