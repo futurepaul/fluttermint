@@ -1,4 +1,4 @@
-package com.example.fluttermint
+package com.justinmoon.fluttermint
 
 import io.flutter.embedding.android.FlutterActivity
 

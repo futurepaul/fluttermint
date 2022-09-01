@@ -44,6 +44,15 @@ flutter build ipa
 
 Uploaded it using transport app.
 
+# Play Store
+
+## App Bundle (recommended, but it seems more complex)
+
+```
+flutter build appbundle
+```
+
+Upload that to google play. [Here](https://docs.flutter.dev/deployment/android#offline-using-the-bundle-tool) are some docs about testing it locally.
 
 # Contributing
 
