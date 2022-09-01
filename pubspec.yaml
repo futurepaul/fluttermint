@@ -41,10 +41,11 @@ dependencies:
   flutter_riverpod: ^1.0.4
   share_plus: ^4.0.6
   freezed_annotation: ^2.0.3
-  flutter_rust_bridge: ^1.33.0
+  flutter_rust_bridge: ^1.41.3
   path_provider: ^2.0.9
-  rive: ^0.8.4
+  rive: ^0.9.1
   qr_code_scanner: ^1.0.0
+  ffi: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +59,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   build_runner: ^2.1.11
   freezed: ^2.0.3+1
+  ffigen: ^6.1.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

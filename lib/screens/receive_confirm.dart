@@ -17,7 +17,18 @@ import 'package:fluttermint/widgets/ellipsable_text.dart';
 
 import 'package:share_plus/share_plus.dart';
 
-import '../client.dart';
+final paymentStatusStreamProvider = StreamProvider.autoDispose<String?>((ref) {
+  Stream<String?> getStatus() async* {
+    var shouldPoll = true;
+    while (shouldPoll) {
+      await Future.delayed(const Duration(seconds: 1));
+      await ref.read(receiveProvider.notifier).checkPaymentStatus();
+      yield "pending";
+    }
+  }
+
+  return getStatus();
+});
 
 class ReceiveConfirm extends ConsumerWidget {
   const ReceiveConfirm({Key? key}) : super(key: key);
@@ -27,6 +38,12 @@ class ReceiveConfirm extends ConsumerWidget {
     // This should never be null because otherwise it should navigate us away
     final receive = ref.read(receiveProvider)!;
     final receiveNotifier = ref.read(receiveProvider.notifier);
+
+    final statusProvider = ref.watch(paymentStatusStreamProvider);
+
+    if (receive.receiveStatus == "paid") {
+      context.go("/");
+    }
 
     // This shouldn't be null because should be prepped by the constructor
     final invoice = receive.invoice!;
@@ -66,7 +83,15 @@ class ReceiveConfirm extends ConsumerWidget {
                     const SizedBox(height: 16),
                     SmallBalanceDisplay(amountSats: amount),
                     const SizedBox(height: 8),
-                    Text(desc, style: Theme.of(context).textTheme.bodyText2)
+                    Text(desc, style: Theme.of(context).textTheme.bodyText2),
+                    statusProvider.when(
+                        data: (data) =>
+                            Text(data ?? "no status something went wrong?"),
+                        loading: () => const Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Text("loading"),
+                            ),
+                        error: (err, _) => Text(err.toString())),
                   ],
                 )),
                 Container(
