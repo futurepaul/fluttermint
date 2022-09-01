@@ -26,7 +26,7 @@ class Setup extends StatelessWidget {
                   child: RiveAnimation.asset("assets/spinny_globe.riv"),
                 ),
                 const SizedBox(height: 32),
-                const Text("Fedimint\nis a private\nlightning wallet",
+                const Text("Fluttermint",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontFamily: "Archivo 125",

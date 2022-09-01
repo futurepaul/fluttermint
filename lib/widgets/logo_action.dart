@@ -21,7 +21,7 @@ class FedimintLogoAction extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
           Text(
-            "Fedimint",
+            "Fluttermint",
             style: TextStyle(
                 fontFamily: "Archivo 125",
                 fontSize: 18,
