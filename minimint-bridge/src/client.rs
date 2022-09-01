@@ -1,24 +1,21 @@
 //! Minimint client with simpler types
 
-use std::mem;
-
 use anyhow::anyhow;
-use futures::lock::Mutex;
-use futures::{stream::FuturesUnordered, StreamExt};
-use lightning_invoice::Invoice;
 use fedimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
 };
 use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
-use mint_client::api::WsFederationConnect;
+use futures::stream::FuturesUnordered;
+use futures::StreamExt;
+use lightning_invoice::Invoice;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
+use mint_client::{api::WsFederationConnect, Payment};
 use serde_json::json;
 
 pub struct Client {
     pub(crate) client: UserClient,
-    payments: Mutex<Vec<Invoice>>,
 }
 
 #[derive(Debug, Clone, Encodable, Decodable)]
@@ -52,7 +49,6 @@ impl Client {
 
         Ok(Self {
             client: UserClient::new(UserClientConfig(cfg.clone()), db, Default::default()),
-            payments: Mutex::new(Vec::new()),
         })
     }
 
@@ -76,7 +72,7 @@ impl Client {
             .await
             .expect("Contract wasn't accepted in time");
 
-        let gw = self.client.fetch_gateway().await?;
+        let gw = self.client.fetch_active_gateway().await?;
         http.post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
             // .timeout(Duration::from_secs(15)) // TODO: add timeout
@@ -101,55 +97,52 @@ impl Client {
         let invoice = confirmed_invoice.invoice;
 
         // Save the keys and invoice for later polling`
-        self.payments.lock().await.push(invoice.clone());
+        self.client
+            .ln_client()
+            .save_payment(&Payment::new(invoice.clone()));
+        tracing::info!("saved invoice to db");
 
         Ok(invoice.to_string())
     }
 
     pub async fn poll(&self) {
-        let rng = rand::rngs::OsRng::new().unwrap();
         // Spawn a thread to check balances and claim incoming contracts
         loop {
-            // steal old payments
-            let payments = mem::take(&mut *(self.payments.lock().await));
-
-            let mut payment_requests = payments
+            let mut requests = self
+                .client
+                .ln_client()
+                .list_payments()
                 .into_iter()
-                .map(|invoice| async {
-                    tracing::info!("fetching incoming contract {:?}", invoice.payment_hash());
+                .filter(|payment| !payment.paid && !payment.invoice.is_expired())
+                .map(|payment| async move {
+                    // FIXME: don't create rng in here ...
+                    let rng = rand::rngs::OsRng::new().unwrap();
+                    let payment_hash = payment.invoice.payment_hash();
+                    tracing::info!("fetching incoming contract {:?}", &payment_hash);
                     let result = self
                         .client
                         .claim_incoming_contract(
-                            ContractId::from_hash(invoice.payment_hash().clone()),
+                            ContractId::from_hash(payment_hash.clone()),
                             rng.clone(),
                         )
                         .await;
                     if let Err(_) = result {
-                        // TODO: filter out expired invoices
-                        tracing::info!("couldn't complete payment: {:?}", invoice.payment_hash());
-                        // FIXME: is_expired doesn't work on wasm
-                        if cfg!(not(target_family = "wasm")) && invoice.is_expired() {
-                            None
-                        } else {
-                            Some(invoice)
-                        }
+                        tracing::info!("couldn't complete payment: {:?}", &payment_hash);
                     } else {
-                        tracing::info!("completed payment: {:?}", invoice.payment_hash());
+                        tracing::info!("completed payment: {:?}", &payment_hash);
+                        self.client.ln_client().save_payment(&Payment {
+                            invoice: payment.invoice.clone(),
+                            paid: true,
+                        });
                         self.client.fetch_all_coins().await;
-                        None
                     }
                 })
                 .collect::<FuturesUnordered<_>>();
 
-            let mut pending_payments = Vec::new();
-            while let Some(payment) = payment_requests.next().await {
-                if let Some(pending_payment) = payment {
-                    pending_payments.push(pending_payment);
-                }
+            // FIXME: is there a better way to consume these futures?
+            while let Some(_) = requests.next().await {
+                tracing::info!("completed api request");
             }
-
-            // Re-add old payments
-            self.payments.lock().await.extend(pending_payments);
 
             fedimint_api::task::sleep(std::time::Duration::from_secs(1)).await;
         }

@@ -434,7 +434,7 @@ checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 [[package]]
 name = "fedimint-api"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -462,8 +462,8 @@ dependencies = [
 
 [[package]]
 name = "fedimint-core"
-version = "0.0.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "async-trait",
  "bincode",
@@ -491,7 +491,7 @@ dependencies = [
 [[package]]
 name = "fedimint-derive"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -502,7 +502,7 @@ dependencies = [
 [[package]]
 name = "fedimint-ln"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "async-trait",
  "bincode",
@@ -523,7 +523,7 @@ dependencies = [
 [[package]]
 name = "fedimint-mint"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "async-trait",
  "bincode",
@@ -543,7 +543,7 @@ dependencies = [
 [[package]]
 name = "fedimint-wallet"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1306,7 +1306,7 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2251,7 +2251,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
-source = "git+https://github.com/fedimint/fedimint#d1e696d0a5bfae3e2cc23f42eba8739213aefa20"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
 dependencies = [
  "bls12_381",
  "ff 0.11.1",

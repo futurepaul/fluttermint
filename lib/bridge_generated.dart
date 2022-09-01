@@ -28,6 +28,20 @@ abstract class MinimintBridge {
 
   Future<String> invoice(
       {required int amount, required String description, dynamic hint});
+
+  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint});
+
+  Future<List<MyPayment>> listPayments({dynamic hint});
+}
+
+class MyPayment {
+  final String invoice;
+  final bool paid;
+
+  MyPayment({
+    required this.invoice,
+    required this.paid,
+  });
 }
 
 class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
@@ -125,6 +139,31 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         hint: hint,
       ));
 
+  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) =>
+            inner.wire_fetch_payment(port_, _api2wire_String(paymentHash)),
+        parseSuccessData: _wire2api_my_payment,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "fetch_payment",
+          argNames: ["paymentHash"],
+        ),
+        argValues: [paymentHash],
+        hint: hint,
+      ));
+
+  Future<List<MyPayment>> listPayments({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_list_payments(port_),
+        parseSuccessData: _wire2api_list_my_payment,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "list_payments",
+          argNames: [],
+        ),
+        argValues: [],
+        hint: hint,
+      ));
+
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
@@ -155,6 +194,20 @@ String _wire2api_String(dynamic raw) {
 
 bool _wire2api_bool(dynamic raw) {
   return raw as bool;
+}
+
+List<MyPayment> _wire2api_list_my_payment(dynamic raw) {
+  return (raw as List<dynamic>).map(_wire2api_my_payment).toList();
+}
+
+MyPayment _wire2api_my_payment(dynamic raw) {
+  final arr = raw as List<dynamic>;
+  if (arr.length != 2)
+    throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+  return MyPayment(
+    invoice: _wire2api_String(arr[0]),
+    paid: _wire2api_bool(arr[1]),
+  );
 }
 
 int _wire2api_u64(dynamic raw) {
@@ -310,6 +363,37 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
               ffi.Pointer<wire_uint_8_list>)>>('wire_invoice');
   late final _wire_invoice = _wire_invoicePtr
       .asFunction<void Function(int, int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_fetch_payment(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> payment_hash,
+  ) {
+    return _wire_fetch_payment(
+      port_,
+      payment_hash,
+    );
+  }
+
+  late final _wire_fetch_paymentPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_fetch_payment');
+  late final _wire_fetch_payment = _wire_fetch_paymentPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_list_payments(
+    int port_,
+  ) {
+    return _wire_list_payments(
+      port_,
+    );
+  }
+
+  late final _wire_list_paymentsPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_list_payments');
+  late final _wire_list_payments =
+      _wire_list_paymentsPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,

@@ -2,6 +2,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
+use bitcoin::hashes::sha256;
 use lazy_static::lazy_static;
 use tokio::runtime;
 use tokio::sync::Mutex;
@@ -110,5 +111,46 @@ pub fn invoice(amount: u64, description: String) -> Result<String> {
             .await?
             .invoice(amount, description)
             .await
+    })
+}
+
+#[derive(Clone, Debug)]
+pub struct MyPayment {
+    pub invoice: String, // FIXME: we should pass the real invoice here
+    pub paid: bool,
+}
+
+pub fn fetch_payment(payment_hash: String) -> Result<MyPayment> {
+    let hash: sha256::Hash = payment_hash.parse()?;
+    RUNTIME.block_on(async {
+        let payment = global_client::get()
+            .await?
+            .client
+            .ln_client()
+            .fetch_payment(&hash)
+            .ok_or(anyhow!("payment not found"))?;
+        Ok(MyPayment {
+            invoice: decode_invoice(payment.invoice.to_string())?,
+            paid: payment.paid,
+        })
+    })
+}
+
+pub fn list_payments() -> Result<Vec<MyPayment>> {
+    RUNTIME.block_on(async {
+        let payments = global_client::get()
+            .await?
+            .client
+            .ln_client()
+            .list_payments()
+            .iter()
+            .map(|payment| MyPayment {
+                // FIXME: don't expect
+                invoice: decode_invoice(payment.invoice.to_string())
+                    .expect("couldn't decode invoice"),
+                paid: payment.paid,
+            })
+            .collect();
+        Ok(payments)
     })
 }
