@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 const black = Color(0xFF212121);
-const grey = Color(0x7FFFFFFF);
+const grey = Color.fromRGBO(255, 255, 255, 0.498);
+const disabledGrey = Color(0xFFC4C4C4);
 const offwhite = Color(0xFFA0A0A0);
 const white = Color(0xFFF1F1F1);
 
@@ -19,6 +20,12 @@ Map<int, Color> color = {
 };
 
 MaterialColor materialWhite = MaterialColor(0xFFF1F1F1, color);
+
+const spacer12 = SizedBox(
+  height: 12.0,
+  width: 12.0,
+);
+const spacer24 = SizedBox(height: 24.0, width: 12.0);
 
 const TextTheme textThemeDefault = TextTheme(
   headline1: TextStyle(
