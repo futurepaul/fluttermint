@@ -1,3 +1,4 @@
+import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/fedi_tooltip.dart';
@@ -32,7 +33,9 @@ class Home extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const BalanceDisplay(),
+                spacer24,
                 const TransactionsList(),
+                spacer24,
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
