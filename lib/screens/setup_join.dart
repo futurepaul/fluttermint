@@ -25,22 +25,26 @@ class SetupJoin extends ConsumerWidget {
 
     void joinFederation(String cfg) async {
       await api.joinFederation(configUrl: cfg);
-      await codeProviderNotifier.update(cfg);
-      context.go("/");
+      await codeProviderNotifier.update(cfg).then((_) => {context.go("/")});
     }
 
     void onDetect(Barcode barcode) async {
       final data = barcode.code;
       if (data != null) {
         debugPrint('Barcode found! $data');
-        joinFederation(data);
+        try {
+          joinFederation(data);
+        } catch (e) {
+          debugPrint('Caught error: $e');
+          context.go("/errormodal", extra: e);
+        }
       }
     }
 
     return Textured(
       child: Scaffold(
           appBar: FediAppBar(
-            title: "Join Federation",
+            title: "Join Federation a",
             closeAction: () => context.go("/setup"),
           ),
           backgroundColor: Colors.transparent,
