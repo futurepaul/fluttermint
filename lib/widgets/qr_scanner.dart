@@ -50,6 +50,11 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
+    // When we navigate away we need to make sure the camera can be re-created on mount again
+    setState(() {
+      this.controller = controller;
+      controller.resumeCamera();
+    });
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       setState(() {
@@ -57,10 +62,6 @@ class _QRViewExampleState extends State<QRViewExample> {
         widget.onDetect(scanData);
       });
     });
-
-    // FIXME: https://github.com/juliuscanute/qr_code_scanner/issues/560
-    controller.pauseCamera();
-    controller.resumeCamera();
   }
 
   @override
