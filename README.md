@@ -14,6 +14,12 @@ A fedimint wallet in Flutter + Rust. Powered by [Minimint](https://github.com/fe
 $ cat ~/.gradle/gradle.properties
 ANDROID_NDK=/Users/justin/Library/Android/sdk/ndk-bundle
 
+Tail logs from terminal:
+
+```
+adb logcat | grep -F "`adb shell ps | grep com.justinmoon.fluttermint  | tr -s [:space:] ' ' | cut -d' ' -f2`"
+```
+
 ## Building for WASM
 
 ### Prerequisites
