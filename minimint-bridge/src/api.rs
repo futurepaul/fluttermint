@@ -74,7 +74,10 @@ pub fn init(path: String) -> Result<bool> {
         let filename = Path::new(&path).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         if let Some(client) = Client::try_load(Box::new(db)).await? {
-            global_client::set(Arc::new(client)).await;
+            let client = Arc::new(client);
+            global_client::set(client.clone()).await;
+            // TODO: kill the poll task on leave
+            tokio::spawn(async move { client.poll().await });
             return Ok(true);
         }
         Ok(false)
