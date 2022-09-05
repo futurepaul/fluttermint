@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttermint/data/prefs.dart';
 import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import './client.dart';
 
-late SharedPreferences prefs;
-
-final prefProvider = createPrefProvider(
-  prefs: (_) => prefs,
-);
+final isConnectedToFederation = StateProvider<bool>((ref) => false);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  prefs = await SharedPreferences.getInstance();
-
   // TODO: should we block until this completes?
   //use boolean return value to decide where to route?
-  api.init();
+  try {
+    final success = await api.init();
+
+    debugPrint("init was = $success");
+    if (!success) {
+      // await ref.read(isConnectedToFederation.notifier).update(true);
+      //  final router = ref.watch(routerProvider);
+
+    }
+  } catch (e) {
+    debugPrint('Caught error in init: $e');
+  }
 
   runApp(const ProviderScope(child: App()));
 }

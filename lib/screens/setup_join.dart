@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttermint/main.dart';
 import 'package:fluttermint/widgets/autopaste_text_field.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -12,20 +11,21 @@ import 'package:fluttermint/widgets/textured.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import '../client.dart';
-// import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SetupJoin extends ConsumerWidget {
   const SetupJoin({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final codeProvider = ref.read(prefProvider);
-    final codeProviderNotifier = ref.read(prefProvider.notifier);
     final textController = TextEditingController();
 
     void joinFederation(String cfg) async {
-      await api.joinFederation(configUrl: cfg);
-      await codeProviderNotifier.update(cfg).then((_) => {context.go("/")});
+      try {
+        await api.joinFederation(configUrl: cfg).then((_) => {context.go("/")});
+      } catch (e) {
+        debugPrint('Caught error in joinFederation: $e');
+        context.go("/errormodal", extra: e);
+      }
     }
 
     void onDetect(Barcode barcode) async {
@@ -35,7 +35,7 @@ class SetupJoin extends ConsumerWidget {
         try {
           joinFederation(data);
         } catch (e) {
-          debugPrint('Caught error: $e');
+          debugPrint('Caught error in onDetect: $e');
           context.go("/errormodal", extra: e);
         }
       }
@@ -44,7 +44,7 @@ class SetupJoin extends ConsumerWidget {
     return Textured(
       child: Scaffold(
           appBar: FediAppBar(
-            title: "Join Federation a",
+            title: "Join Federation",
             closeAction: () => context.go("/setup"),
           ),
           backgroundColor: Colors.transparent,
@@ -61,7 +61,7 @@ class SetupJoin extends ConsumerWidget {
                 AutoPasteTextField(
                   labelText: "Paste Federation Code",
                   controller: textController,
-                  initialValue: codeProvider ?? "",
+                  initialValue: "",
                 ),
                 const SizedBox(height: 16),
                 OutlineGradientButton(
@@ -70,7 +70,7 @@ class SetupJoin extends ConsumerWidget {
                       var newText = textController.text;
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
                       try {
-                        joinFederation(newText);
+                        var test = joinFederation(newText);
                       } catch (err) {
                         context.go("/errormodal", extra: err);
                       }
