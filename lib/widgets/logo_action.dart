@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../main.dart';
 import '../utils/constants.dart';
 
 class FedimintLogoAction extends ConsumerWidget {
@@ -13,8 +13,7 @@ class FedimintLogoAction extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () async {
-        // Clear the federation code, which redirects us to setup
-        await ref.read(prefProvider.notifier).update(null);
+        context.go("/setup");
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

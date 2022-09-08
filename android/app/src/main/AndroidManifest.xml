@@ -3,7 +3,10 @@
    <application
         android:label="fluttermint"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:debuggable="true"
+        android:usesCleartextTraffic="true"
+        >
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -31,4 +34,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
 </manifest>

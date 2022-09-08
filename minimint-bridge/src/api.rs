@@ -31,6 +31,11 @@ mod global_client {
         Ok(client)
     }
 
+    pub async fn remove() -> Result<()> {
+        *GLOBAL_CLIENT.lock().await = None;
+        Ok(())
+    }
+
     pub async fn set(client: Arc<Client>) {
         *GLOBAL_CLIENT.lock().await = Some(client);
     }
@@ -64,11 +69,15 @@ pub fn init(path: String) -> Result<bool> {
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
-    let filename = Path::new(&path).join("client.db");
-    let db = sled::open(&filename)?.open_tree("mint-client")?;
     RUNTIME.block_on(async {
+        global_client::remove().await?;
+        let filename = Path::new(&path).join("client.db");
+        let db = sled::open(&filename)?.open_tree("mint-client")?;
         if let Some(client) = Client::try_load(Box::new(db)).await? {
-            global_client::set(Arc::new(client)).await;
+            let client = Arc::new(client);
+            global_client::set(client.clone()).await;
+            // TODO: kill the poll task on leave
+            tokio::spawn(async move { client.poll().await });
             return Ok(true);
         }
         Ok(false)
@@ -78,6 +87,7 @@ pub fn init(path: String) -> Result<bool> {
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
         let filename = Path::new(&user_dir).join("client.db");
+        std::fs::remove_dir_all(&filename)?;
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
         global_client::set(client.clone()).await;

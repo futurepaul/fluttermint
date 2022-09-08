@@ -14,7 +14,6 @@ import 'package:fluttermint/screens/setup.dart';
 import 'package:fluttermint/screens/setup_join.dart';
 import 'package:fluttermint/screens/home.dart';
 
-import 'main.dart';
 // import 'user.dart';
 
 /// Caches and Exposes a [GoRouter]
@@ -35,11 +34,6 @@ class RouterNotifier extends ChangeNotifier {
   /// This implementation exploits `ref.listen()` to add a simple callback that
   /// calls `notifyListeners()` whenever there's change onto a desider provider.
   RouterNotifier(this._ref) {
-    _ref.listen<String?>(
-      prefProvider,
-      (_, __) => notifyListeners(),
-    );
-
     _ref.listen<Receive?>(
       receiveProvider,
       (_, __) => notifyListeners(),
@@ -50,26 +44,6 @@ class RouterNotifier extends ChangeNotifier {
   /// GoRouter is already aware of state changes through `refreshListenable`
   /// We don't want to trigger a rebuild of the surrounding provider.
   String? _redirectLogic(GoRouterState state) {
-    final federationCode = _ref.read(prefProvider);
-    // final receive = _ref.read(receiveProvider);
-
-    final areWeInSetup =
-        state.location == '/setup' || state.location == '/setup/join';
-
-    if (federationCode == null) {
-      return areWeInSetup ? null : '/setup';
-    }
-
-    // // Receive has been populated
-    // if (state.location == '/receive' && receive != null) {
-    //   return '/receive/confirm';
-    // }
-
-    // // Receive was cancelled
-    // if (state.location == '/receive/confirm' && receive == null) {
-    //   return '/';
-    // }
-
     return null;
   }
 

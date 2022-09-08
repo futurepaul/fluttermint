@@ -22,7 +22,13 @@ class BalanceNotifier extends StateNotifier<Balance?> {
   BalanceNotifier() : super(null);
 
   createBalance() async {
-    state = Balance(amountSats: await api.balance());
+    try {
+      final int balance = await api.balance();
+      state = Balance(amountSats: balance);
+    } catch (e) {
+      debugPrint('Caught error in createBalance: $e');
+      state = const Balance(amountSats: 0);
+    }
   }
 
   clear() {
