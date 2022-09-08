@@ -12,6 +12,8 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import '../client.dart';
 
+final isConnectedToFederation = StateProvider<bool>((ref) => false);
+
 class SetupJoin extends ConsumerWidget {
   const SetupJoin({super.key});
 
@@ -19,12 +21,23 @@ class SetupJoin extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textController = TextEditingController();
 
+    // Trying this so we don't do context.go across async boundary
+    ref.listen<bool>(isConnectedToFederation, (_, isConnected) {
+      debugPrint(isConnected.toString());
+      if (isConnected) {
+        context.go("/");
+      }
+    });
+
     void joinFederation(String cfg) async {
       try {
-        await api.joinFederation(configUrl: cfg).then((_) => {context.go("/")});
+        ref.read(isConnectedToFederation.notifier).state = false;
+        await api.joinFederation(configUrl: cfg);
+        ref.read(isConnectedToFederation.notifier).state = true;
+        debugPrint("Joined federation from setup screen");
       } catch (e) {
         debugPrint('Caught error in joinFederation: $e');
-        context.go("/errormodal", extra: e);
+        ref.read(isConnectedToFederation.notifier).state = false;
       }
     }
 
@@ -70,7 +83,7 @@ class SetupJoin extends ConsumerWidget {
                       var newText = textController.text;
                       // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
                       try {
-                        var test = joinFederation(newText);
+                        joinFederation(newText);
                       } catch (err) {
                         context.go("/errormodal", extra: err);
                       }
