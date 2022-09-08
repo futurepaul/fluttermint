@@ -39,6 +39,7 @@ class App extends ConsumerWidget {
 
     return MaterialApp.router(
       routeInformationParser: router.routeInformationParser,
+      routeInformationProvider: router.routeInformationProvider,
       routerDelegate: router.routerDelegate,
       title: title,
       debugShowCheckedModeBanner: false,
