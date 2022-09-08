@@ -44,13 +44,6 @@ class RouterNotifier extends ChangeNotifier {
   /// GoRouter is already aware of state changes through `refreshListenable`
   /// We don't want to trigger a rebuild of the surrounding provider.
   String? _redirectLogic(GoRouterState state) {
-    // final areWeInSetup =
-    //     state.location == '/setup' || state.location == '/setup/join';
-
-    // if (federationCode == null) {
-    //   return areWeInSetup ? null : '/setup';
-    // }
-
     return null;
   }
 

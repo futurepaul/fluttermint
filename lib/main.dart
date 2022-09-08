@@ -10,17 +10,10 @@ final isConnectedToFederation = StateProvider<bool>((ref) => false);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // TODO: should we block until this completes?
-  //use boolean return value to decide where to route?
   try {
     final success = await api.init();
 
     debugPrint("init was = $success");
-    if (!success) {
-      // await ref.read(isConnectedToFederation.notifier).update(true);
-      //  final router = ref.watch(routerProvider);
-
-    }
   } catch (e) {
     debugPrint('Caught error in init: $e');
   }

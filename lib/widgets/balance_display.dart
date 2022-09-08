@@ -9,8 +9,6 @@ final balanceStreamProvider = StreamProvider.autoDispose<num?>((ref) {
       await Future.delayed(const Duration(seconds: 1));
       debugPrint("polling balance");
       await ref.read(balanceProvider.notifier).createBalance();
-      // await ref.read(receiveProvider.notifier).checkPaymentStatus();
-      // yield ;
       yield ref.read(balanceProvider)?.amountSats;
     }
   }
@@ -25,12 +23,7 @@ class BalanceDisplay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final balance = ref.watch(balanceProvider);
-    // final balanceNotifier = ref.watch(balanceProvider.notifier);
     final balanceProvider = ref.watch(balanceStreamProvider);
-
-    // Fetch initial balance. Is there a better way?
-    // balanceNotifier.createBalance();
 
     return Column(
       children: [
