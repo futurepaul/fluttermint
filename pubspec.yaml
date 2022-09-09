@@ -45,7 +45,6 @@ dependencies:
   rive: ^0.9.1
   qr_code_scanner: ^1.0.0
   ffi: ^2.0.1
-  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
