@@ -6,6 +6,7 @@ use bitcoin::hashes::sha256;
 use lazy_static::lazy_static;
 use tokio::runtime;
 use tokio::sync::Mutex;
+use tracing_subscriber::EnvFilter;
 
 use crate::client::Client;
 
@@ -43,6 +44,7 @@ mod global_client {
 
 /// If this returns true, user has joined a federation. Otherwise they haven't.
 pub fn init(path: String) -> Result<bool> {
+    tracing::info!("called init()");
     // Configure logging
     #[cfg(target_os = "android")]
     use tracing_subscriber::{layer::SubscriberExt, prelude::*, Layer};
@@ -68,6 +70,14 @@ pub fn init(path: String) -> Result<bool> {
         )
         .try_init()
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
+
+    #[cfg(target_os = "macos")]
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .with_writer(std::io::stderr)
+        .init();
 
     RUNTIME.block_on(async {
         global_client::remove().await?;
