@@ -35,18 +35,19 @@ class ReceiveConfirm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // This should never be null because otherwise it should navigate us away
     final receive = ref.read(receiveProvider)!;
     final receiveNotifier = ref.read(receiveProvider.notifier);
 
     final statusProvider = ref.watch(paymentStatusStreamProvider);
 
-    if (receive.receiveStatus == "paid") {
-      context.go("/");
-    }
+    // Don't context.go across async boundary
+    ref.listen<Receive?>(receiveProvider, (_, receive) {
+      if (receive?.receiveStatus == "paid") {
+        context.go("/");
+      }
+    });
 
-    // This shouldn't be null because should be prepped by the constructor
-    final invoice = receive.invoice!;
+    final invoice = receive.invoice;
     final lightningUri = "lightning:$invoice";
     final desc = receive.description;
     final amount = receive.amountSats;
@@ -112,7 +113,7 @@ class ReceiveConfirm extends ConsumerWidget {
                                 .clamp(0, 300.0)),
                         const SizedBox(height: 16),
                         EllipsableText(
-                            text: invoice,
+                            text: invoice ?? "",
                             style: Theme.of(context).textTheme.caption),
                       ],
                     ),
