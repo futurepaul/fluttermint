@@ -6,7 +6,6 @@ use bitcoin::hashes::sha256;
 use lazy_static::lazy_static;
 use tokio::runtime;
 use tokio::sync::Mutex;
-use tracing_subscriber::EnvFilter;
 
 use crate::client::Client;
 
@@ -32,8 +31,13 @@ mod global_client {
         Ok(client)
     }
 
+    pub async fn is_some() -> bool {
+        GLOBAL_CLIENT.lock().await.is_some()
+    }
+
     pub async fn remove() -> Result<()> {
         *GLOBAL_CLIENT.lock().await = None;
+        tracing::info!("Client removed");
         Ok(())
     }
 
@@ -73,13 +77,13 @@ pub fn init(path: String) -> Result<bool> {
 
     #[cfg(target_os = "macos")]
     tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
-        )
-        .with_writer(std::io::stderr)
-        .init();
+        .try_init()
+        .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
     RUNTIME.block_on(async {
+        if global_client::is_some().await {
+            return Ok(true);
+        };
         global_client::remove().await?;
         let filename = Path::new(&path).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
@@ -96,6 +100,7 @@ pub fn init(path: String) -> Result<bool> {
 
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
+        global_client::remove().await?;
         let filename = Path::new(&user_dir).join("client.db");
         std::fs::remove_dir_all(&filename)?;
         let db = sled::open(&filename)?.open_tree("mint-client")?;
