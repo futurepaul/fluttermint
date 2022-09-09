@@ -86,7 +86,7 @@ class SendConfirm extends ConsumerWidget {
                         await sendNotifier.pay(send);
                         await ref
                             .read(balanceProvider.notifier)
-                            .createBalance()
+                            .refreshBalance()
                             .then((_) async {
                           context.go("/");
                         });

@@ -5,8 +5,6 @@ import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
 import './client.dart';
 
-final isConnectedToFederation = StateProvider<bool>((ref) => false);
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
