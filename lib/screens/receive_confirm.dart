@@ -35,7 +35,7 @@ class ReceiveConfirm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final receive = ref.read(receiveProvider)!;
+    final receive = ref.read(receiveProvider);
     final receiveNotifier = ref.read(receiveProvider.notifier);
 
     final statusProvider = ref.watch(paymentStatusStreamProvider);
@@ -47,10 +47,10 @@ class ReceiveConfirm extends ConsumerWidget {
       }
     });
 
-    final invoice = receive.invoice;
+    final invoice = receive?.invoice;
     final lightningUri = "lightning:$invoice";
-    final desc = receive.description;
-    final amount = receive.amountSats;
+    final desc = receive?.description;
+    final amount = receive?.amountSats;
 
     return Textured(
       child: Scaffold(
@@ -82,9 +82,10 @@ class ReceiveConfirm extends ConsumerWidget {
                     Text("RECEIVE",
                         style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),
-                    SmallBalanceDisplay(amountSats: amount),
+                    SmallBalanceDisplay(amountSats: amount ?? 0),
                     const SizedBox(height: 8),
-                    Text(desc, style: Theme.of(context).textTheme.bodyText2),
+                    Text(desc ?? "",
+                        style: Theme.of(context).textTheme.bodyText2),
                     statusProvider.when(
                         data: (data) =>
                             Text(data ?? "no status something went wrong?"),

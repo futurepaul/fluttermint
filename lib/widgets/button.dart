@@ -1,6 +1,6 @@
-import 'package:fluttermint/widgets/outline_gradient.dart';
 import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
 import 'package:flutter_inset_box_shadow/flutter_inset_box_shadow.dart';
+import 'package:fluttermint/widgets/outline_gradient.dart';
 
 import '../utils/constants.dart';
 
@@ -54,11 +54,7 @@ class OutlineGradientButton extends StatelessWidget {
           splashColor:
               primary ? black.withOpacity(0.1) : white.withOpacity(0.1),
           borderRadius: br,
-          onTap: () {
-            if (!disabled) {
-              onTap();
-            }
-          },
+          onTap: disabled ? null : onTap,
           onLongPress: onLongPress,
           child: CustomPaint(
             painter: primary

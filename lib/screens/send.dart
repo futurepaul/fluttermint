@@ -15,7 +15,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../client.dart';
 import '../widgets/autopaste_text_field.dart';
 
-// import 'package:mobile_scanner/mobile_scanner.dart';
+final isCreatingSend = StateProvider<bool>((ref) => false);
 
 class SendScreen extends ConsumerWidget {
   const SendScreen({Key? key}) : super(key: key);
@@ -24,6 +24,7 @@ class SendScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textController = TextEditingController();
     final sendNotifier = ref.read(sendProvider.notifier);
+    final send = ref.watch(sendProvider);
 
     Future<void> tryDecode(String data) async {
       try {
@@ -82,12 +83,10 @@ class SendScreen extends ConsumerWidget {
                   height: 16,
                 ),
                 OutlineGradientButton(
-                    disabled: textController.text != "",
+                    disabled: textController.text == "",
                     text: "Continue",
                     onTap: () async {
-                      var maybeInvoice = textController.text;
-                      // var invoice =
-                      // "lnbcrt2n1p3fa59gsp55gx5flut7kvk7w5vq8vq4w0x4xjd78rgr35wsn6carnwz7kfqhdqpp5wx347a07kwydgyc9adkvuhn4nymdpujeynuqzj7j20rrdzxa62fsdq8w3jhxaqxqyjw5qcqp29qyysgqnfl6dt4h2wvn05crjrtpfm2kr6ah7zzwhl5w5nw8dja3yl7k6x3qnk6slfzatvgdfl3e2fj9glzfl9tjepasjhwqxl79t7kgm5nd99cpryu0w8";
+                      final maybeInvoice = textController.text;
                       await tryDecode(maybeInvoice.trim());
                     })
               ],
