@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -9,14 +10,19 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
-class ReceiveScreen extends ConsumerWidget {
+final isCreatingReceive = StateProvider<bool>((ref) => false);
+
+class ReceiveScreen extends HookConsumerWidget {
   const ReceiveScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final amountController = TextEditingController();
+    final amountController = useTextEditingController();
+    final amount = useValueListenable(amountController).text;
     final descriptionController = TextEditingController();
     final receiveNotifier = ref.read(receiveProvider.notifier);
+    final creating = ref.watch(isCreatingReceive);
+    final creatingNotifier = ref.read(isCreatingReceive.notifier);
 
     return Textured(
       child: Scaffold(
@@ -69,8 +75,11 @@ class ReceiveScreen extends ConsumerWidget {
                 ),
                 OutlineGradientButton(
                     primary: true,
+                    disabled: amount == "" || creating,
+                    pending: creating,
                     text: "Continue",
                     onTap: () async {
+                      creatingNotifier.state = true;
                       var desc = descriptionController.text;
                       var amount = int.parse(amountController.text);
                       try {
@@ -82,6 +91,8 @@ class ReceiveScreen extends ConsumerWidget {
                         });
                       } catch (err) {
                         context.go("/errormodal", extra: err);
+                      } finally {
+                        creatingNotifier.state = false;
                       }
                     })
               ],

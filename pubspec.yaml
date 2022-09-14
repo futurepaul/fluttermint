@@ -45,6 +45,8 @@ dependencies:
   rive: ^0.9.1
   qr_code_scanner: ^1.0.0
   ffi: ^2.0.1
+  flutter_hooks: ^0.18.5+1
+  hooks_riverpod: ^1.0.4
 
 dev_dependencies:
   flutter_test:
