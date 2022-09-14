@@ -17,7 +17,7 @@ class ErrorPage extends StatelessWidget {
             ),
             backgroundColor: Colors.transparent,
             body: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(48.0),
               child: Center(child: Text(errorReason)),
             )));
   }
