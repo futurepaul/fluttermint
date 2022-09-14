@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/send.dart';
-import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermint/widgets/button.dart';
 import 'package:fluttermint/widgets/qr_scanner.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,16 +15,14 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../client.dart';
 import '../widgets/autopaste_text_field.dart';
 
-final isCreatingSend = StateProvider<bool>((ref) => false);
-
 class SendScreen extends ConsumerWidget {
   const SendScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final textController = TextEditingController();
+    final invoiceController = TextEditingController();
     final sendNotifier = ref.read(sendProvider.notifier);
-    final send = ref.watch(sendProvider);
+    // final theSend = ref.watch(sendProvider);
 
     Future<void> tryDecode(String data) async {
       try {
@@ -44,6 +42,19 @@ class SendScreen extends ConsumerWidget {
       } catch (err) {
         context.go("/errormodal", extra: err);
       }
+    }
+
+    // TODO: wire this up so we can do pastes nicer
+    Future<void> checkIfWeCanSend() async {
+      if (invoiceController.text.isNotEmpty) {
+        final invoice = invoiceController.text;
+        debugPrint('Invoice found! $invoice');
+        await tryDecode(invoice.trim());
+      }
+    }
+
+    Future<void> doTheSend() async {
+      context.go("/send/confirm");
     }
 
     // TODO is it right that I'm defining the function in here?
@@ -76,18 +87,20 @@ class SendScreen extends ConsumerWidget {
                 ),
                 AutoPasteTextField(
                   labelText: "Paste Lightning Invoice",
-                  controller: textController,
+                  controller: invoiceController,
                   initialValue: "",
                 ),
                 const SizedBox(
                   height: 16,
                 ),
                 OutlineGradientButton(
-                    disabled: textController.text == "",
+                    primary: true,
+                    // disabled: theSend == null,
                     text: "Continue",
                     onTap: () async {
-                      final maybeInvoice = textController.text;
+                      final maybeInvoice = invoiceController.value.text;
                       await tryDecode(maybeInvoice.trim());
+                      // context.go("/send/confirm");
                     })
               ],
             ),
