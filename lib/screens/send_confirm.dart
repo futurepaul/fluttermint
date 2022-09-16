@@ -53,8 +53,8 @@ class SendConfirm extends ConsumerWidget {
                     const SizedBox(
                         width: 32,
                         height: 32,
-                        child:
-                            Image(image: AssetImage("images/bolt-circle.png"))),
+                        child: Image(
+                            image: AssetImage("assets/app/bolt-circle.png"))),
                     const SizedBox(height: 8),
                     Text("SEND", style: Theme.of(context).textTheme.headline4),
                     const SizedBox(height: 16),

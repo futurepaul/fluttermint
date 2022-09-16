@@ -47,6 +47,7 @@ dependencies:
   ffi: ^2.0.1
   flutter_hooks: ^0.18.5+1
   hooks_riverpod: ^1.0.4
+  flutter_native_splash: ^2.2.9
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,13 @@ flutter_icons:
   adaptive_icon_background: "assets/launcher/ic_background.png"
   adaptive_icon_foreground: "assets/launcher/ic_foreground.png"
 
+flutter_native_splash:
+  background_image: "assets/splash/bg-dark.png"
+
+  android_12:
+    image: "assets/splash/image.png"
+    icon_background_color: "#212121"
+
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
@@ -83,10 +91,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/
+    - assets/app/
     - assets/spinny_globe.riv
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

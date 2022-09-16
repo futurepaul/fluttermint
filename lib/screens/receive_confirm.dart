@@ -77,7 +77,7 @@ class ReceiveConfirm extends ConsumerWidget {
                     //     width: 32,
                     //     height: 32,
                     //     child:
-                    //         Image(image: AssetImage("images/bolt-circle.png"))),
+                    //         Image(image: AssetImage("assets/app/bolt-circle.png"))),
                     // const SizedBox(height: 8),
                     Text("RECEIVE",
                         style: Theme.of(context).textTheme.headline4),
