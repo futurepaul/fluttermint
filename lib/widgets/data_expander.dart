@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:fluttermint/widgets/toggle.dart';
 
 class DataExpander extends StatefulWidget {
   const DataExpander({Key? key, required this.child}) : super(key: key);
@@ -22,41 +21,15 @@ class _DataExpanderState extends State<DataExpander> {
   Widget build(BuildContext context) {
     return AnimatedCrossFade(
       sizeCurve: Curves.easeInOutQuad,
-      firstChild: InkWell(
-        onTap: () => _toggle(),
-        child: SizedBox(
-          width: double.infinity,
-          child: Column(
-            children: [
-              Icon(
-                Icons.expand_more,
-                color: Theme.of(context).primaryColor,
-                size: 24.0,
-                semanticLabel: 'Expand',
-              ),
-            ],
-          ),
-        ),
+      firstChild: Toggle(
+        active: false,
+        onToggle: _toggle,
       ),
       secondChild: Column(
         children: [
           widget.child,
           const SizedBox(height: 16),
-          InkWell(
-            onTap: () => _toggle(),
-            child: SizedBox(
-              width: double.infinity,
-              child: Transform.rotate(
-                angle: pi,
-                child: Icon(
-                  Icons.expand_more,
-                  color: Theme.of(context).primaryColor,
-                  size: 24.0,
-                  semanticLabel: 'Minimize',
-                ),
-              ),
-            ),
-          )
+          Toggle(onToggle: _toggle, active: true)
         ],
       ),
       crossFadeState:

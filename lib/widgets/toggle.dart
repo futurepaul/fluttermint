@@ -11,28 +11,32 @@ class Toggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(8.0),
       onTap: () => onToggle(),
       child: SizedBox(
         width: double.infinity,
-        child: Column(
-          children: [
-            active
-                ? Transform.rotate(
-                    angle: pi,
-                    child: Icon(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              active
+                  ? Transform.rotate(
+                      angle: pi,
+                      child: Icon(
+                        Icons.expand_more,
+                        color: Theme.of(context).primaryColor,
+                        size: 24.0,
+                        semanticLabel: 'Minimize',
+                      ),
+                    )
+                  : Icon(
                       Icons.expand_more,
                       color: Theme.of(context).primaryColor,
                       size: 24.0,
-                      semanticLabel: 'Minimize',
+                      semanticLabel: 'Expand',
                     ),
-                  )
-                : Icon(
-                    Icons.expand_more,
-                    color: Theme.of(context).primaryColor,
-                    size: 24.0,
-                    semanticLabel: 'Expand',
-                  ),
-          ],
+            ],
+          ),
         ),
       ),
     );
