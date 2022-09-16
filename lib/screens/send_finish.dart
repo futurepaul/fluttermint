@@ -49,7 +49,7 @@ class _SendFinishState extends State<SendFinish> {
                   curve: Curves.easeInOutQuad,
                   onEnd: () => _changeScale(),
                   child: const Image(
-                    image: AssetImage("images/polygon.png"),
+                    image: AssetImage("assets/app/polygon.png"),
                   ),
                 ),
                 OutlineGradientButton(

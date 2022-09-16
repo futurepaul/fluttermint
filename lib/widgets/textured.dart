@@ -13,7 +13,7 @@ class Textured extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
           image: DecorationImage(
-              image: AssetImage("images/bg-dark.png"), fit: BoxFit.cover)),
+              image: AssetImage("assets/app/bg-dark.png"), fit: BoxFit.cover)),
       child: SafeArea(child: child),
     );
   }
