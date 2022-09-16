@@ -1,12 +1,13 @@
-import 'package:fluttermint/widgets/outline_gradient.dart';
 import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
 import 'package:flutter_inset_box_shadow/flutter_inset_box_shadow.dart';
+import 'package:fluttermint/widgets/outline_gradient.dart';
 
 import '../utils/constants.dart';
 
 class OutlineGradientButton extends StatelessWidget {
   final String text;
   final bool disabled;
+  final bool pending;
   final double strokeWidth;
   final Radius radius;
   final Gradient gradient;
@@ -25,6 +26,7 @@ class OutlineGradientButton extends StatelessWidget {
           colors: [Color(0xfff1f1f1), Color(0xffA0A0A0)]),
       this.radius = const Radius.circular(30),
       this.disabled = false,
+      this.pending = false,
       required this.onTap,
       this.onLongPress,
       this.tooltip,
@@ -54,11 +56,7 @@ class OutlineGradientButton extends StatelessWidget {
           splashColor:
               primary ? black.withOpacity(0.1) : white.withOpacity(0.1),
           borderRadius: br,
-          onTap: () {
-            if (!disabled) {
-              onTap();
-            }
-          },
+          onTap: disabled ? null : onTap,
           onLongPress: onLongPress,
           child: CustomPaint(
             painter: primary
@@ -82,7 +80,12 @@ class OutlineGradientButton extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: primary
-                            ? const [Color(0xfff4f4f3), Color(0xffc8c8c7)]
+                            ? disabled
+                                ? [
+                                    const Color(0xfff4f4f3).withOpacity(0.5),
+                                    const Color(0xffc8c8c7).withOpacity(0.2)
+                                  ]
+                                : const [Color(0xfff4f4f3), Color(0xffc8c8c7)]
                             : [
                                 const Color(0xffffffff).withOpacity(0.2),
                                 const Color(0xffA0A0A0).withOpacity(0.0)
@@ -106,27 +109,46 @@ class OutlineGradientButton extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24.0, vertical: 16.0),
-                    child: Text(text,
-                        style: TextStyle(
-                            fontFamily: "Archivo",
-                            color: primary
-                                ? black
-                                : disabled
-                                    ? white.withOpacity(0.3)
-                                    : white,
-                            fontSize: 16,
-                            shadows: [
-                              Shadow(
-                                blurRadius: primary ? 1.0 : 0.0,
+                    child: pending
+                        ? Center(
+                            // This is just hand-measured to be the same height as the text
+                            child: SizedBox(
+                              height: 17.0,
+                              width: 17.0,
+                              child: CircularProgressIndicator(
                                 color: primary
-                                    ? white
+                                    ? black
                                     : disabled
-                                        ? black.withOpacity(0.3)
-                                        : black,
-                                offset: Offset(0.0, primary ? -1.0 : 1.0),
+                                        ? white.withOpacity(0.3)
+                                        : white,
+                                semanticsLabel: 'Circular progress indicator',
                               ),
-                            ],
-                            fontWeight: FontWeight.w600)),
+                            ),
+                          )
+                        : Text(text,
+                            style: TextStyle(
+                                fontFamily: "Archivo",
+                                color: primary
+                                    ? black
+                                    : disabled
+                                        ? white.withOpacity(0.3)
+                                        : white,
+                                fontSize: 16,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius:
+                                        primary && !disabled ? 1.0 : 0.0,
+                                    color: primary
+                                        ? disabled
+                                            ? white.withOpacity(0.3)
+                                            : white
+                                        : disabled
+                                            ? black.withOpacity(0.3)
+                                            : black,
+                                    offset: Offset(0.0, primary ? -1.0 : 1.0),
+                                  ),
+                                ],
+                                fontWeight: FontWeight.w600)),
                   ),
                 )),
           ),

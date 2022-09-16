@@ -14,6 +14,8 @@ import 'package:fluttermint/widgets/textured.dart';
 import '../widgets/chill_info_card.dart';
 import '../widgets/small_balance_display.dart';
 
+final isSending = StateProvider<bool>((ref) => false);
+
 class SendConfirm extends ConsumerWidget {
   const SendConfirm({Key? key}) : super(key: key);
 
@@ -21,6 +23,8 @@ class SendConfirm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final send = ref.read(sendProvider)!;
     final sendNotifier = ref.read(sendProvider.notifier);
+    final sending = ref.watch(isSending);
+    final sendingNotifier = ref.read(isSending.notifier);
 
     final invoice = send.invoice;
     // final lightningUri = "lightning:$invoice";
@@ -80,8 +84,12 @@ class SendConfirm extends ConsumerWidget {
                   ],
                 )),
                 OutlineGradientButton(
+                    primary: true,
+                    disabled: sending,
+                    pending: sending,
                     text: "Send $amount SATS",
                     onTap: () async {
+                      sendingNotifier.state = true;
                       try {
                         await sendNotifier.pay(send);
                         await ref
@@ -92,6 +100,8 @@ class SendConfirm extends ConsumerWidget {
                         });
                       } catch (err) {
                         context.go("/errormodal", extra: err);
+                      } finally {
+                        sendingNotifier.state = false;
                       }
                     })
               ],
