@@ -43,22 +43,23 @@ abstract class MinimintBridge {
 
   FlutterRustBridgeTaskConstMeta get kInvoiceConstMeta;
 
-  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint});
+  Future<BridgePayment> fetchPayment(
+      {required String paymentHash, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kFetchPaymentConstMeta;
 
-  Future<List<MyPayment>> listPayments({dynamic hint});
+  Future<List<BridgePayment>> listPayments({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kListPaymentsConstMeta;
 }
 
-class MyPayment {
+class BridgePayment {
   final String invoice;
   final PaymentStatus status;
   final int createdAt;
   final bool paid;
 
-  MyPayment({
+  BridgePayment({
     required this.invoice,
     required this.status,
     required this.createdAt,
@@ -189,11 +190,12 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: ["amount", "description"],
       );
 
-  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint}) =>
+  Future<BridgePayment> fetchPayment(
+          {required String paymentHash, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) =>
             inner.wire_fetch_payment(port_, _api2wire_String(paymentHash)),
-        parseSuccessData: _wire2api_my_payment,
+        parseSuccessData: _wire2api_bridge_payment,
         constMeta: kFetchPaymentConstMeta,
         argValues: [paymentHash],
         hint: hint,
@@ -205,10 +207,10 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: ["paymentHash"],
       );
 
-  Future<List<MyPayment>> listPayments({dynamic hint}) =>
+  Future<List<BridgePayment>> listPayments({dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) => inner.wire_list_payments(port_),
-        parseSuccessData: _wire2api_list_my_payment,
+        parseSuccessData: _wire2api_list_bridge_payment,
         constMeta: kListPaymentsConstMeta,
         argValues: [],
         hint: hint,
@@ -252,24 +254,24 @@ bool _wire2api_bool(dynamic raw) {
   return raw as bool;
 }
 
-int _wire2api_i32(dynamic raw) {
-  return raw as int;
-}
-
-List<MyPayment> _wire2api_list_my_payment(dynamic raw) {
-  return (raw as List<dynamic>).map(_wire2api_my_payment).toList();
-}
-
-MyPayment _wire2api_my_payment(dynamic raw) {
+BridgePayment _wire2api_bridge_payment(dynamic raw) {
   final arr = raw as List<dynamic>;
   if (arr.length != 4)
     throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
-  return MyPayment(
+  return BridgePayment(
     invoice: _wire2api_String(arr[0]),
     status: _wire2api_payment_status(arr[1]),
     createdAt: _wire2api_u64(arr[2]),
     paid: _wire2api_bool(arr[3]),
   );
+}
+
+int _wire2api_i32(dynamic raw) {
+  return raw as int;
+}
+
+List<BridgePayment> _wire2api_list_bridge_payment(dynamic raw) {
+  return (raw as List<dynamic>).map(_wire2api_bridge_payment).toList();
 }
 
 PaymentStatus _wire2api_payment_status(dynamic raw) {

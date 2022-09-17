@@ -35,14 +35,6 @@ pub enum PaymentStatus {
     Expired,
 }
 
-// impl From<InternalPaymentStatus> for PaymentStatus {
-//     fn from(status: InternalPaymentStatus) -> Self {
-//         match status {
-//             InternalPaymentStatus::Paid =>
-//         }
-
-// }
-
 impl Payment {
     fn new(invoice: Invoice, status: InternalPaymentStatus) -> Self {
         Self {

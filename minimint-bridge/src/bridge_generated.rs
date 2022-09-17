@@ -236,7 +236,7 @@ impl<T> NewWithNullPtr for *mut T {
 
 // Section: impl IntoDart
 
-impl support::IntoDart for MyPayment {
+impl support::IntoDart for BridgePayment {
     fn into_dart(self) -> support::DartCObject {
         vec![
             self.invoice.into_dart(),
@@ -247,7 +247,7 @@ impl support::IntoDart for MyPayment {
         .into_dart()
     }
 }
-impl support::IntoDartExceptPrimitive for MyPayment {}
+impl support::IntoDartExceptPrimitive for BridgePayment {}
 
 impl support::IntoDart for PaymentStatus {
     fn into_dart(self) -> support::DartCObject {
