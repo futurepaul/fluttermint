@@ -8,8 +8,6 @@ final balanceStreamProvider = StreamProvider.autoDispose<String?>((ref) {
     while (shouldPoll) {
       try {
         await Future.delayed(const Duration(seconds: 5));
-        debugPrint("polling balance");
-
         await ref.read(balanceProvider.notifier).refreshBalance();
         yield "good";
       } catch (e) {
@@ -32,6 +30,11 @@ class BalanceDisplay extends ConsumerWidget {
     final balanceNotifier = ref.watch(balanceProvider.notifier);
     final balanceStreamWatcher = ref.watch(balanceStreamProvider);
 
+    final biggestText = Theme.of(context).textTheme.headline1;
+    final bigText =
+        Theme.of(context).textTheme.headline1?.copyWith(fontSize: 44);
+    final smallText = Theme.of(context).textTheme.headline2;
+
     ref.listen<Balance?>(balanceProvider, (_, balance) {
       if (balance != null) {
         debugPrint(balance.toString());
@@ -46,7 +49,9 @@ class BalanceDisplay extends ConsumerWidget {
         children: [
           balanceStreamWatcher.when(
               data: (_) => Text(balance != null ? balance.prettyPrint() : "???",
-                  style: Theme.of(context).textTheme.headline1),
+                  style: balance?.denomination == Denom.sats
+                      ? biggestText
+                      : bigText),
               loading: () =>
                   Text("~", style: Theme.of(context).textTheme.headline1),
               error: (err, _) => Text(err.toString())),
@@ -54,8 +59,8 @@ class BalanceDisplay extends ConsumerWidget {
               data: (_) => Text(
                   balance != null
                       ? balance.denomination.toReadableString()
-                      : "NULL",
-                  style: Theme.of(context).textTheme.headline2),
+                      : "SATS",
+                  style: smallText),
               loading: () =>
                   Text("-", style: Theme.of(context).textTheme.headline1),
               error: (err, _) => Text(err.toString()))

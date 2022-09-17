@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/send.dart';
@@ -77,11 +78,14 @@ class SendScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: QRViewExample(onDetect: onDetect)),
-                ),
+                // QR scanner doesn't work on other platforms
+                if (Platform.isAndroid || Platform.isIOS) ...[
+                  Expanded(
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: QRViewExample(onDetect: onDetect)),
+                  )
+                ],
                 const SizedBox(
                   height: 16,
                 ),

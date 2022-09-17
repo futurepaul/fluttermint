@@ -24,28 +24,51 @@ class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           backAction != null
-              ? InkWell(
-                  onTap: backAction,
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: Theme.of(context).primaryColor,
-                    size: 24.0,
-                    semanticLabel: 'Back',
-                  ))
+              ? SimpleIconButton(
+                  action: backAction,
+                  icon: Icons.arrow_back,
+                  semanticLabel: "Back",
+                )
               : const SizedBox(
                   width: 24,
                 ),
           Text(title, style: Theme.of(context).textTheme.headline3),
-          InkWell(
-            onTap: closeAction,
-            child: Icon(
-              Icons.close,
-              color: Theme.of(context).primaryColor,
-              size: 24.0,
-              semanticLabel: 'Close',
-            ),
+          SimpleIconButton(
+            action: closeAction,
+            icon: Icons.close,
+            semanticLabel: "Close",
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SimpleIconButton extends StatelessWidget {
+  const SimpleIconButton({
+    Key? key,
+    required this.action,
+    required this.icon,
+    required this.semanticLabel,
+  }) : super(key: key);
+
+  final void Function()? action;
+  final IconData icon;
+  final String semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+      onTap: action,
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(
+          icon,
+          color: Theme.of(context).primaryColor,
+          size: 24.0,
+          semanticLabel: semanticLabel,
+        ),
       ),
     );
   }

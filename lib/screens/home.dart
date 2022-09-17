@@ -1,6 +1,10 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/utils/constants.dart';
+import 'package:fluttermint/utils/network_detector_notifier.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermint/widgets/not_connected_warning.dart';
 
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:fluttermint/widgets/transaction_list.dart';
@@ -10,11 +14,14 @@ import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/logo_action.dart';
 
-class Home extends StatelessWidget {
+class Home extends ConsumerWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final network = ref.watch(networkAwareProvider);
+    final balance = ref.watch(balanceProvider);
+
     return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -31,6 +38,10 @@ class Home extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (network == NetworkStatus.Off) ...[
+                  const NotConnectedWarning(),
+                  spacer12
+                ],
                 const BalanceDisplay(),
                 spacer24,
                 const TransactionsList(),
@@ -41,6 +52,7 @@ class Home extends StatelessWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Receive",
+                            disabled: network == NetworkStatus.Off,
                             onTap: () {
                               context.go("/receive");
                             }),
@@ -49,6 +61,14 @@ class Home extends StatelessWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Send",
+                            // If we have a balance, and that balance is greater than 0, and we're connected to the internet
+                            disabled: balance != null
+                                ? balance.amountSats > 0
+                                    ? network != NetworkStatus.Off
+                                        ? false
+                                        : true
+                                    : true
+                                : true,
                             onTap: () {
                               context.go("/send");
                             }),
