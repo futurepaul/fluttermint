@@ -63,6 +63,10 @@ impl Payment {
         Self::new(invoice, InternalPaymentStatus::Paid)
     }
 
+    pub fn new_failed(invoice: Invoice) -> Self {
+        Self::new(invoice, InternalPaymentStatus::Failed)
+    }
+
     pub fn paid(&self) -> bool {
         self.status() == PaymentStatus::Paid
     }

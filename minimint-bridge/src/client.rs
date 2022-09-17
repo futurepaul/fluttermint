@@ -83,36 +83,42 @@ impl Client {
         (self.client.coins().total_amount().milli_sat as f64 / 1000.) as u64
     }
 
-    pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
+    async fn pay_inner(&self, bolt11: Invoice) -> anyhow::Result<()> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
         let http = reqwest::Client::new();
-        let bolt11: Invoice = bolt11.parse()?;
 
         let (contract_id, outpoint) = self
             .client
             .fund_outgoing_ln_contract(bolt11.clone(), &mut rng)
-            .await
-            .expect("Not enough coins");
+            .await?;
 
         self.client
             .await_outgoing_contract_acceptance(outpoint)
-            .await
-            .expect("Contract wasn't accepted in time");
+            .await?;
 
         let gw = self.client.fetch_active_gateway().await?;
         http.post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
             // .timeout(Duration::from_secs(15)) // TODO: add timeout
             .send()
-            .await
-            .unwrap();
-
-        // TODO: save failures?
-        self.save_payment(&Payment::new_paid(bolt11.clone()));
-
-        self.client.fetch_all_coins().await;
+            .await?;
 
         Ok(())
+    }
+
+    pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
+        let invoice: Invoice = bolt11.parse()?;
+        match self.pay_inner(invoice.clone()).await {
+            Ok(_) => {
+                self.save_payment(&Payment::new_paid(invoice));
+                self.client.fetch_all_coins().await;
+                Ok(())
+            }
+            Err(e) => {
+                self.save_payment(&Payment::new_failed(invoice));
+                Err(e)
+            }
+        }
     }
 
     pub async fn invoice(&self, amount: u64, description: String) -> anyhow::Result<String> {
