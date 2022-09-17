@@ -1,5 +1,4 @@
 //! Minimint client with simpler types
-
 use anyhow::anyhow;
 use bitcoin::hashes::sha256;
 use fedimint_api::{
@@ -9,12 +8,14 @@ use fedimint_api::{
 use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
 use futures::{stream::FuturesUnordered, StreamExt};
-use lightning_invoice::Invoice;
+use lightning_invoice::{Invoice, InvoiceDescription};
 use mint_client::api::WsFederationConnect;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
-use serde_json::json;
 
-use crate::payments::{Payment, PaymentKey, PaymentKeyPrefix};
+use crate::{
+    api::BridgeInvoice,
+    payments::{Payment, PaymentKey, PaymentKeyPrefix},
+};
 
 pub struct Client {
     pub(crate) client: UserClient,
@@ -183,7 +184,7 @@ impl Client {
     }
 }
 
-pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
+pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
     let bolt11: Invoice = bolt11.parse()?;
 
     let amount = bolt11
@@ -193,14 +194,17 @@ pub fn decode_invoice(bolt11: String) -> anyhow::Result<String> {
         .ok_or(anyhow!("Invoice missing amount"))?;
 
     let invoice = bolt11.to_string();
-    let json = json!({
-        "amount": amount,
-        "description": "Testing".to_string(),
-        // FIXME: I assume this doesn't work in WASM
-        // "description": bolt11.description().to_owned().to_string(),
-        "invoice": invoice,
-        "paymentHash": bolt11.payment_hash()
-    });
 
-    Ok(serde_json::to_string(&json)?)
+    // We might get no description
+    let description = match bolt11.description() {
+        InvoiceDescription::Direct(desc) => desc.to_string(),
+        InvoiceDescription::Hash(_) => "".to_string(),
+    };
+
+    Ok(BridgeInvoice {
+        amount,
+        description,
+        invoice,
+        payment_hash: bolt11.payment_hash().to_string(),
+    })
 }

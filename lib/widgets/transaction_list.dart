@@ -25,8 +25,6 @@ class TransactionsList extends ConsumerWidget {
     final transactions = ref.watch(transactionsProvider);
     final transactionsNotifier = ref.watch(transactionsProvider.notifier);
 
-    transactionsNotifier.fetchTransactions();
-    // transactionsNotifier.addTransaction(Transaction ())
     final showTransactions = ref.watch(showTransactionsProvider);
 
     return Expanded(
@@ -34,9 +32,13 @@ class TransactionsList extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(children: [
           Toggle(
-              onToggle: () => ref
-                  .read(showTransactionsProvider.notifier)
-                  .update((show) => !show),
+              onToggle: () async {
+                // TODO: need a more canonical place to do this
+                await transactionsNotifier.fetchTransactions();
+                ref
+                    .read(showTransactionsProvider.notifier)
+                    .update((show) => !show);
+              },
               active: showTransactions),
           showTransactions
               ? Expanded(

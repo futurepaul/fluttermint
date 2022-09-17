@@ -34,7 +34,7 @@ abstract class MinimintBridge {
 
   FlutterRustBridgeTaskConstMeta get kPayConstMeta;
 
-  Future<String> decodeInvoice({required String bolt11, dynamic hint});
+  Future<BridgeInvoice> decodeInvoice({required String bolt11, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kDecodeInvoiceConstMeta;
 
@@ -53,8 +53,22 @@ abstract class MinimintBridge {
   FlutterRustBridgeTaskConstMeta get kListPaymentsConstMeta;
 }
 
-class BridgePayment {
+class BridgeInvoice {
+  final String paymentHash;
+  final int amount;
+  final String description;
   final String invoice;
+
+  BridgeInvoice({
+    required this.paymentHash,
+    required this.amount,
+    required this.description,
+    required this.invoice,
+  });
+}
+
+class BridgePayment {
+  final BridgeInvoice invoice;
   final PaymentStatus status;
   final int createdAt;
   final bool paid;
@@ -157,11 +171,11 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: ["bolt11"],
       );
 
-  Future<String> decodeInvoice({required String bolt11, dynamic hint}) =>
+  Future<BridgeInvoice> decodeInvoice({required String bolt11, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) =>
             inner.wire_decode_invoice(port_, _api2wire_String(bolt11)),
-        parseSuccessData: _wire2api_String,
+        parseSuccessData: _wire2api_bridge_invoice,
         constMeta: kDecodeInvoiceConstMeta,
         argValues: [bolt11],
         hint: hint,
@@ -254,12 +268,24 @@ bool _wire2api_bool(dynamic raw) {
   return raw as bool;
 }
 
+BridgeInvoice _wire2api_bridge_invoice(dynamic raw) {
+  final arr = raw as List<dynamic>;
+  if (arr.length != 4)
+    throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+  return BridgeInvoice(
+    paymentHash: _wire2api_String(arr[0]),
+    amount: _wire2api_u64(arr[1]),
+    description: _wire2api_String(arr[2]),
+    invoice: _wire2api_String(arr[3]),
+  );
+}
+
 BridgePayment _wire2api_bridge_payment(dynamic raw) {
   final arr = raw as List<dynamic>;
   if (arr.length != 4)
     throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
   return BridgePayment(
-    invoice: _wire2api_String(arr[0]),
+    invoice: _wire2api_bridge_invoice(arr[0]),
     status: _wire2api_payment_status(arr[1]),
     createdAt: _wire2api_u64(arr[2]),
     paid: _wire2api_bool(arr[3]),

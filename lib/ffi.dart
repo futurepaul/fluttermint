@@ -52,7 +52,7 @@ class MinimintClientImpl implements MinimintClient {
   }
 
   @override
-  Future<String> decodeInvoice({required String bolt11}) {
+  Future<BridgeInvoice> decodeInvoice({required String bolt11}) {
     return api.decodeInvoice(bolt11: bolt11);
   }
 

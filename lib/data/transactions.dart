@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:fluttermint/bridge_generated.dart';
 import 'package:fluttermint/client.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -24,6 +25,16 @@ class Transaction {
       required this.invoice,
       required this.when,
       required this.status});
+
+  Transaction txFromBridgePayment(BridgePayment payment) {
+    // final decoded = jsonDecode(await api.decodeInvoice(bolt11: invoice));
+    return Transaction(
+        description: "fake description",
+        amountSats: 1234,
+        invoice: payment.invoice.invoice,
+        when: "May 6 - 9:21p",
+        status: payment.status.toString());
+  }
 
   final String description;
   final int amountSats;
@@ -60,11 +71,28 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
   }
 
   fetchTransactions() async {
+    debugPrint("Fetching txs");
     final payments = await api.fetchPayments();
+    List<Transaction> txs = [];
     for (var payment in payments) {
-      debugPrint(payment.toString());
+      debugPrint(payment.invoice.toString());
+      // debugPrint(payment.invoice);
+      // final decoded = .(payment.invoice);
+      // debugPrint(decoded);
+      int amount = payment.invoice.amount;
+      // String desc = decoded["description"];
+
+      // var decoded =
+      //     jsonDecode(await api.decodeInvoice(bolt11: payment.invoice));
+      // debugPrint(decoded);
+      txs.add(Transaction(
+          description: payment.invoice.description,
+          amountSats: payment.invoice.amount,
+          invoice: payment.invoice.invoice,
+          when: "May 6 - 9:21p",
+          status: payment.status.toString()));
     }
-    // state = Balance(amountSats: await api.balance());
+    state = Transactions(txs);
   }
 
   clear() {

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'dart:convert';
 
 import '../client.dart';
 
@@ -47,10 +46,10 @@ class ReceiveNotifier extends StateNotifier<Receive?> {
       if (invoice == null) {
         throw Exception("no error for some reason");
       }
-      // debugPrint("checking status for ${invoice}");
+      debugPrint("checking status for $invoice");
 
-      var decoded = jsonDecode(await api.decodeInvoice(bolt11: invoice));
-      var status = await api.fetchPayment(paymentHash: decoded["paymentHash"]);
+      var decoded = await api.decodeInvoice(bolt11: invoice);
+      var status = await api.fetchPayment(paymentHash: decoded.paymentHash);
       debugPrint(status.paid ? "paid" : "not paid");
       if (status.paid) {
         state = state?.copyWith(receiveStatus: "paid");
