@@ -144,7 +144,7 @@ pub fn invoice(amount: u64, description: String) -> Result<String> {
 // Do the "expired" conversion in there, too
 #[derive(Clone, Debug)]
 pub struct BridgePayment {
-    // FIXME: we should pass the real invoice here, but flutter_rust_bridge chokes on it
+    // FIXME: this is json now, but should be a simple struct with invoice fields ...
     pub invoice: String,
     pub status: PaymentStatus,
     pub created_at: u64,
@@ -160,7 +160,7 @@ pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
             .ok_or(anyhow!("payment not found"))?;
         Ok(BridgePayment {
             invoice: decode_invoice(payment.invoice.to_string())?,
-            status: payment.status(),
+            status: payment.status,
             created_at: payment.created_at,
             paid: payment.paid(),
         })
@@ -177,7 +177,7 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
                 // FIXME: don't expect
                 invoice: decode_invoice(payment.invoice.to_string())
                     .expect("couldn't decode invoice"),
-                status: payment.status(),
+                status: payment.status,
                 created_at: payment.created_at,
                 paid: payment.paid(),
             })
