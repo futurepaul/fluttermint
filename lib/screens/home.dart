@@ -42,7 +42,9 @@ class Home extends ConsumerWidget {
                   const NotConnectedWarning(),
                   spacer12
                 ],
-                const BalanceDisplay(),
+                balance == null
+                    ? CircularProgressIndicator(color: white.withOpacity(0.3))
+                    : const BalanceDisplay(),
                 spacer24,
                 const TransactionsList(),
                 spacer24,
