@@ -15,6 +15,7 @@ use flutter_rust_bridge::*;
 
 // Section: imports
 
+use crate::client::ConnectionStatus;
 use crate::payments::PaymentStatus;
 
 // Section: wire functions
@@ -151,6 +152,18 @@ pub extern "C" fn wire_list_payments(port_: i64) {
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_connection_status(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "connection_status",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| connection_status(),
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]
@@ -248,6 +261,17 @@ impl support::IntoDart for BridgePayment {
     }
 }
 impl support::IntoDartExceptPrimitive for BridgePayment {}
+
+impl support::IntoDart for ConnectionStatus {
+    fn into_dart(self) -> support::DartCObject {
+        match self {
+            Self::NotConfigured => 0,
+            Self::NotConnected => 1,
+            Self::Connected => 2,
+        }
+        .into_dart()
+    }
+}
 
 impl support::IntoDart for PaymentStatus {
     fn into_dart(self) -> support::DartCObject {

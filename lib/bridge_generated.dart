@@ -13,7 +13,7 @@ import 'dart:ffi' as ffi;
 
 abstract class MinimintBridge {
   /// If this returns true, user has joined a federation. Otherwise they haven't.
-  Future<bool> init({required String path, dynamic hint});
+  Future<ConnectionStatus> init({required String path, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kInitConstMeta;
 
@@ -51,6 +51,10 @@ abstract class MinimintBridge {
   Future<List<BridgePayment>> listPayments({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kListPaymentsConstMeta;
+
+  Future<ConnectionStatus> connectionStatus({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kConnectionStatusConstMeta;
 }
 
 class BridgePayment {
@@ -67,6 +71,12 @@ class BridgePayment {
   });
 }
 
+enum ConnectionStatus {
+  NotConfigured,
+  NotConnected,
+  Connected,
+}
+
 enum PaymentStatus {
   Paid,
   Pending,
@@ -81,10 +91,10 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
 
   MinimintBridgeImpl.raw(MinimintBridgeWire inner) : super(inner);
 
-  Future<bool> init({required String path, dynamic hint}) =>
+  Future<ConnectionStatus> init({required String path, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) => inner.wire_init(port_, _api2wire_String(path)),
-        parseSuccessData: _wire2api_bool,
+        parseSuccessData: _wire2api_connection_status,
         constMeta: kInitConstMeta,
         argValues: [path],
         hint: hint,
@@ -222,6 +232,21 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: [],
       );
 
+  Future<ConnectionStatus> connectionStatus({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_connection_status(port_),
+        parseSuccessData: _wire2api_connection_status,
+        constMeta: kConnectionStatusConstMeta,
+        argValues: [],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kConnectionStatusConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "connection_status",
+        argNames: [],
+      );
+
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
@@ -264,6 +289,10 @@ BridgePayment _wire2api_bridge_payment(dynamic raw) {
     createdAt: _wire2api_u64(arr[2]),
     paid: _wire2api_bool(arr[3]),
   );
+}
+
+ConnectionStatus _wire2api_connection_status(dynamic raw) {
+  return ConnectionStatus.values[raw];
 }
 
 int _wire2api_i32(dynamic raw) {
@@ -462,6 +491,20 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
           'wire_list_payments');
   late final _wire_list_payments =
       _wire_list_paymentsPtr.asFunction<void Function(int)>();
+
+  void wire_connection_status(
+    int port_,
+  ) {
+    return _wire_connection_status(
+      port_,
+    );
+  }
+
+  late final _wire_connection_statusPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_connection_status');
+  late final _wire_connection_status =
+      _wire_connection_statusPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,
