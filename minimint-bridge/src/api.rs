@@ -7,7 +7,7 @@ use lazy_static::lazy_static;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
-use crate::client::Client;
+use crate::client::{Client, ConnectionStatus};
 use crate::payments::PaymentStatus;
 
 lazy_static! {
@@ -47,8 +47,7 @@ mod global_client {
     }
 }
 
-/// If this returns true, user has joined a federation. Otherwise they haven't.
-pub fn init(path: String) -> Result<bool> {
+pub fn init(path: String) -> Result<ConnectionStatus> {
     tracing::info!("called init()");
     // Configure logging
     #[cfg(target_os = "android")]
@@ -83,7 +82,7 @@ pub fn init(path: String) -> Result<bool> {
 
     RUNTIME.block_on(async {
         if global_client::is_some().await {
-            return Ok(true);
+            return connection_status();
         };
         global_client::remove().await?;
         let filename = Path::new(&path).join("client.db");
@@ -93,9 +92,10 @@ pub fn init(path: String) -> Result<bool> {
             global_client::set(client.clone()).await;
             // TODO: kill the poll task on leave
             tokio::spawn(async move { client.poll().await });
-            return Ok(true);
+            let status = connection_status()?;
+            return Ok(status);
         }
-        Ok(false)
+        Ok(ConnectionStatus::NotConfigured)
     })
 }
 
@@ -183,5 +183,17 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
             })
             .collect();
         Ok(payments)
+    })
+}
+
+pub fn connection_status() -> Result<ConnectionStatus> {
+    RUNTIME.block_on(async {
+        if !global_client::is_some().await {
+            return Ok(ConnectionStatus::NotConfigured);
+        }
+        match global_client::get().await?.check_connection().await {
+            true => Ok(ConnectionStatus::Connected),
+            false => Ok(ConnectionStatus::NotConnected),
+        }
     })
 }

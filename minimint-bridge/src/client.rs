@@ -20,6 +20,13 @@ pub struct Client {
     pub(crate) client: UserClient,
 }
 
+#[derive(Clone, Debug, Encodable, Decodable)]
+pub enum ConnectionStatus {
+    NotConfigured,
+    NotConnected,
+    Connected,
+}
+
 impl Client {
     pub fn fetch_payment(&self, payment_hash: &sha256::Hash) -> Option<Payment> {
         self.client
@@ -136,6 +143,14 @@ impl Client {
         tracing::info!("saved invoice to db");
 
         Ok(invoice.to_string())
+    }
+
+    // FIXME: there should be a cheaper way to check if we're connected
+    pub async fn check_connection(&self) -> bool {
+        match self.client.fetch_registered_gateways().await {
+            Ok(_) => true,
+            Err(_) => false,
+        }
     }
 
     pub async fn poll(&self) {
