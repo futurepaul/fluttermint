@@ -3,7 +3,9 @@ import 'package:fluttermint/utils/constants.dart';
 
 class ChillInfoCard extends StatelessWidget {
   final Widget child;
-  const ChillInfoCard({Key? key, required this.child}) : super(key: key);
+  final bool? warning;
+  const ChillInfoCard({Key? key, required this.child, this.warning})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,10 @@ class ChillInfoCard extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             // Add one stop for each color. Stops should increase from 0 to 1
-            colors: [white.withOpacity(0.2), white.withOpacity(0.04)],
+            colors: [
+              white.withOpacity(warning != null ? 0.8 : 0.2),
+              white.withOpacity(warning != null ? 0.2 : 0.04)
+            ],
           ),
         ),
         child: Padding(padding: const EdgeInsets.all(20), child: child));

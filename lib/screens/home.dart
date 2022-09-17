@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/utils/constants.dart';
+import 'package:fluttermint/utils/network_detector_notifier.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermint/widgets/not_connected_warning.dart';
 
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:fluttermint/widgets/transaction_list.dart';
@@ -17,6 +19,8 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    var network = ref.watch(networkAwareProvider);
+
     final balance = ref.watch(balanceProvider);
     return Textured(
       child: Scaffold(
@@ -34,6 +38,10 @@ class Home extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (network == NetworkStatus.Off) ...[
+                  const NotConnectedWarning(),
+                  spacer12
+                ],
                 const BalanceDisplay(),
                 spacer24,
                 const TransactionsList(),
