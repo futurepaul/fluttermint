@@ -8,6 +8,7 @@ use tokio::runtime;
 use tokio::sync::Mutex;
 
 use crate::client::Client;
+use crate::payments::PaymentStatus;
 
 lazy_static! {
     static ref RUNTIME: runtime::Runtime = runtime::Builder::new_multi_thread()
@@ -139,41 +140,46 @@ pub fn invoice(amount: u64, description: String) -> Result<String> {
     })
 }
 
+// TODO: impl From<Payment>
+// Do the "expired" conversion in there, too
 #[derive(Clone, Debug)]
-pub struct MyPayment {
-    pub invoice: String, // FIXME: we should pass the real invoice here
+pub struct BridgePayment {
+    // FIXME: we should pass the real invoice here, but flutter_rust_bridge chokes on it
+    pub invoice: String,
+    pub status: PaymentStatus,
+    pub created_at: u64,
     pub paid: bool,
 }
 
-pub fn fetch_payment(payment_hash: String) -> Result<MyPayment> {
+pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
     let hash: sha256::Hash = payment_hash.parse()?;
     RUNTIME.block_on(async {
         let payment = global_client::get()
             .await?
-            .client
-            .ln_client()
             .fetch_payment(&hash)
             .ok_or(anyhow!("payment not found"))?;
-        Ok(MyPayment {
+        Ok(BridgePayment {
             invoice: decode_invoice(payment.invoice.to_string())?,
-            paid: payment.paid,
+            status: payment.status(),
+            created_at: payment.created_at,
+            paid: payment.paid(),
         })
     })
 }
 
-pub fn list_payments() -> Result<Vec<MyPayment>> {
+pub fn list_payments() -> Result<Vec<BridgePayment>> {
     RUNTIME.block_on(async {
         let payments = global_client::get()
             .await?
-            .client
-            .ln_client()
             .list_payments()
             .iter()
-            .map(|payment| MyPayment {
+            .map(|payment| BridgePayment {
                 // FIXME: don't expect
                 invoice: decode_invoice(payment.invoice.to_string())
                     .expect("couldn't decode invoice"),
-                paid: payment.paid,
+                status: payment.status(),
+                created_at: payment.created_at,
+                paid: payment.paid(),
             })
             .collect();
         Ok(payments)

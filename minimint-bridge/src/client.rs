@@ -1,21 +1,48 @@
 //! Minimint client with simpler types
 
 use anyhow::anyhow;
+use bitcoin::hashes::sha256;
 use fedimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
 };
 use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
-use futures::stream::FuturesUnordered;
-use futures::StreamExt;
+use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::Invoice;
+use mint_client::api::WsFederationConnect;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
-use mint_client::{api::WsFederationConnect, Payment};
 use serde_json::json;
 
+use crate::payments::{InternalPaymentStatus, Payment, PaymentKey, PaymentKeyPrefix};
+
+// TODO: should we put payments here?
 pub struct Client {
     pub(crate) client: UserClient,
+}
+
+impl Client {
+    pub fn fetch_payment(&self, payment_hash: &sha256::Hash) -> Option<Payment> {
+        self.client
+            .db()
+            .get_value(&PaymentKey(payment_hash.clone()))
+            .expect("Db error")
+    }
+
+    pub fn list_payments(&self) -> Vec<Payment> {
+        self.client
+            .db()
+            .find_by_prefix(&PaymentKeyPrefix)
+            .map(|res| res.expect("Db error").1)
+            .collect()
+    }
+
+    pub fn save_payment(&self, payment: &Payment) {
+        self.client
+            .db()
+            .insert_entry(&PaymentKey(payment.invoice.payment_hash().clone()), payment)
+            .expect("Db error");
+    }
 }
 
 #[derive(Debug, Clone, Encodable, Decodable)]
@@ -53,36 +80,45 @@ impl Client {
     }
 
     pub async fn balance(&self) -> u64 {
-        (self.client.coins().amount().milli_sat as f64 / 1000.) as u64
+        (self.client.coins().total_amount().milli_sat as f64 / 1000.) as u64
     }
 
-    pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
+    async fn pay_inner(&self, bolt11: Invoice) -> anyhow::Result<()> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
         let http = reqwest::Client::new();
-        let bolt11: Invoice = bolt11.parse()?;
 
         let (contract_id, outpoint) = self
             .client
-            .fund_outgoing_ln_contract(bolt11, &mut rng)
-            .await
-            .expect("Not enough coins");
+            .fund_outgoing_ln_contract(bolt11.clone(), &mut rng)
+            .await?;
 
         self.client
             .await_outgoing_contract_acceptance(outpoint)
-            .await
-            .expect("Contract wasn't accepted in time");
+            .await?;
 
         let gw = self.client.fetch_active_gateway().await?;
         http.post(&format!("{}/pay_invoice", gw.api))
             .json(&contract_id)
             // .timeout(Duration::from_secs(15)) // TODO: add timeout
             .send()
-            .await
-            .unwrap();
-
-        self.client.fetch_all_coins().await;
+            .await?;
 
         Ok(())
+    }
+
+    pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
+        let invoice: Invoice = bolt11.parse()?;
+        match self.pay_inner(invoice.clone()).await {
+            Ok(_) => {
+                self.save_payment(&Payment::new_paid(invoice));
+                self.client.fetch_all_coins().await;
+                Ok(())
+            }
+            Err(e) => {
+                self.save_payment(&Payment::new_failed(invoice));
+                Err(e)
+            }
+        }
     }
 
     pub async fn invoice(&self, amount: u64, description: String) -> anyhow::Result<String> {
@@ -97,9 +133,7 @@ impl Client {
         let invoice = confirmed_invoice.invoice;
 
         // Save the keys and invoice for later polling`
-        self.client
-            .ln_client()
-            .save_payment(&Payment::new(invoice.clone()));
+        self.save_payment(&Payment::new_pending(invoice.clone()));
         tracing::info!("saved invoice to db");
 
         Ok(invoice.to_string())
@@ -109,11 +143,10 @@ impl Client {
         // Spawn a thread to check balances and claim incoming contracts
         loop {
             let mut requests = self
-                .client
-                .ln_client()
                 .list_payments()
                 .into_iter()
-                .filter(|payment| !payment.paid && !payment.invoice.is_expired())
+                // TODO: should we filter
+                .filter(|payment| !payment.paid() && !payment.expired())
                 .map(|payment| async move {
                     // FIXME: don't create rng in here ...
                     let rng = rand::rngs::OsRng::new().unwrap();
@@ -130,10 +163,7 @@ impl Client {
                         tracing::info!("couldn't complete payment: {:?}", &payment_hash);
                     } else {
                         tracing::info!("completed payment: {:?}", &payment_hash);
-                        self.client.ln_client().save_payment(&Payment {
-                            invoice: payment.invoice.clone(),
-                            paid: true,
-                        });
+                        self.save_payment(&Payment::new_paid(payment.invoice.clone()));
                         self.client.fetch_all_coins().await;
                     }
                 })

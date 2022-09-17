@@ -31,9 +31,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.61"
+version = "1.0.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "508b352bb5c066aac251f6daf6b36eccd03e8a88e8081cd44959ea277a3af9a8"
+checksum = "98161a4e3e2184da77bb14f02184cdd111e83bbbcc9979dfee3c44b9a85f5602"
 
 [[package]]
 name = "async-lock"
@@ -187,15 +187,17 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
 dependencies = [
- "block-padding",
  "generic-array",
 ]
 
 [[package]]
-name = "block-padding"
-version = "0.2.1"
+name = "block-buffer"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
+checksum = "69cce20737498f97b993470a6e536b8523f0af7892a4f928cceb1ac5e52ebe7e"
+dependencies = [
+ "generic-array",
+]
 
 [[package]]
 name = "bls12_381"
@@ -389,12 +391,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 
 [[package]]
+name = "crypto-common"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
+dependencies = [
+ "generic-array",
+ "typenum",
+]
+
+[[package]]
 name = "digest"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
  "generic-array",
+]
+
+[[package]]
+name = "digest"
+version = "0.10.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "adfbc57365a37acbd2ebf2b64d7e69bb766e2fea813521ed536f5d0520dcf86c"
+dependencies = [
+ "block-buffer 0.10.3",
+ "crypto-common",
 ]
 
 [[package]]
@@ -434,7 +456,7 @@ checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 [[package]]
 name = "fedimint-api"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -457,13 +479,14 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+ "url",
  "wasm-bindgen-futures",
 ]
 
 [[package]]
 name = "fedimint-core"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "async-trait",
  "bincode",
@@ -486,12 +509,13 @@ dependencies = [
  "thiserror",
  "threshold_crypto",
  "tracing",
+ "url",
 ]
 
 [[package]]
 name = "fedimint-derive"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -502,7 +526,7 @@ dependencies = [
 [[package]]
 name = "fedimint-ln"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "async-trait",
  "bincode",
@@ -518,12 +542,13 @@ dependencies = [
  "thiserror",
  "threshold_crypto",
  "tracing",
+ "url",
 ]
 
 [[package]]
 name = "fedimint-mint"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "async-trait",
  "bincode",
@@ -543,7 +568,7 @@ dependencies = [
 [[package]]
 name = "fedimint-wallet"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -990,6 +1015,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyper-rustls"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d87c48c02e0dc5e3b849a2041db3029fd066650f8f717c07bf8ed78ccb895cac"
+dependencies = [
+ "http",
+ "hyper",
+ "rustls",
+ "tokio",
+ "tokio-rustls",
+]
+
+[[package]]
 name = "idna"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1063,9 +1101,9 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-client-transport"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce395539a14d3ad4ec1256fde105abd36a2da25d578a291cabe98f45adfdb111"
+checksum = "8752740ecd374bcbf8b69f3e80b0327942df76f793f8d4e60d3355650c31fb74"
 dependencies = [
  "anyhow",
  "futures-channel",
@@ -1088,9 +1126,9 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-core"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16efcd4477de857d4a2195a45769b2fe9ebb54f3ef5a4221d3b014a4fe33ec0b"
+checksum = "f3dc3e9cf2ba50b7b1d7d76a667619f82846caa39e8e8daa8a4962d74acaddca"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -1106,14 +1144,15 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+ "tracing-futures",
  "wasm-bindgen-futures",
 ]
 
 [[package]]
 name = "jsonrpsee-types"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bcf76cd316f5d3ad48138085af1f45e2c58c98e02f0779783dbb034d43f7c86"
+checksum = "e290bba767401b646812f608c099b922d8142603c9e73a50fb192d3ac86f4a0d"
 dependencies = [
  "anyhow",
  "beef",
@@ -1125,9 +1164,9 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-wasm-client"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1fcb257e9b60de22ec3c151106ad1e089ab1c0691d25e3282f1cc7a0c7ba651"
+checksum = "597b4eb94730e7695d0a2a429bc37a12e6e84d12680fdafb9b8f5f53652aab57"
 dependencies = [
  "jsonrpsee-client-transport",
  "jsonrpsee-core",
@@ -1136,10 +1175,11 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-ws-client"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee043cb5dd0d51d3eb93432e998d5bae797691a7b10ec4a325e036bcdb48c48a"
+checksum = "6ee5feddd5188e62ac08fcf0e56478138e581509d4730f3f7be9b57dd402a4ff"
 dependencies = [
+ "http",
  "jsonrpsee-client-transport",
  "jsonrpsee-core",
  "jsonrpsee-types",
@@ -1181,18 +1221,18 @@ dependencies = [
 
 [[package]]
 name = "lightning"
-version = "0.0.109"
+version = "0.0.110"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "740348ba79a57039390b13236e6a3d7fe5f5c1627702178b9c19cd397e45d07e"
+checksum = "2dce6da860338d5a9ddc3fd42432465310cfab93b342bbd23b41b7c1f7c509d3"
 dependencies = [
  "bitcoin",
 ]
 
 [[package]]
 name = "lightning-invoice"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c87c47064c865a3e2f204837279a9a48c5f18ea4db8a56e813921793dc1f3cc5"
+checksum = "32aa02b7fd0bd95e40b6ca8d9d9232b162d5e23b41bd2bc42abe9e9c78d34d72"
 dependencies = [
  "bech32",
  "bitcoin_hashes",
@@ -1306,7 +1346,7 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1334,6 +1374,7 @@ dependencies = [
  "tbs",
  "thiserror",
  "tracing",
+ "url",
 ]
 
 [[package]]
@@ -1875,6 +1916,7 @@ dependencies = [
  "http",
  "http-body",
  "hyper",
+ "hyper-rustls",
  "ipnet",
  "js-sys",
  "lazy_static",
@@ -1882,15 +1924,19 @@ dependencies = [
  "mime",
  "percent-encoding",
  "pin-project-lite",
+ "rustls",
+ "rustls-pemfile",
  "serde",
  "serde_json",
  "serde_urlencoded",
  "tokio",
+ "tokio-rustls",
  "tower-service",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+ "webpki-roots",
  "winreg",
 ]
 
@@ -2114,23 +2160,21 @@ version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99cd6713db3cf16b6c84e06321e049a9b9f699826e16096d23bbcc44d15d51a6"
 dependencies = [
- "block-buffer",
+ "block-buffer 0.9.0",
  "cfg-if",
  "cpufeatures",
- "digest",
+ "digest 0.9.0",
  "opaque-debug",
 ]
 
 [[package]]
 name = "sha3"
-version = "0.9.1"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f81199417d4e5de3f04b1e871023acea7389672c4135918f05aa9cbf2f2fa809"
+checksum = "e2904bea16a1ae962b483322a1c7b81d976029203aea1f461e51cd7705db7ba9"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.5",
  "keccak",
- "opaque-debug",
 ]
 
 [[package]]
@@ -2251,7 +2295,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint#76c9257453e5f7aae659354b9d67a998674ddf33"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#6d54176282a8fb19a33bfb046b212dcd86023e7f"
 dependencies = [
  "bls12_381",
  "ff 0.11.1",
@@ -2364,9 +2408,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.20.1"
+version = "1.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a8325f63a7d4774dd041e363b2409ed1c5cbbd0f867795e661df066b2b0a581"
+checksum = "0020c875007ad96677dcc890298f4b942882c5d4eb7cc8f439fc3bf813dc9c95"
 dependencies = [
  "autocfg 1.1.0",
  "bytes",
@@ -2457,6 +2501,16 @@ checksum = "5aeea4303076558a00714b823f9ad67d58a3bbda1df83d8827d21193156e22f7"
 dependencies = [
  "once_cell",
  "valuable",
+]
+
+[[package]]
+name = "tracing-futures"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97d095ae15e245a057c8e8451bab9b3ee1e1f68e9ba2b4fbc18d0ac5237835f2"
+dependencies = [
+ "pin-project",
+ "tracing",
 ]
 
 [[package]]
@@ -2576,6 +2630,7 @@ dependencies = [
  "idna",
  "matches",
  "percent-encoding",
+ "serde",
 ]
 
 [[package]]
