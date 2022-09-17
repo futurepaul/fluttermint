@@ -15,6 +15,8 @@ use flutter_rust_bridge::*;
 
 // Section: imports
 
+use crate::payments::PaymentStatus;
+
 // Section: wire functions
 
 #[no_mangle]
@@ -236,10 +238,28 @@ impl<T> NewWithNullPtr for *mut T {
 
 impl support::IntoDart for MyPayment {
     fn into_dart(self) -> support::DartCObject {
-        vec![self.invoice.into_dart(), self.paid.into_dart()].into_dart()
+        vec![
+            self.invoice.into_dart(),
+            self.status.into_dart(),
+            self.created_at.into_dart(),
+            self.paid.into_dart(),
+        ]
+        .into_dart()
     }
 }
 impl support::IntoDartExceptPrimitive for MyPayment {}
+
+impl support::IntoDart for PaymentStatus {
+    fn into_dart(self) -> support::DartCObject {
+        match self {
+            Self::Paid => 0,
+            Self::Pending => 1,
+            Self::Failed => 2,
+            Self::Expired => 3,
+        }
+        .into_dart()
+    }
+}
 
 // Section: executor
 

@@ -54,12 +54,23 @@ abstract class MinimintBridge {
 
 class MyPayment {
   final String invoice;
+  final PaymentStatus status;
+  final int createdAt;
   final bool paid;
 
   MyPayment({
     required this.invoice,
+    required this.status,
+    required this.createdAt,
     required this.paid,
   });
+}
+
+enum PaymentStatus {
+  Paid,
+  Pending,
+  Failed,
+  Expired,
 }
 
 class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
@@ -241,18 +252,28 @@ bool _wire2api_bool(dynamic raw) {
   return raw as bool;
 }
 
+int _wire2api_i32(dynamic raw) {
+  return raw as int;
+}
+
 List<MyPayment> _wire2api_list_my_payment(dynamic raw) {
   return (raw as List<dynamic>).map(_wire2api_my_payment).toList();
 }
 
 MyPayment _wire2api_my_payment(dynamic raw) {
   final arr = raw as List<dynamic>;
-  if (arr.length != 2)
-    throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+  if (arr.length != 4)
+    throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
   return MyPayment(
     invoice: _wire2api_String(arr[0]),
-    paid: _wire2api_bool(arr[1]),
+    status: _wire2api_payment_status(arr[1]),
+    createdAt: _wire2api_u64(arr[2]),
+    paid: _wire2api_bool(arr[3]),
   );
+}
+
+PaymentStatus _wire2api_payment_status(dynamic raw) {
+  return PaymentStatus.values[raw];
 }
 
 int _wire2api_u64(dynamic raw) {

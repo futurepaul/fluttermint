@@ -6,3 +6,5 @@ mod client;
 
 #[cfg(target_family = "wasm")]
 mod wasm_client;
+
+mod payments;
