@@ -13,7 +13,7 @@ abstract class MinimintClient {
 
   Future<void> pay({required String bolt11});
 
-  Future<String> decodeInvoice({required String bolt11});
+  Future<BridgeInvoice> decodeInvoice({required String bolt11});
 
   Future<String> invoice({required int amount, required String description});
 

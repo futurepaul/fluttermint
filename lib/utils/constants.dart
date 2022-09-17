@@ -66,11 +66,7 @@ const TextTheme textThemeDefault = TextTheme(
   ),
   bodyText1: TextStyle(color: white, fontSize: 14, height: 1.5),
   bodyText2: TextStyle(
-      fontFamily: "Inter",
-      color: Color(0xCCF1F1F1),
-      fontSize: 14,
-      fontWeight: FontWeight.w400),
-
+      color: Color(0xCCF1F1F1), fontSize: 14, fontWeight: FontWeight.w400),
   subtitle1: TextStyle(color: white, fontSize: 16, fontWeight: FontWeight.w400),
   subtitle2: TextStyle(color: grey, fontSize: 12),
   caption: TextStyle(fontFamily: "Archivo 125", color: black, fontSize: 12),

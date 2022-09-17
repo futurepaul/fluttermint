@@ -52,7 +52,8 @@ class Home extends ConsumerWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Receive",
-                            disabled: network == NetworkStatus.Off,
+                            disabled:
+                                network == NetworkStatus.Off || balance == null,
                             onTap: () {
                               context.go("/receive");
                             }),

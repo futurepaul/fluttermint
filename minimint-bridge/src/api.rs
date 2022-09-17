@@ -127,7 +127,7 @@ pub fn pay(bolt11: String) -> Result<()> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
 
-pub fn decode_invoice(bolt11: String) -> Result<String> {
+pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
     crate::client::decode_invoice(bolt11)
 }
 
@@ -144,11 +144,18 @@ pub fn invoice(amount: u64, description: String) -> Result<String> {
 // Do the "expired" conversion in there, too
 #[derive(Clone, Debug)]
 pub struct BridgePayment {
-    // FIXME: this is json now, but should be a simple struct with invoice fields ...
-    pub invoice: String,
+    pub invoice: BridgeInvoice,
     pub status: PaymentStatus,
     pub created_at: u64,
     pub paid: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct BridgeInvoice {
+    pub payment_hash: String,
+    pub amount: u64,
+    pub description: String,
+    pub invoice: String,
 }
 
 pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
@@ -168,6 +175,7 @@ pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
 }
 
 pub fn list_payments() -> Result<Vec<BridgePayment>> {
+    println!("Listing payments...");
     RUNTIME.block_on(async {
         let payments = global_client::get()
             .await?

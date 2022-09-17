@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,13 +27,13 @@ class SendScreen extends ConsumerWidget {
     Future<void> tryDecode(String data) async {
       try {
         debugPrint("decoding: $data");
-        var decoded = jsonDecode(await api.decodeInvoice(bolt11: data));
+        var decoded = await api.decodeInvoice(bolt11: data);
         debugPrint("after decoded");
-        debugPrint("amount: ${decoded["amount"]}");
+        debugPrint("amount: ${decoded.amount}");
         var send = Send(
-            description: decoded["description"],
-            amountSats: (decoded["amount"] != null) ? decoded["amount"]! : 0,
-            invoice: decoded["invoice"]);
+            description: decoded.description,
+            amountSats: decoded.amount,
+            invoice: data);
 
         debugPrint("Decoded was not null");
         await sendNotifier.createSend(send).then((_) {

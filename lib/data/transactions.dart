@@ -1,6 +1,24 @@
 import 'package:flutter/foundation.dart';
-import 'package:fluttermint/client.dart';
+import 'package:intl/intl.dart';
 import 'package:riverpod/riverpod.dart';
+
+import 'package:fluttermint/bridge_generated.dart';
+import 'package:fluttermint/client.dart';
+
+extension ParseToString on PaymentStatus {
+  String toReadableString() {
+    switch (this) {
+      case PaymentStatus.Expired:
+        return "Expired";
+      case PaymentStatus.Paid:
+        return "Paid";
+      case PaymentStatus.Pending:
+        return "Pending";
+      case PaymentStatus.Failed:
+        return "Failed";
+    }
+  }
+}
 
 const FAKE_TX = Transaction(
     amountSats: 123,
@@ -15,6 +33,17 @@ const FAKE_TX_2 = Transaction(
     invoice: "abc123",
     when: "October 7 - 12:21a",
     status: "Pending");
+
+Transaction txFromBridgePayment(BridgePayment payment) {
+  final when = DateTime.fromMillisecondsSinceEpoch(payment.createdAt * 1000);
+
+  return Transaction(
+      description: payment.invoice.description,
+      amountSats: payment.invoice.amount,
+      invoice: payment.invoice.invoice,
+      when: DateFormat.MMMMd().add_jm().format(when),
+      status: payment.status.toReadableString());
+}
 
 @immutable
 class Transaction {
@@ -60,11 +89,14 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
   }
 
   fetchTransactions() async {
-    final payments = await api.fetchPayments();
+    debugPrint("Fetching txs");
+    var payments = await api.fetchPayments();
+    payments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    List<Transaction> txs = [];
     for (var payment in payments) {
-      debugPrint(payment.toString());
+      txs.add(txFromBridgePayment(payment));
     }
-    // state = Balance(amountSats: await api.balance());
+    state = Transactions(txs);
   }
 
   clear() {

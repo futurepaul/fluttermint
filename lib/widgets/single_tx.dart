@@ -3,7 +3,7 @@ import 'package:fluttermint/data/transactions.dart';
 import 'package:fluttermint/utils/constants.dart';
 
 class SingleTx extends StatelessWidget {
-  const SingleTx({Key? key, required this.tx}) : super(key: key);
+  SingleTx({Key? key, required this.tx}) : super(key: key);
 
   final Transaction tx;
 
@@ -11,10 +11,14 @@ class SingleTx extends StatelessWidget {
     return '$sats sats';
   }
 
+  final small =
+      TextStyle(color: white.withOpacity(0.7), fontSize: 12, height: 1.5);
+  final med = const TextStyle(color: white, fontSize: 15, height: 1.5);
+
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: tx.status == "Pending" ? 0.6 : 1.0,
+      opacity: tx.status == "Pending" || tx.status == "Expired" ? 0.6 : 1.0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Container(
@@ -25,14 +29,20 @@ class SingleTx extends StatelessWidget {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [Text(tx.status), Text(fmtSats(tx.amountSats))],
+                children: [
+                  Text(tx.status, style: med),
+                  Text(fmtSats(tx.amountSats), style: med)
+                ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
                     child: Text(
-                      tx.description,
+                      style: small,
+                      tx.description.isEmpty
+                          ? "No description"
+                          : tx.description,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
