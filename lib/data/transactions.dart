@@ -1,7 +1,24 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
+import 'package:riverpod/riverpod.dart';
+
 import 'package:fluttermint/bridge_generated.dart';
 import 'package:fluttermint/client.dart';
-import 'package:riverpod/riverpod.dart';
+
+extension ParseToString on PaymentStatus {
+  String toReadableString() {
+    switch (this) {
+      case PaymentStatus.Expired:
+        return "Expired";
+      case PaymentStatus.Paid:
+        return "Paid";
+      case PaymentStatus.Pending:
+        return "Pending";
+      case PaymentStatus.Failed:
+        return "Failed";
+    }
+  }
+}
 
 const FAKE_TX = Transaction(
     amountSats: 123,
@@ -17,6 +34,17 @@ const FAKE_TX_2 = Transaction(
     when: "October 7 - 12:21a",
     status: "Pending");
 
+Transaction txFromBridgePayment(BridgePayment payment) {
+  final when = DateTime.fromMillisecondsSinceEpoch(payment.createdAt * 1000);
+
+  return Transaction(
+      description: payment.invoice.description,
+      amountSats: payment.invoice.amount,
+      invoice: payment.invoice.invoice,
+      when: DateFormat.MMMMd().add_jm().format(when),
+      status: payment.status.toReadableString());
+}
+
 @immutable
 class Transaction {
   const Transaction(
@@ -25,16 +53,6 @@ class Transaction {
       required this.invoice,
       required this.when,
       required this.status});
-
-  Transaction txFromBridgePayment(BridgePayment payment) {
-    // final decoded = jsonDecode(await api.decodeInvoice(bolt11: invoice));
-    return Transaction(
-        description: "fake description",
-        amountSats: 1234,
-        invoice: payment.invoice.invoice,
-        when: "May 6 - 9:21p",
-        status: payment.status.toString());
-  }
 
   final String description;
   final int amountSats;
@@ -76,17 +94,7 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
     payments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     List<Transaction> txs = [];
     for (var payment in payments) {
-      debugPrint(payment.invoice.toString());
-
-      final when =
-          DateTime.fromMillisecondsSinceEpoch(payment.createdAt * 1000);
-
-      txs.add(Transaction(
-          description: payment.invoice.description,
-          amountSats: payment.invoice.amount,
-          invoice: payment.invoice.invoice,
-          when: when.toString(),
-          status: payment.status.toString()));
+      txs.add(txFromBridgePayment(payment));
     }
     state = Transactions(txs);
   }
