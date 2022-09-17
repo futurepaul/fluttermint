@@ -8,8 +8,6 @@ final balanceStreamProvider = StreamProvider.autoDispose<String?>((ref) {
     while (shouldPoll) {
       try {
         await Future.delayed(const Duration(seconds: 5));
-        debugPrint("polling balance");
-
         await ref.read(balanceProvider.notifier).refreshBalance();
         yield "good";
       } catch (e) {

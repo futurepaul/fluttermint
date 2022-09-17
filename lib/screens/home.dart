@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +12,12 @@ import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/logo_action.dart';
 
-class Home extends StatelessWidget {
+class Home extends ConsumerWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final balance = ref.watch(balanceProvider);
     return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -49,6 +52,11 @@ class Home extends StatelessWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Send",
+                            disabled: balance != null
+                                ? balance.amountSats > 0
+                                    ? false
+                                    : true
+                                : true,
                             onTap: () {
                               context.go("/send");
                             }),

@@ -49,7 +49,6 @@ class BalanceNotifier extends StateNotifier<Balance?> {
   refreshBalance() async {
     try {
       final int balance = await api.balance();
-      debugPrint(balance.toString());
       state =
           state?.copyWith(amountSats: balance) ?? Balance(amountSats: balance);
     } catch (e) {
