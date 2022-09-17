@@ -26,78 +26,76 @@ class ReceiveScreen extends HookConsumerWidget {
 
     return Textured(
       child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: FediAppBar(
-            title: "Receive",
-            closeAction: () {
-              receiveNotifier.clear();
-              context.go("/");
-            },
+        backgroundColor: Colors.transparent,
+        appBar: FediAppBar(
+          title: "Receive",
+          closeAction: () {
+            receiveNotifier.clear();
+            context.go("/");
+          },
+        ),
+        body: ContentPadding(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  TextField(
+                    controller: amountController,
+                    autofocus: true,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: "Archivo 125",
+                        fontSize: 52,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  Text("SATS", style: Theme.of(context).textTheme.headline6),
+                  const SizedBox(
+                    height: 36,
+                  ),
+                  TextField(
+                    controller: descriptionController,
+                    style: Theme.of(context).textTheme.subtitle1,
+                    decoration: InputDecoration(
+                      labelText: "Description",
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(width: 1, color: white)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(width: 1, color: white)),
+                    ),
+                  ),
+                ],
+              ),
+              OutlineGradientButton(
+                  primary: true,
+                  disabled: amount == "" || creating,
+                  pending: creating,
+                  text: "Continue",
+                  onTap: () async {
+                    creatingNotifier.state = true;
+                    var desc = descriptionController.text;
+                    var amount = int.parse(amountController.text);
+                    try {
+                      await receiveNotifier
+                          .createReceive(
+                              Receive(description: desc, amountSats: amount))
+                          .then((_) {
+                        context.go("/receive/confirm");
+                      });
+                    } catch (err) {
+                      context.go("/errormodal", extra: err);
+                    } finally {
+                      creatingNotifier.state = false;
+                    }
+                  })
+            ],
           ),
-          body: ContentPadding(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    TextField(
-                      controller: amountController,
-                      autofocus: true,
-                      decoration:
-                          const InputDecoration(border: InputBorder.none),
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontFamily: "Archivo 125",
-                          fontSize: 52,
-                          fontWeight: FontWeight.w400),
-                    ),
-                    Text("SATS", style: Theme.of(context).textTheme.headline6),
-                    const SizedBox(
-                      height: 36,
-                    ),
-                    TextField(
-                      controller: descriptionController,
-                      style: Theme.of(context).textTheme.subtitle1,
-                      decoration: InputDecoration(
-                        labelText: "Description",
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                const BorderSide(width: 1, color: white)),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                const BorderSide(width: 1, color: white)),
-                      ),
-                    ),
-                  ],
-                ),
-                OutlineGradientButton(
-                    primary: true,
-                    disabled: amount == "" || creating,
-                    pending: creating,
-                    text: "Continue",
-                    onTap: () async {
-                      creatingNotifier.state = true;
-                      var desc = descriptionController.text;
-                      var amount = int.parse(amountController.text);
-                      try {
-                        await receiveNotifier
-                            .createReceive(
-                                Receive(description: desc, amountSats: amount))
-                            .then((_) {
-                          context.go("/receive/confirm");
-                        });
-                      } catch (err) {
-                        context.go("/errormodal", extra: err);
-                      } finally {
-                        creatingNotifier.state = false;
-                      }
-                    })
-              ],
-            ),
-          )),
+        ),
+      ),
     );
   }
 }
