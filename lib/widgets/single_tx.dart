@@ -18,7 +18,7 @@ class SingleTx extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: tx.status == "Pending" ? 0.6 : 1.0,
+      opacity: tx.status == "Pending" || tx.status == "Expired" ? 0.6 : 1.0,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Container(
