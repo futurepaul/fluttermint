@@ -72,24 +72,20 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
 
   fetchTransactions() async {
     debugPrint("Fetching txs");
-    final payments = await api.fetchPayments();
+    var payments = await api.fetchPayments();
+    payments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     List<Transaction> txs = [];
     for (var payment in payments) {
       debugPrint(payment.invoice.toString());
-      // debugPrint(payment.invoice);
-      // final decoded = .(payment.invoice);
-      // debugPrint(decoded);
-      int amount = payment.invoice.amount;
-      // String desc = decoded["description"];
 
-      // var decoded =
-      //     jsonDecode(await api.decodeInvoice(bolt11: payment.invoice));
-      // debugPrint(decoded);
+      final when =
+          DateTime.fromMillisecondsSinceEpoch(payment.createdAt * 1000);
+
       txs.add(Transaction(
           description: payment.invoice.description,
           amountSats: payment.invoice.amount,
           invoice: payment.invoice.invoice,
-          when: "May 6 - 9:21p",
+          when: when.toString(),
           status: payment.status.toString()));
     }
     state = Transactions(txs);
