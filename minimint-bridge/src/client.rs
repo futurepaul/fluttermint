@@ -14,9 +14,8 @@ use mint_client::api::WsFederationConnect;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 use serde_json::json;
 
-use crate::payments::{InternalPaymentStatus, Payment, PaymentKey, PaymentKeyPrefix};
+use crate::payments::{Payment, PaymentKey, PaymentKeyPrefix};
 
-// TODO: should we put payments here?
 pub struct Client {
     pub(crate) client: UserClient,
 }
@@ -149,9 +148,10 @@ impl Client {
                 .filter(|payment| !payment.paid() && !payment.expired())
                 .map(|payment| async move {
                     // FIXME: don't create rng in here ...
+                    let invoice_expired = payment.invoice.is_expired();
                     let rng = rand::rngs::OsRng::new().unwrap();
                     let payment_hash = payment.invoice.payment_hash();
-                    tracing::info!("fetching incoming contract {:?}", &payment_hash);
+                    tracing::debug!("fetching incoming contract {:?}", &payment_hash);
                     let result = self
                         .client
                         .claim_incoming_contract(
@@ -160,9 +160,13 @@ impl Client {
                         )
                         .await;
                     if let Err(_) = result {
-                        tracing::info!("couldn't complete payment: {:?}", &payment_hash);
+                        tracing::debug!("couldn't complete payment: {:?}", &payment_hash);
+                        // Mark it "expired" in db if we couldn't claim it and invoice is expired
+                        if invoice_expired {
+                            self.save_payment(&Payment::new_expired(payment.invoice.clone()));
+                        }
                     } else {
-                        tracing::info!("completed payment: {:?}", &payment_hash);
+                        tracing::debug!("completed payment: {:?}", &payment_hash);
                         self.save_payment(&Payment::new_paid(payment.invoice.clone()));
                         self.client.fetch_all_coins().await;
                     }
