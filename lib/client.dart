@@ -3,7 +3,7 @@ import 'bridge_generated.dart';
 
 abstract class MinimintClient {
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
-  Future<bool> init();
+  Future<ConnectionStatus> init();
 
   Future<void> joinFederation({required String configUrl});
 

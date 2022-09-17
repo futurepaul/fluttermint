@@ -12,7 +12,6 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'dart:ffi' as ffi;
 
 abstract class MinimintBridge {
-  /// If this returns true, user has joined a federation. Otherwise they haven't.
   Future<ConnectionStatus> init({required String path, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kInitConstMeta;

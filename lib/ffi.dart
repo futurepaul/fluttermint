@@ -25,7 +25,7 @@ class MinimintClientImpl implements MinimintClient {
 
   /// If this returns Some, user has joined a federation. Otherwise they haven't.
   @override
-  Future<bool> init() async {
+  Future<ConnectionStatus> init() async {
     final userDir = await getApplicationDocumentsDirectory();
     return api.init(path: userDir.path);
   }
