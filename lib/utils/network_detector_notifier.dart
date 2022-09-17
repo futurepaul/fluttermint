@@ -23,7 +23,6 @@ class NetworkDetectorNotifier extends StateNotifier<NetworkStatus> {
           break;
         case ConnectivityResult.none:
           newState = NetworkStatus.Off;
-          // TODO: Handle this case.
           break;
       }
 

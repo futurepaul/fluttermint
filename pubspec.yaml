@@ -147,10 +147,12 @@ flutter:
           weight: 200
         - asset: fonts/Archivo-Thin.ttf
           weight: 100
-    - family: Inter
+    - family: Albert Sans
       fonts:
-        - asset: fonts/Inter-Regular.ttf
+        - asset: fonts/AlbertSans-Regular.ttf
           weight: 400
+        - asset: fonts/AlbertSans-SemiBold.ttf
+          weight: 600
 
   #
   # For details regarding fonts from package dependencies,

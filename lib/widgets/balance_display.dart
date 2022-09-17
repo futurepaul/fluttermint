@@ -59,7 +59,7 @@ class BalanceDisplay extends ConsumerWidget {
               data: (_) => Text(
                   balance != null
                       ? balance.denomination.toReadableString()
-                      : "NULL",
+                      : "SATS",
                   style: smallText),
               loading: () =>
                   Text("-", style: Theme.of(context).textTheme.headline1),

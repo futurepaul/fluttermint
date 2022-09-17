@@ -19,9 +19,9 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var network = ref.watch(networkAwareProvider);
-
+    final network = ref.watch(networkAwareProvider);
     final balance = ref.watch(balanceProvider);
+
     return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
