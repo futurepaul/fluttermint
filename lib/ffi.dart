@@ -62,12 +62,13 @@ class MinimintClientImpl implements MinimintClient {
   }
 
   @override
-  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint}) {
+  Future<BridgePayment> fetchPayment(
+      {required String paymentHash, dynamic hint}) {
     return api.fetchPayment(paymentHash: paymentHash);
   }
 
   @override
-  Future<List<MyPayment>> fetchPayments() {
+  Future<List<BridgePayment>> fetchPayments() {
     return api.listPayments();
   }
 }

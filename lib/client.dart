@@ -17,9 +17,10 @@ abstract class MinimintClient {
 
   Future<String> invoice({required int amount, required String description});
 
-  Future<MyPayment> fetchPayment({required String paymentHash, dynamic hint});
+  Future<BridgePayment> fetchPayment(
+      {required String paymentHash, dynamic hint});
 
-  Future<List<MyPayment>> fetchPayments();
+  Future<List<BridgePayment>> fetchPayments();
 }
 
 final MinimintClient api = MinimintClientImpl();
