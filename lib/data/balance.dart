@@ -29,7 +29,7 @@ class Balance {
       case Denom.sats:
         return amountSats.toString();
       case Denom.btc:
-        return (amountSats / 100000000).toString();
+        return (amountSats / 100000000).toStringAsFixed(8);
     }
   }
 
