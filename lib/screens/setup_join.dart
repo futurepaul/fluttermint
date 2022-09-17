@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/widgets/autopaste_text_field.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -65,11 +67,14 @@ class SetupJoin extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                    // TODO some sort of clip for aiming the scanner
+                // QR scanner doesn't work on other platforms
+                if (Platform.isAndroid || Platform.isIOS) ...[
+                  Expanded(
                     child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: QRViewExample(onDetect: onDetect))),
+                        child: QRViewExample(onDetect: onDetect)),
+                  )
+                ],
                 const SizedBox(height: 16),
                 AutoPasteTextField(
                   labelText: "Paste Federation Code",

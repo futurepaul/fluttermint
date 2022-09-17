@@ -85,8 +85,7 @@ class ReceiveConfirm extends ConsumerWidget {
                                 Text(desc,
                                     style:
                                         Theme.of(context).textTheme.bodyText2),
-                              ] else
-                                ...[],
+                              ],
                               statusProvider.when(
                                   data: (data) => Text(data ??
                                       "no status something went wrong?"),
