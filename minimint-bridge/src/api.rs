@@ -82,7 +82,7 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
 
     RUNTIME.block_on(async {
         if global_client::is_some().await {
-            return connection_status();
+            return connection_status_private().await;
         };
         global_client::remove().await?;
         let filename = Path::new(&path).join("client.db");
@@ -92,7 +92,7 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
             global_client::set(client.clone()).await;
             // TODO: kill the poll task on leave
             tokio::spawn(async move { client.poll().await });
-            let status = connection_status()?;
+            let status = connection_status_private().await?;
             return Ok(status);
         }
         Ok(ConnectionStatus::NotConfigured)
@@ -194,14 +194,16 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
     })
 }
 
+pub async fn connection_status_private() -> Result<ConnectionStatus> {
+    if !global_client::is_some().await {
+        return Ok(ConnectionStatus::NotConfigured);
+    }
+    match global_client::get().await?.check_connection().await {
+        true => Ok(ConnectionStatus::Connected),
+        false => Ok(ConnectionStatus::NotConnected),
+    }
+}
+
 pub fn connection_status() -> Result<ConnectionStatus> {
-    RUNTIME.block_on(async {
-        if !global_client::is_some().await {
-            return Ok(ConnectionStatus::NotConfigured);
-        }
-        match global_client::get().await?.check_connection().await {
-            true => Ok(ConnectionStatus::Connected),
-            false => Ok(ConnectionStatus::NotConnected),
-        }
-    })
+    RUNTIME.block_on(async { connection_status_private().await })
 }
