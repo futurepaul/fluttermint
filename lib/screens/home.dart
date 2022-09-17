@@ -52,6 +52,7 @@ class Home extends ConsumerWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Receive",
+                            disabled: network == NetworkStatus.Off,
                             onTap: () {
                               context.go("/receive");
                             }),
@@ -60,9 +61,12 @@ class Home extends ConsumerWidget {
                       Expanded(
                         child: OutlineGradientButton(
                             text: "Send",
+                            // If we have a balance, and that balance is greater than 0, and we're connected to the internet
                             disabled: balance != null
                                 ? balance.amountSats > 0
-                                    ? false
+                                    ? network != NetworkStatus.Off
+                                        ? false
+                                        : true
                                     : true
                                 : true,
                             onTap: () {
