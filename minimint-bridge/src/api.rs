@@ -177,10 +177,6 @@ pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
 pub fn list_payments() -> Result<Vec<BridgePayment>> {
     println!("Listing payments...");
     RUNTIME.block_on(async {
-        // let payments = global_client::get().await?.list_payments();
-
-        // dbg!(payments);
-
         let payments = global_client::get()
             .await?
             .list_payments()
