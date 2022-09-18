@@ -37,7 +37,7 @@ class BalanceDisplay extends ConsumerWidget {
 
     ref.listen<Balance?>(balanceProvider, (_, balance) {
       if (balance != null) {
-        debugPrint(balance.toString());
+        debugPrint("balance: ${balance.amountSats.toString()}");
       } else {
         debugPrint("balance is null?");
       }
