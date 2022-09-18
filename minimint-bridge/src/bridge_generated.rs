@@ -16,6 +16,7 @@ use flutter_rust_bridge::*;
 // Section: imports
 
 use crate::client::ConnectionStatus;
+use crate::payments::PaymentDirection;
 use crate::payments::PaymentStatus;
 
 // Section: wire functions
@@ -269,6 +270,7 @@ impl support::IntoDart for BridgePayment {
             self.status.into_dart(),
             self.created_at.into_dart(),
             self.paid.into_dart(),
+            self.direction.into_dart(),
         ]
         .into_dart()
     }
@@ -286,6 +288,15 @@ impl support::IntoDart for ConnectionStatus {
     }
 }
 
+impl support::IntoDart for PaymentDirection {
+    fn into_dart(self) -> support::DartCObject {
+        match self {
+            Self::Outgoing => 0,
+            Self::Incoming => 1,
+        }
+        .into_dart()
+    }
+}
 impl support::IntoDart for PaymentStatus {
     fn into_dart(self) -> support::DartCObject {
         match self {
