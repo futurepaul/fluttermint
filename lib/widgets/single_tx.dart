@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttermint/bridge_generated.dart';
 import 'package:fluttermint/data/transactions.dart';
 import 'package:fluttermint/utils/constants.dart';
 
@@ -7,8 +8,12 @@ class SingleTx extends StatelessWidget {
 
   final Transaction tx;
 
-  String fmtSats(int sats) {
-    return '$sats sats';
+  String fmtSats(int sats, PaymentDirection direction) {
+    if (direction == PaymentDirection.Incoming) {
+      return '+$sats sats';
+    } else {
+      return '-$sats sats';
+    }
   }
 
   final small =
@@ -31,7 +36,7 @@ class SingleTx extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(tx.status, style: med),
-                  Text(fmtSats(tx.amountSats), style: med)
+                  Text(fmtSats(tx.amountSats, tx.direction), style: med)
                 ],
               ),
               Row(
