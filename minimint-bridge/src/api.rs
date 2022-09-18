@@ -106,6 +106,8 @@ pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
         std::fs::remove_dir_all(&filename)?;
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
+        // for good measure, make sure the balance is updated (FIXME)
+        client.client.fetch_all_coins().await;
         global_client::set(client.clone()).await;
         // TODO: kill the poll task on leave
         tokio::spawn(async move { client.poll().await });
@@ -181,6 +183,7 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
             .await?
             .list_payments()
             .iter()
+            // TODO From impl
             .map(|payment| BridgePayment {
                 // FIXME: don't expect
                 invoice: decode_invoice(payment.invoice.to_string())
