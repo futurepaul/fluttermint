@@ -8,7 +8,7 @@ use tokio::runtime;
 use tokio::sync::Mutex;
 
 use crate::client::{Client, ConnectionStatus};
-use crate::payments::PaymentStatus;
+use crate::payments::{PaymentDirection, PaymentStatus};
 
 lazy_static! {
     static ref RUNTIME: runtime::Runtime = runtime::Builder::new_multi_thread()
@@ -148,6 +148,7 @@ pub struct BridgePayment {
     pub status: PaymentStatus,
     pub created_at: u64,
     pub paid: bool,
+    pub direction: PaymentDirection,
 }
 
 #[derive(Clone, Debug)]
@@ -170,6 +171,7 @@ pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
             status: payment.status,
             created_at: payment.created_at,
             paid: payment.paid(),
+            direction: payment.direction,
         })
     })
 }
@@ -188,6 +190,7 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
                 status: payment.status,
                 created_at: payment.created_at,
                 paid: payment.paid(),
+                direction: payment.direction,
             })
             .collect();
         Ok(payments)

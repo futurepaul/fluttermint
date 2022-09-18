@@ -14,6 +14,7 @@ pub struct Payment {
     pub invoice: Invoice,
     pub status: PaymentStatus,
     pub created_at: u64,
+    pub direction: PaymentDirection,
 }
 
 #[derive(Copy, Clone, Debug, Encodable, Decodable, PartialEq)]
@@ -24,8 +25,14 @@ pub enum PaymentStatus {
     Expired,
 }
 
+#[derive(Copy, Clone, Debug, Encodable, Decodable, PartialEq)]
+pub enum PaymentDirection {
+    Outgoing,
+    Incoming,
+}
+
 impl Payment {
-    fn new(invoice: Invoice, status: PaymentStatus) -> Self {
+    pub fn new(invoice: Invoice, status: PaymentStatus, direction: PaymentDirection) -> Self {
         Self {
             invoice,
             status,
@@ -33,24 +40,8 @@ impl Payment {
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .expect("couldn't get utc timestamp") // FIXME: maybe just return 0?
                 .as_secs(),
+            direction,
         }
-    }
-
-    // FIXME: all these constructors are weird
-    pub fn new_pending(invoice: Invoice) -> Self {
-        Self::new(invoice, PaymentStatus::Pending)
-    }
-
-    pub fn new_paid(invoice: Invoice) -> Self {
-        Self::new(invoice, PaymentStatus::Paid)
-    }
-
-    pub fn new_failed(invoice: Invoice) -> Self {
-        Self::new(invoice, PaymentStatus::Failed)
-    }
-
-    pub fn new_expired(invoice: Invoice) -> Self {
-        Self::new(invoice, PaymentStatus::Expired)
     }
 
     pub fn paid(&self) -> bool {

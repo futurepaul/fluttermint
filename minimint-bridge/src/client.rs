@@ -14,7 +14,7 @@ use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 
 use crate::{
     api::BridgeInvoice,
-    payments::{Payment, PaymentKey, PaymentKeyPrefix},
+    payments::{Payment, PaymentDirection, PaymentKey, PaymentKeyPrefix, PaymentStatus},
 };
 
 pub struct Client {
@@ -49,6 +49,17 @@ impl Client {
             .db()
             .insert_entry(&PaymentKey(payment.invoice.payment_hash().clone()), payment)
             .expect("Db error");
+    }
+
+    pub fn update_payment_status(&self, payment_hash: &sha256::Hash, status: PaymentStatus) {
+        if let Some(mut payment) = self.fetch_payment(&payment_hash) {
+            payment.status = status;
+            self.client
+                .db()
+                .insert_entry(&PaymentKey(*payment_hash), &payment)
+                .expect("Db error");
+        }
+        // TODO: what to do if this payment doesn't exist?
     }
 }
 
@@ -117,12 +128,20 @@ impl Client {
         let invoice: Invoice = bolt11.parse()?;
         match self.pay_inner(invoice.clone()).await {
             Ok(_) => {
-                self.save_payment(&Payment::new_paid(invoice));
+                self.save_payment(&Payment::new(
+                    invoice,
+                    PaymentStatus::Paid,
+                    PaymentDirection::Outgoing,
+                ));
                 self.client.fetch_all_coins().await;
                 Ok(())
             }
             Err(e) => {
-                self.save_payment(&Payment::new_failed(invoice));
+                self.save_payment(&Payment::new(
+                    invoice,
+                    PaymentStatus::Failed,
+                    PaymentDirection::Outgoing,
+                ));
                 Err(e)
             }
         }
@@ -140,7 +159,11 @@ impl Client {
         let invoice = confirmed_invoice.invoice;
 
         // Save the keys and invoice for later polling`
-        self.save_payment(&Payment::new_pending(invoice.clone()));
+        self.save_payment(&Payment::new(
+            invoice.clone(),
+            PaymentStatus::Pending,
+            PaymentDirection::Incoming,
+        ));
         tracing::info!("saved invoice to db");
 
         Ok(invoice.to_string())
@@ -179,11 +202,11 @@ impl Client {
                         tracing::debug!("couldn't complete payment: {:?}", &payment_hash);
                         // Mark it "expired" in db if we couldn't claim it and invoice is expired
                         if invoice_expired {
-                            self.save_payment(&Payment::new_expired(payment.invoice.clone()));
+                            self.update_payment_status(payment_hash, PaymentStatus::Expired);
                         }
                     } else {
                         tracing::debug!("completed payment: {:?}", &payment_hash);
-                        self.save_payment(&Payment::new_paid(payment.invoice.clone()));
+                        self.update_payment_status(payment_hash, PaymentStatus::Paid);
                         self.client.fetch_all_coins().await;
                     }
                 })

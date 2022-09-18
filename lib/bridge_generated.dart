@@ -75,12 +75,14 @@ class BridgePayment {
   final PaymentStatus status;
   final int createdAt;
   final bool paid;
+  final PaymentDirection direction;
 
   BridgePayment({
     required this.invoice,
     required this.status,
     required this.createdAt,
     required this.paid,
+    required this.direction,
   });
 }
 
@@ -88,6 +90,11 @@ enum ConnectionStatus {
   NotConfigured,
   NotConnected,
   Connected,
+}
+
+enum PaymentDirection {
+  Outgoing,
+  Incoming,
 }
 
 enum PaymentStatus {
@@ -306,13 +313,14 @@ BridgeInvoice _wire2api_bridge_invoice(dynamic raw) {
 
 BridgePayment _wire2api_bridge_payment(dynamic raw) {
   final arr = raw as List<dynamic>;
-  if (arr.length != 4)
-    throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+  if (arr.length != 5)
+    throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
   return BridgePayment(
     invoice: _wire2api_bridge_invoice(arr[0]),
     status: _wire2api_payment_status(arr[1]),
     createdAt: _wire2api_u64(arr[2]),
     paid: _wire2api_bool(arr[3]),
+    direction: _wire2api_payment_direction(arr[4]),
   );
 }
 
@@ -326,6 +334,10 @@ int _wire2api_i32(dynamic raw) {
 
 List<BridgePayment> _wire2api_list_bridge_payment(dynamic raw) {
   return (raw as List<dynamic>).map(_wire2api_bridge_payment).toList();
+}
+
+PaymentDirection _wire2api_payment_direction(dynamic raw) {
+  return PaymentDirection.values[raw];
 }
 
 PaymentStatus _wire2api_payment_status(dynamic raw) {
