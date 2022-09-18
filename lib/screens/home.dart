@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/balance.dart';
+import 'package:fluttermint/utils/connection_status.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/utils/network_detector_notifier.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -21,6 +22,7 @@ class Home extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final network = ref.watch(networkAwareProvider);
     final balance = ref.watch(balanceProvider);
+    final connection = ref.watch(connectionStreamProvider);
 
     return Textured(
       child: Scaffold(
@@ -38,13 +40,17 @@ class Home extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (network == NetworkStatus.Off) ...[
-                  const NotConnectedWarning(),
-                  spacer12
-                ],
-                balance == null
-                    ? CircularProgressIndicator(color: white.withOpacity(0.3))
-                    : const BalanceDisplay(),
+                connection.when(
+                  loading: () => Column(
+                    children: const [CircularProgressIndicator(), spacer24],
+                  ),
+                  error: (error, stack) => const NotConnectedWarning(),
+                  data: (value) => NotConnectedWarning(
+                    networkStatus: network,
+                    connectionStatus: value,
+                  ),
+                ),
+                const BalanceDisplay(),
                 spacer24,
                 const TransactionsList(),
                 spacer24,

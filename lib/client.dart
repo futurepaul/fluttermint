@@ -21,6 +21,8 @@ abstract class MinimintClient {
       {required String paymentHash, dynamic hint});
 
   Future<List<BridgePayment>> fetchPayments();
+
+  Future<ConnectionStatus> connectionStatus();
 }
 
 final MinimintClient api = MinimintClientImpl();
