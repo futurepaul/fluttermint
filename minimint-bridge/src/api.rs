@@ -194,7 +194,7 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
     })
 }
 
-pub async fn connection_status_private() -> Result<ConnectionStatus> {
+async fn connection_status_private() -> Result<ConnectionStatus> {
     if !global_client::is_some().await {
         return Ok(ConnectionStatus::NotConfigured);
     }
