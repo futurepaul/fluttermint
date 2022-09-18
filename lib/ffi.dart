@@ -76,4 +76,9 @@ class MinimintClientImpl implements MinimintClient {
   Future<ConnectionStatus> connectionStatus() {
     return api.connectionStatus();
   }
+
+  @override
+  Future<String> network() {
+    return api.network();
+  }
 }

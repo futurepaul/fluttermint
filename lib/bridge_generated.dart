@@ -54,6 +54,10 @@ abstract class MinimintBridge {
   Future<ConnectionStatus> connectionStatus({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kConnectionStatusConstMeta;
+
+  Future<String> network({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kNetworkConstMeta;
 }
 
 class BridgeInvoice {
@@ -257,6 +261,20 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
   FlutterRustBridgeTaskConstMeta get kConnectionStatusConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
         debugName: "connection_status",
+        argNames: [],
+      );
+
+  Future<String> network({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_network(port_),
+        parseSuccessData: _wire2api_String,
+        constMeta: kNetworkConstMeta,
+        argValues: [],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kNetworkConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "network",
         argNames: [],
       );
 
@@ -530,6 +548,18 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
           'wire_connection_status');
   late final _wire_connection_status =
       _wire_connection_statusPtr.asFunction<void Function(int)>();
+
+  void wire_network(
+    int port_,
+  ) {
+    return _wire_network(
+      port_,
+    );
+  }
+
+  late final _wire_networkPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_network');
+  late final _wire_network = _wire_networkPtr.asFunction<void Function(int)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,

@@ -207,3 +207,7 @@ async fn connection_status_private() -> Result<ConnectionStatus> {
 pub fn connection_status() -> Result<ConnectionStatus> {
     RUNTIME.block_on(async { connection_status_private().await })
 }
+
+pub fn network() -> Result<String> {
+    RUNTIME.block_on(async { Ok(global_client::get().await?.network().to_string()) })
+}

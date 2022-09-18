@@ -23,6 +23,8 @@ abstract class MinimintClient {
   Future<List<BridgePayment>> fetchPayments();
 
   Future<ConnectionStatus> connectionStatus();
+
+  Future<String> network();
 }
 
 final MinimintClient api = MinimintClientImpl();

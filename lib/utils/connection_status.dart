@@ -13,6 +13,7 @@ final connectionStreamProvider =
       try {
         await Future.delayed(const Duration(seconds: 5));
         final status = await api.connectionStatus();
+        // TODO: maybe there's a better place to put this
         debugPrint(status.toString());
         yield status;
       } catch (e) {

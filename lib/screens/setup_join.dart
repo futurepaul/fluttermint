@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/screens/home.dart';
 import 'package:fluttermint/widgets/autopaste_text_field.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,8 @@ class SetupJoin extends ConsumerWidget {
     ref.listen<bool>(isConnectedToFederation, (_, isConnected) {
       debugPrint(isConnected.toString());
       if (isConnected) {
+        // When we connect to another federation we need to refresh which network
+        ref.refresh(bitcoinNetworkProvider);
         context.go("/");
       }
     });
