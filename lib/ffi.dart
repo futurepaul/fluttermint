@@ -71,4 +71,14 @@ class MinimintClientImpl implements MinimintClient {
   Future<List<BridgePayment>> fetchPayments() {
     return api.listPayments();
   }
+
+  @override
+  Future<ConnectionStatus> connectionStatus() {
+    return api.connectionStatus();
+  }
+
+  @override
+  Future<String> network() {
+    return api.network();
+  }
 }

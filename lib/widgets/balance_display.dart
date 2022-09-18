@@ -37,7 +37,7 @@ class BalanceDisplay extends ConsumerWidget {
 
     ref.listen<Balance?>(balanceProvider, (_, balance) {
       if (balance != null) {
-        debugPrint(balance.toString());
+        debugPrint("balance: ${balance.amountSats.toString()}");
       } else {
         debugPrint("balance is null?");
       }
@@ -45,27 +45,22 @@ class BalanceDisplay extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () => {balanceNotifier.switchDenom()},
-      child: Column(
-        children: [
-          balanceStreamWatcher.when(
-              data: (_) => Text(balance != null ? balance.prettyPrint() : "???",
-                  style: balance?.denomination == Denom.sats
-                      ? biggestText
-                      : bigText),
-              loading: () =>
-                  Text("~", style: Theme.of(context).textTheme.headline1),
-              error: (err, _) => Text(err.toString())),
-          balanceStreamWatcher.when(
-              data: (_) => Text(
-                  balance != null
-                      ? balance.denomination.toReadableString()
-                      : "SATS",
-                  style: smallText),
-              loading: () =>
-                  Text("-", style: Theme.of(context).textTheme.headline1),
-              error: (err, _) => Text(err.toString()))
-        ],
-      ),
+      child: balanceStreamWatcher.when(
+          data: (_) => Column(
+                children: [
+                  Text(balance != null ? balance.prettyPrint() : "???",
+                      style: balance?.denomination == Denom.sats
+                          ? biggestText
+                          : bigText),
+                  Text(
+                      balance != null
+                          ? balance.denomination.toReadableString()
+                          : "SATS",
+                      style: smallText),
+                ],
+              ),
+          loading: () => const SizedBox(height: 0),
+          error: (err, _) => Text(err.toString())),
     );
   }
 }

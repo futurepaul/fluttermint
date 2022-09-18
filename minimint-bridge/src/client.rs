@@ -101,6 +101,10 @@ impl Client {
         (self.client.coins().total_amount().milli_sat as f64 / 1000.) as u64
     }
 
+    pub fn network(&self) -> bitcoin::Network {
+        self.client.wallet_client().config.network
+    }
+
     async fn pay_inner(&self, bolt11: Invoice) -> anyhow::Result<()> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
         let http = reqwest::Client::new();

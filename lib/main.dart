@@ -10,7 +10,6 @@ Future<void> main() async {
 
   try {
     final success = await api.init();
-
     debugPrint("init was = $success");
   } catch (e) {
     debugPrint('Caught error in init: $e');

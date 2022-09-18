@@ -165,6 +165,18 @@ pub extern "C" fn wire_connection_status(port_: i64) {
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_network(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "network",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| network(),
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]
