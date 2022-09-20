@@ -128,7 +128,10 @@ impl Client {
         Ok(())
     }
 
-    pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
+    pub async fn pay(&self, invoice: String) -> anyhow::Result<()> {
+        // Get rid of potential 'lightning:' prefix
+        let bolt11 = invoice.split(':').last().expect("is always Some");
+
         let invoice: Invoice = bolt11.parse()?;
         match self.pay_inner(invoice.clone()).await {
             Ok(_) => {
@@ -226,8 +229,13 @@ impl Client {
     }
 }
 
-pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
-    let bolt11: Invoice = bolt11.parse()?;
+pub fn decode_invoice(invoice: String) -> anyhow::Result<BridgeInvoice> {
+    // Get rid of potential 'lightning:' prefix
+    let bolt11: Invoice = invoice
+        .split(':')
+        .last()
+        .expect("is always Some")
+        .parse()?;
 
     let amount = bolt11
         .amount_milli_satoshis()
