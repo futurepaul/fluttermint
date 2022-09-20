@@ -30,8 +30,10 @@ class App extends ConsumerWidget {
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
+      // IOS
       statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.dark,
+      // Android, opposite meaning lol
+      statusBarIconBrightness: Brightness.light,
     ));
 
     return MaterialApp.router(
