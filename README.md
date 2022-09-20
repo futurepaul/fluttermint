@@ -16,6 +16,8 @@ If you're following the flutter_rust_bridge guide, you'll want ["Alternative NDK
 
 # Android
 
+When making a release, increment version number and build number in pubspec.yaml: 0.5.1+12 -> 0.5.2+13. Suffix is android build number.
+
 ````
 $ cat ~/.gradle/gradle.properties
 ANDROID_NDK=/Users/justin/Library/Android/sdk/ndk-bundle
