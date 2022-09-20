@@ -27,6 +27,9 @@ class SendScreen extends ConsumerWidget {
     Future<void> tryDecode(String data) async {
       try {
         debugPrint("decoding: $data");
+        if (data.startsWith("lightning:")) {
+          data = data.split(":")[1];
+        }
         var decoded = await api.decodeInvoice(bolt11: data);
         debugPrint("after decoded");
         debugPrint("amount: ${decoded.amount}");
