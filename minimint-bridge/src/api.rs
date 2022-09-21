@@ -85,8 +85,11 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
             return connection_status_private().await;
         };
         global_client::remove().await?;
-        let filename = Path::new(&path).join("client.db");
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
+        let filename = Path::new(&path).join("rocksdb.db");
+        // let db = sled::open(&filename)?.open_tree("mint-client")?;
+        let db: rocksdb::OptimisticTransactionDB<rocksdb::SingleThreaded> =
+            rocksdb::OptimisticTransactionDB::open_default(&filename)?;
+
         if let Some(client) = Client::try_load(Box::new(db)).await? {
             let client = Arc::new(client);
             global_client::set(client.clone()).await;
@@ -102,9 +105,11 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
 pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
         global_client::remove().await?;
-        let filename = Path::new(&user_dir).join("client.db");
+        let filename = Path::new(&user_dir).join("rocksdb.db");
         std::fs::remove_dir_all(&filename)?;
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
+        // let db = sled::open(&filename)?.open_tree("mint-client")?;
+        let db: rocksdb::OptimisticTransactionDB<rocksdb::SingleThreaded> =
+            rocksdb::OptimisticTransactionDB::open_default(&filename)?;
         let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
         // for good measure, make sure the balance is updated (FIXME)
         client.client.fetch_all_coins().await;

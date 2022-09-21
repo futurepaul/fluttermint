@@ -12,7 +12,7 @@ anyhow = "1"
 futures = "0.3"
 
 mint-client = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2" }
-fedimint-api = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2" }
+fedimint-api = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2", features = ["rocksdb"] }
 fedimint-core = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2" }
 # mint-client = { path = "../../fedimint/client/client-lib/"}
 # fedimint-api = { path = "../../fedimint/fedimint-api/" }
@@ -30,6 +30,7 @@ tracing = "0.1.26"
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 tracing-subscriber = { version = "0.3.1", features = [ "env-filter" ] }
 flutter_rust_bridge = "1"
+rocksdb = "0.19.0"
 sled = "0.34.6"
 tokio = {version = "1.0", features = ["full"]}
 
