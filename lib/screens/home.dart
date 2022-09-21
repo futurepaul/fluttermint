@@ -43,7 +43,7 @@ class Home extends ConsumerWidget {
                 bitcoinNetwork.when(
                   loading: () => const Text(""),
                   error: (error, stack) =>
-                      const Text('Oops, something unexpected happened'),
+                      const Text('Tap here to join a federation'),
                   data: (value) => Text('(on $value)'),
                 )
               ],
