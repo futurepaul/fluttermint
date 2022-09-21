@@ -456,6 +456,7 @@ checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 [[package]]
 name = "fedimint-api"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -485,6 +486,7 @@ dependencies = [
 [[package]]
 name = "fedimint-core"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "async-trait",
  "bincode",
@@ -513,6 +515,7 @@ dependencies = [
 [[package]]
 name = "fedimint-derive"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -523,6 +526,7 @@ dependencies = [
 [[package]]
 name = "fedimint-ln"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "async-trait",
  "bincode",
@@ -544,6 +548,7 @@ dependencies = [
 [[package]]
 name = "fedimint-mint"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "async-trait",
  "bincode",
@@ -563,6 +568,7 @@ dependencies = [
 [[package]]
 name = "fedimint-wallet"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1340,6 +1346,7 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2289,6 +2296,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
 dependencies = [
  "bls12_381",
  "ff 0.11.1",
