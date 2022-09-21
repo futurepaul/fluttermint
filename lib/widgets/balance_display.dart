@@ -48,7 +48,7 @@ class BalanceDisplay extends ConsumerWidget {
       child: balanceStreamWatcher.when(
           data: (_) => Column(
                 children: [
-                  Text(balance != null ? balance.prettyPrint() : "???",
+                  Text(balance != null ? balance.prettyPrint() : "",
                       style: balance?.denomination == Denom.sats
                           ? biggestText
                           : bigText),
