@@ -9,8 +9,8 @@ use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
 use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::{Invoice, InvoiceDescription};
-use mint_client::api::WsFederationConnect;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
+use mint_client::{api::WsFederationConnect, query::CurrentConsensus};
 
 use crate::{
     api::BridgeInvoice,
@@ -86,7 +86,9 @@ impl Client {
     pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
         let connect_cfg: WsFederationConnect = serde_json::from_str(cfg_json)?;
         let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
-        let cfg: ClientConfig = api.request("/config", ()).await?;
+        let cfg: ClientConfig = api
+            .request("/config", (), CurrentConsensus::new(connect_cfg.max_evil))
+            .await?;
 
         // FIXME: this isn't the right thing to store
         db.insert_entry(&ConfigKey, &cfg_json.to_string())
