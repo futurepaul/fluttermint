@@ -30,7 +30,7 @@ class SendScreen extends ConsumerWidget {
         if (data.startsWith("lightning:")) {
           data = data.split(":")[1];
         }
-        var decoded = await api.decodeInvoice(bolt11: data);
+        var decoded = await api.decodeInvoice(bolt11: data.toLowerCase());
         debugPrint("after decoded");
         debugPrint("amount: ${decoded.amount}");
         var send = Send(
