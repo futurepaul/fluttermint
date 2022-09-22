@@ -1,6 +1,6 @@
 //! Minimint client with simpler types
 use anyhow::anyhow;
-use bitcoin::hashes::sha256;
+use bitcoin::{hashes::sha256, Network};
 use fedimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
@@ -9,7 +9,7 @@ use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
 use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::{Invoice, InvoiceDescription};
-use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
+use mint_client::{api::WsFederationApi, utils::network_to_currency, UserClient, UserClientConfig};
 use mint_client::{api::WsFederationConnect, query::CurrentConsensus};
 
 use crate::{
@@ -228,8 +228,16 @@ impl Client {
     }
 }
 
-pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
+pub fn decode_invoice(bolt11: String, expected_network: Network) -> anyhow::Result<BridgeInvoice> {
     let bolt11: Invoice = bolt11.parse()?;
+
+    if network_to_currency(expected_network) != bolt11.currency() {
+        return Err(anyhow!(format!(
+            "Wrong network. Expected {}, got {}",
+            network_to_currency(expected_network),
+            bolt11.currency()
+        )));
+    }
 
     let amount = bolt11
         .amount_milli_satoshis()
