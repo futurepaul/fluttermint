@@ -78,6 +78,11 @@ class MinimintClientImpl implements MinimintClient {
   }
 
   @override
+  Future<bool> configuredStatus() {
+    return api.configuredStatus();
+  }
+
+  @override
   Future<String> network() {
     return api.network();
   }

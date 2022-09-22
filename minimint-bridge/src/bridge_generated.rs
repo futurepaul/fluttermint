@@ -154,6 +154,18 @@ pub extern "C" fn wire_list_payments(port_: i64) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_configured_status(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "configured_status",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| configured_status(),
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_connection_status(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {

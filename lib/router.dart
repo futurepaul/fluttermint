@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttermint/data/receive.dart';
+import 'package:fluttermint/client.dart';
 import 'package:fluttermint/screens/error_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -34,16 +36,29 @@ class RouterNotifier extends ChangeNotifier {
   /// This implementation exploits `ref.listen()` to add a simple callback that
   /// calls `notifyListeners()` whenever there's change onto a desider provider.
   RouterNotifier(this._ref) {
-    _ref.listen<Receive?>(
-      receiveProvider,
-      (_, __) => notifyListeners(),
-    );
+    // _ref.listen<ConnectionStatus?>(
+    //   connectionStatusProvider,
+    //   (_, __) => notifyListeners(),
+    // );
   }
 
   /// IMPORTANT: conceptually, we want to use `ref.read` to read providers, here.
   /// GoRouter is already aware of state changes through `refreshListenable`
   /// We don't want to trigger a rebuild of the surrounding provider.
-  String? _redirectLogic(GoRouterState state) {
+  FutureOr<String?> _redirectLogic(
+      BuildContext context, GoRouterState state) async {
+    final configured = await api.configuredStatus();
+
+    debugPrint("are we configured in redirect: $configured");
+
+    final areWeInSetup =
+        state.location == '/setup' || state.location == '/setup/join';
+
+    if (!configured && !areWeInSetup) {
+      debugPrint("redirecting to setup");
+      return "/setup";
+    }
+
     return null;
   }
 

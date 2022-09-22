@@ -21,19 +21,17 @@ final balanceStreamProvider = StreamProvider.autoDispose<String?>((ref) {
 
 class BalanceDisplay extends ConsumerWidget {
   const BalanceDisplay({
+    required this.initialBalance,
     Key? key,
   }) : super(key: key);
+
+  final Balance initialBalance;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final balance = ref.watch(balanceProvider);
     final balanceNotifier = ref.watch(balanceProvider.notifier);
     final balanceStreamWatcher = ref.watch(balanceStreamProvider);
-
-    final biggestText = Theme.of(context).textTheme.headline1;
-    final bigText =
-        Theme.of(context).textTheme.headline1?.copyWith(fontSize: 44);
-    final smallText = Theme.of(context).textTheme.headline2;
 
     ref.listen<Balance?>(balanceProvider, (_, balance) {
       if (balance != null) {
@@ -46,21 +44,36 @@ class BalanceDisplay extends ConsumerWidget {
     return GestureDetector(
       onTap: () => {balanceNotifier.switchDenom()},
       child: balanceStreamWatcher.when(
-          data: (_) => Column(
-                children: [
-                  Text(balance != null ? balance.prettyPrint() : "",
-                      style: balance?.denomination == Denom.sats
-                          ? biggestText
-                          : bigText),
-                  Text(
-                      balance != null
-                          ? balance.denomination.toReadableString()
-                          : "SATS",
-                      style: smallText),
-                ],
+          data: (_) => ActualBalanceDisplay(
+              balance: balance ?? const Balance(amountSats: 0)),
+          loading: () => ActualBalanceDisplay(
+                balance: initialBalance,
               ),
-          loading: () => const SizedBox(height: 0),
           error: (err, _) => Text(err.toString())),
+    );
+  }
+}
+
+class ActualBalanceDisplay extends StatelessWidget {
+  const ActualBalanceDisplay({
+    Key? key,
+    required this.balance,
+  }) : super(key: key);
+
+  final Balance balance;
+
+  @override
+  Widget build(BuildContext context) {
+    final biggestText = Theme.of(context).textTheme.headline1;
+    final bigText =
+        Theme.of(context).textTheme.headline1?.copyWith(fontSize: 44);
+    final smallText = Theme.of(context).textTheme.headline2;
+    return Column(
+      children: [
+        Text(balance.prettyPrint(),
+            style: balance.denomination == Denom.sats ? biggestText : bigText),
+        Text(balance.denomination.toReadableString(), style: smallText),
+      ],
     );
   }
 }

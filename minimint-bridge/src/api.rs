@@ -200,6 +200,19 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
     })
 }
 
+// TODO why does this even have to be a result>
+async fn configured_status_private() -> Result<bool> {
+    if global_client::is_some().await {
+        return Ok(true);
+    } else {
+        return Ok(false);
+    }
+}
+
+pub fn configured_status() -> Result<bool> {
+    RUNTIME.block_on(async { configured_status_private().await })
+}
+
 async fn connection_status_private() -> Result<ConnectionStatus> {
     if !global_client::is_some().await {
         return Ok(ConnectionStatus::NotConfigured);

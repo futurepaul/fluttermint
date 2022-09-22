@@ -25,6 +25,8 @@ abstract class MinimintClient {
   Future<ConnectionStatus> connectionStatus();
 
   Future<String> network();
+
+  Future<bool> configuredStatus();
 }
 
 final MinimintClient api = MinimintClientImpl();
