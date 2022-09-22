@@ -29,7 +29,6 @@ class SetupJoin extends ConsumerWidget {
       debugPrint(isConnected.toString());
       if (isConnected) {
         // When we connect to another federation we need to refresh which network
-        ref.refresh(bitcoinNetworkProvider);
         context.go("/");
       }
     });
@@ -39,7 +38,7 @@ class SetupJoin extends ConsumerWidget {
         ref.read(isConnectedToFederation.notifier).state = false;
         await api.joinFederation(configUrl: cfg);
         ref.read(isConnectedToFederation.notifier).state = true;
-        debugPrint("Joined federation from setup screen");
+        ref.refresh(bitcoinNetworkProvider);
       } catch (e) {
         debugPrint('Caught error in joinFederation: $e');
         ref.read(isConnectedToFederation.notifier).state = false;

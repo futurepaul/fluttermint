@@ -51,6 +51,10 @@ abstract class MinimintBridge {
 
   FlutterRustBridgeTaskConstMeta get kListPaymentsConstMeta;
 
+  Future<bool> configuredStatus({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kConfiguredStatusConstMeta;
+
   Future<ConnectionStatus> connectionStatus({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kConnectionStatusConstMeta;
@@ -253,6 +257,21 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
   FlutterRustBridgeTaskConstMeta get kListPaymentsConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
         debugName: "list_payments",
+        argNames: [],
+      );
+
+  Future<bool> configuredStatus({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_configured_status(port_),
+        parseSuccessData: _wire2api_bool,
+        constMeta: kConfiguredStatusConstMeta,
+        argValues: [],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kConfiguredStatusConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "configured_status",
         argNames: [],
       );
 
@@ -546,6 +565,20 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
           'wire_list_payments');
   late final _wire_list_payments =
       _wire_list_paymentsPtr.asFunction<void Function(int)>();
+
+  void wire_configured_status(
+    int port_,
+  ) {
+    return _wire_configured_status(
+      port_,
+    );
+  }
+
+  late final _wire_configured_statusPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_configured_status');
+  late final _wire_configured_status =
+      _wire_configured_statusPtr.asFunction<void Function(int)>();
 
   void wire_connection_status(
     int port_,

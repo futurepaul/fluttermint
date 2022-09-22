@@ -46,6 +46,9 @@ class TransactionsList extends ConsumerWidget {
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(8),
                       children: [
+                        if (transactions.txs.isEmpty) ...[
+                          const Center(child: Text("No transactions"))
+                        ],
                         ...transactions.txs.map((tx) => SingleTx(tx: tx))
                       ]),
                 )
