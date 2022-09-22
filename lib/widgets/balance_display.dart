@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/balance.dart';
 
+// FIXME: How do we get a initial value
 final balanceStreamProvider = StreamProvider.autoDispose<String?>((ref) {
   Stream<String?> getBalance() async* {
     var shouldPoll = true;
+    await ref.read(balanceProvider.notifier).refreshBalance();
     while (shouldPoll) {
       try {
-        await Future.delayed(const Duration(seconds: 5));
+        await Future.delayed(const Duration(seconds: 1));
         await ref.read(balanceProvider.notifier).refreshBalance();
         yield "good";
       } catch (e) {
@@ -32,14 +34,6 @@ class BalanceDisplay extends ConsumerWidget {
     final balance = ref.watch(balanceProvider);
     final balanceNotifier = ref.watch(balanceProvider.notifier);
     final balanceStreamWatcher = ref.watch(balanceStreamProvider);
-
-    ref.listen<Balance?>(balanceProvider, (_, balance) {
-      if (balance != null) {
-        debugPrint("balance: ${balance.amountSats.toString()}");
-      } else {
-        debugPrint("balance is null?");
-      }
-    });
 
     return GestureDetector(
       onTap: () => {balanceNotifier.switchDenom()},

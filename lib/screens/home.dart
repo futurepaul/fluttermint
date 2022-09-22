@@ -15,12 +15,13 @@ import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 
-final bitcoinNetworkProvider = StreamProvider<String>((_) async* {
-  yield await api.network();
+final bitcoinNetworkProvider = FutureProvider<String>((_) async {
+  return await api.network();
 });
 
-final balanceProvider = StreamProvider<int>((_) async* {
-  yield await api.balance();
+// TODO: this is gross but my stream poller is so bad I need it
+final balanceOnceProvider = FutureProvider<int>((_) async {
+  return await api.balance();
 });
 
 class Home extends ConsumerWidget {
@@ -28,9 +29,12 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final balance = ref.watch(balanceProvider);
+    final balanceOnce = ref.watch(balanceOnceProvider);
     final network = ref.watch(networkAwareProvider);
     final bitcoinNetwork = ref.watch(bitcoinNetworkProvider);
+
+    // FIXME: annoying to have this value and not be able to update it effectively
+    final Balance initialBalance = Balance(amountSats: balanceOnce.value ?? 0);
 
     return Textured(
       child: Scaffold(
@@ -57,25 +61,13 @@ class Home extends ConsumerWidget {
                 NotConnectedWarning(
                   networkStatus: network,
                 ),
-                balance.when(
-                    data: (data) => BalanceDisplay(
-                          initialBalance: Balance(amountSats: data),
-                        ),
-                    error: (error, stackTrace) => const Text(""),
-                    loading: () => const CircularProgressIndicator()),
-                spacer24,
-                balance.when(
-                  data: (data) => const TransactionsList(),
-                  error: (error, stackTrace) => spacer12,
-                  loading: () => spacer12,
+                BalanceDisplay(
+                  initialBalance: initialBalance,
                 ),
                 spacer24,
-                balance.when(
-                  data: (data) => HomeButtonRow(network: network, sats: data),
-                  error: (error, stackTrace) =>
-                      HomeButtonRow(network: network, sats: 0),
-                  loading: () => HomeButtonRow(network: network, sats: 0),
-                ),
+                const TransactionsList(),
+                spacer24,
+                HomeButtonRow(network: network, initialBalance: initialBalance),
               ],
             ),
           )),
@@ -83,18 +75,19 @@ class Home extends ConsumerWidget {
   }
 }
 
-class HomeButtonRow extends StatelessWidget {
+class HomeButtonRow extends ConsumerWidget {
   const HomeButtonRow({
     Key? key,
     required this.network,
-    required this.sats,
+    required this.initialBalance,
   }) : super(key: key);
 
   final NetworkStatus network;
-  final int sats;
+  final Balance initialBalance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final balance = ref.watch(balanceProvider);
     return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       Expanded(
         child: OutlineGradientButton(
@@ -108,12 +101,8 @@ class HomeButtonRow extends StatelessWidget {
       Expanded(
         child: OutlineGradientButton(
             text: "Send",
-            // If we have a balance, and that balance is greater than 0, and we're connected to the internet
-            disabled: sats > 0
-                ? network != NetworkStatus.Off
-                    ? false
-                    : true
-                : true,
+            // if balance isn't 0 and we're connected to the internet
+            disabled: balance?.amountSats == 0 || network == NetworkStatus.Off,
             onTap: () {
               context.go("/send");
             }),
