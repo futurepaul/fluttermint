@@ -129,8 +129,15 @@ pub fn pay(bolt11: String) -> Result<()> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
 
+/// Decode bolt11 invocie
+///
+/// Returns an error if the invoice is on a different network than the
+/// global client is
 pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
-    crate::client::decode_invoice(bolt11)
+    RUNTIME.block_on(async {
+        let client = global_client::get().await?;
+        crate::client::decode_invoice(bolt11, client.network())
+    })
 }
 
 pub fn invoice(amount: u64, description: String) -> Result<String> {
