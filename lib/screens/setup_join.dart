@@ -39,7 +39,6 @@ class SetupJoin extends ConsumerWidget {
         await api.joinFederation(configUrl: cfg);
         ref.read(isConnectedToFederation.notifier).state = true;
         ref.refresh(bitcoinNetworkProvider);
-        debugPrint("Joined federation from setup screen");
       } catch (e) {
         debugPrint('Caught error in joinFederation: $e');
         ref.read(isConnectedToFederation.notifier).state = false;

@@ -35,9 +35,10 @@ class RouterNotifier extends ChangeNotifier {
 
   /// This implementation exploits `ref.listen()` to add a simple callback that
   /// calls `notifyListeners()` whenever there's change onto a desider provider.
+  // TODO: the dream is we listen here for configured / connection status and can re-route accordingly
   RouterNotifier(this._ref) {
-    // _ref.listen<ConnectionStatus?>(
-    //   connectionStatusProvider,
+    // _ref.listen<bool?>(
+    //   configuredProvider,
     //   (_, __) => notifyListeners(),
     // );
   }
@@ -48,8 +49,6 @@ class RouterNotifier extends ChangeNotifier {
   FutureOr<String?> _redirectLogic(
       BuildContext context, GoRouterState state) async {
     final configured = await api.configuredStatus();
-
-    debugPrint("are we configured in redirect: $configured");
 
     final areWeInSetup =
         state.location == '/setup' || state.location == '/setup/join';
