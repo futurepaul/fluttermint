@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
-    crane.url = "github:ipetkov/crane?rev=2d5e7fbfcee984424fe4ad4b3b077c62d18fe1cf"; # v0.6
+    crane.url = "github:dpc/crane";
     crane.inputs.nixpkgs.follows = "nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     fenix = {
@@ -102,6 +102,12 @@
             pkg-config
           ];
 
+          preBuild = ''
+            chmod +x .cargo/ar.*
+            chmod +x .cargo/ld.*
+            patchShebangs .cargo
+          '';
+
           LLVM_CONFIG_PATH = "${androidComposition.ndk-bundle}/libexec/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-config";
 
           CC_armv7_linux_androideabi = "${androidComposition.ndk-bundle}/libexec/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/clang";
@@ -128,7 +134,7 @@
         workspaceDeps = { target }: craneLib.buildDepsOnly ((commonArgs { inherit target; }) // {
           src = filterWorkspaceDepsBuildFiles ./.;
           pname = "workspace-deps";
-          buildPhaseCargoCommand = "find . && cargo doc --target ${target} && cargo check --target ${target} --profile release --all-targets && cargo build --target ${target} --profile release --all-targets";
+          buildPhaseCargoCommand = "cargo doc --target ${target} && cargo check --target ${target} --profile release --all-targets && cargo build --target ${target} --profile release --all-targets";
           doCheck = false;
         });
 
