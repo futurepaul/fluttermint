@@ -147,9 +147,8 @@ pub fn join_federation(config_url: String) -> Result<()> {
     })
 }
 
+/// Unset client and wipe database. Ecash will be destroyed. Use with caution!!!
 pub fn leave_federation() -> Result<()> {
-    // delete the database (their ecash tokens will disappear ... this shouldn't be done lightly ...)
-    // set CLIENT to None
     RUNTIME.block_on(async {
         global_client::remove().await?;
         Ok(())
