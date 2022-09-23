@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/client.dart';
+import 'package:fluttermint/screens/about.dart';
 import 'package:fluttermint/screens/error_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,18 @@ import 'package:fluttermint/screens/setup.dart';
 import 'package:fluttermint/screens/setup_join.dart';
 import 'package:fluttermint/screens/home.dart';
 
-// import 'user.dart';
+CustomTransitionPage buildPageWithDefaultTransition({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        FadeTransition(opacity: animation, child: child),
+  );
+}
 
 /// Caches and Exposes a [GoRouter]
 final routerProvider = Provider<GoRouter>((ref) {
@@ -100,7 +112,15 @@ class RouterNotifier extends ChangeNotifier {
                 return MaterialPage(
                     fullscreenDialog: true,
                     child: ErrorPage(errorReason: state.extra.toString()));
-              })
+              }),
+          GoRoute(
+            path: "about",
+            pageBuilder: (context, state) => buildPageWithDefaultTransition(
+              context: context,
+              state: state,
+              child: const AboutScreen(),
+            ),
+          )
         ]),
       ];
 }
