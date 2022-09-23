@@ -105,7 +105,7 @@ class ReceiveConfirm extends ConsumerWidget {
                     Expanded(
                       child: OutlineGradientButton(
                         text: "Share",
-                        onTap: () => Share.share(lightningUri),
+                        onTap: () => Share.share(invoice ?? ""),
                       ),
                     ),
                     const SizedBox(width: 20),
