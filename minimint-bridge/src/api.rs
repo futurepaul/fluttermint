@@ -4,6 +4,7 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use bitcoin::hashes::sha256;
 use lazy_static::lazy_static;
+use lightning_invoice::Invoice;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -266,4 +267,17 @@ pub fn connection_status() -> Result<ConnectionStatus> {
 
 pub fn network() -> Result<String> {
     RUNTIME.block_on(async { Ok(global_client::get().await?.network().to_string()) })
+}
+
+pub fn calculate_fee(bolt11: String) -> Result<Option<u64>> {
+    let invoice: Invoice = bolt11.parse()?;
+    let fee = invoice
+        .amount_milli_satoshis()
+        .map(|msat| {
+            // Add 1% fee margin
+            msat / 100
+        })
+        // FIXME janky msat -> sat conversion
+        .map(|msat| (msat as f64 / 1000 as f64).round() as u64);
+    Ok(fee)
 }

@@ -184,6 +184,21 @@ pub extern "C" fn wire_network(port_: i64) {
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_calculate_fee(port_: i64, bolt11: *mut wire_uint_8_list) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "calculate_fee",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_bolt11 = bolt11.wire2api();
+            move |task_callback| calculate_fee(api_bolt11)
+        },
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]

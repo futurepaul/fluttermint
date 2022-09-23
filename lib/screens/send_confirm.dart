@@ -11,6 +11,7 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 
+import '../client.dart';
 import '../widgets/chill_info_card.dart';
 import '../widgets/small_balance_display.dart';
 
@@ -30,6 +31,7 @@ class SendConfirm extends ConsumerWidget {
     // final lightningUri = "lightning:$invoice";
     final desc = send.description;
     final amount = send.amountSats;
+    final fee = send.fee;
     return Textured(
       child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -61,6 +63,8 @@ class SendConfirm extends ConsumerWidget {
                     SmallBalanceDisplay(
                       amountSats: send.amountSats,
                     ),
+                    spacer12,
+                    Text("$fee fee"),
                     const SizedBox(height: 8),
                     Text(desc, style: Theme.of(context).textTheme.bodyText2),
                     const SizedBox(height: 16),
