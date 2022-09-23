@@ -50,18 +50,20 @@ mod global_client {
             handle.abort();
         }
 
-        // Wipe database
-        if let Some(user_dir) = GLOBAL_USER_DIR.lock().await.as_ref() {
-            let db_dir = Path::new(&user_dir).join("client.db");
-            std::fs::remove_dir_all(db_dir)?
-        }
-
         tracing::info!("Client removed");
         Ok(())
     }
 
+    pub async fn delete_database() -> Result<()> {
+        // Wipe database
+        if let Some(user_dir) = GLOBAL_USER_DIR.lock().await.as_ref() {
+            let db_dir = Path::new(&user_dir).join("client.db");
+            std::fs::remove_dir_all(db_dir)?;
+        }
+        Ok(())
+    }
+
     pub async fn set(client: Arc<Client>) {
-        remove().await.expect("couldn't remove client");
         *GLOBAL_CLIENT.lock().await = Some(client.clone());
         let poller = tokio::spawn(async move { client.poll().await });
         *GLOBAL_POLLER.lock().await = Some(poller);
@@ -151,6 +153,7 @@ pub fn join_federation(config_url: String) -> Result<()> {
 pub fn leave_federation() -> Result<()> {
     RUNTIME.block_on(async {
         global_client::remove().await?;
+        global_client::delete_database().await?;
         Ok(())
     })
 }
