@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../client.dart';
 import '../utils/constants.dart';
 
 class FedimintLogoAction extends ConsumerWidget {
@@ -26,6 +27,7 @@ class FedimintLogoAction extends ConsumerWidget {
             TextButton(
               onPressed: () async {
                 context.go("/setup");
+                await api.leaveFederation();
               },
               child: const Text('OK'),
             ),
