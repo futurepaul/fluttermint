@@ -85,4 +85,9 @@ class MinimintClientImpl implements MinimintClient {
   Future<String> network() {
     return api.network();
   }
+
+  @override
+  Future<int?> calculateFee({required String bolt11}) {
+    return api.calculateFee(bolt11: bolt11);
+  }
 }

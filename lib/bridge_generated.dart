@@ -20,6 +20,7 @@ abstract class MinimintBridge {
 
   FlutterRustBridgeTaskConstMeta get kJoinFederationConstMeta;
 
+  /// Unset client and wipe database. Ecash will be destroyed. Use with caution!!!
   Future<void> leaveFederation({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kLeaveFederationConstMeta;
@@ -61,6 +62,10 @@ abstract class MinimintBridge {
   Future<String> network({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kNetworkConstMeta;
+
+  Future<int?> calculateFee({required String bolt11, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kCalculateFeeConstMeta;
 }
 
 class BridgeInvoice {
@@ -302,6 +307,22 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: [],
       );
 
+  Future<int?> calculateFee({required String bolt11, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) =>
+            inner.wire_calculate_fee(port_, _api2wire_String(bolt11)),
+        parseSuccessData: _wire2api_opt_box_autoadd_u64,
+        constMeta: kCalculateFeeConstMeta,
+        argValues: [bolt11],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kCalculateFeeConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "calculate_fee",
+        argNames: ["bolt11"],
+      );
+
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
@@ -332,6 +353,10 @@ String _wire2api_String(dynamic raw) {
 
 bool _wire2api_bool(dynamic raw) {
   return raw as bool;
+}
+
+int _wire2api_box_autoadd_u64(dynamic raw) {
+  return raw as int;
 }
 
 BridgeInvoice _wire2api_bridge_invoice(dynamic raw) {
@@ -369,6 +394,10 @@ int _wire2api_i32(dynamic raw) {
 
 List<BridgePayment> _wire2api_list_bridge_payment(dynamic raw) {
   return (raw as List<dynamic>).map(_wire2api_bridge_payment).toList();
+}
+
+int? _wire2api_opt_box_autoadd_u64(dynamic raw) {
+  return raw == null ? null : _wire2api_box_autoadd_u64(raw);
 }
 
 PaymentDirection _wire2api_payment_direction(dynamic raw) {
@@ -600,6 +629,23 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   late final _wire_networkPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_network');
   late final _wire_network = _wire_networkPtr.asFunction<void Function(int)>();
+
+  void wire_calculate_fee(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> bolt11,
+  ) {
+    return _wire_calculate_fee(
+      port_,
+      bolt11,
+    );
+  }
+
+  late final _wire_calculate_feePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_calculate_fee');
+  late final _wire_calculate_fee = _wire_calculate_feePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,

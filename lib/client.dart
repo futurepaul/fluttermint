@@ -27,6 +27,8 @@ abstract class MinimintClient {
   Future<String> network();
 
   Future<bool> configuredStatus();
+
+  Future<int?> calculateFee({required String bolt11});
 }
 
 final MinimintClient api = MinimintClientImpl();
