@@ -16,11 +16,14 @@ lazy_static! {
         .build()
         .expect("failed to build runtime");
 }
-
 mod global_client {
+    use tokio::task::JoinHandle;
+
     use super::*;
 
     static GLOBAL_CLIENT: Mutex<Option<Arc<Client>>> = Mutex::const_new(None);
+    static GLOBAL_POLLER: Mutex<Option<JoinHandle<()>>> = Mutex::const_new(None);
+    static GLOBAL_USER_DIR: Mutex<Option<String>> = Mutex::const_new(None);
 
     pub async fn get() -> Result<Arc<Client>> {
         let client = GLOBAL_CLIENT
@@ -37,13 +40,46 @@ mod global_client {
     }
 
     pub async fn remove() -> Result<()> {
+        // Remove client
         *GLOBAL_CLIENT.lock().await = None;
+
+        // Kill poller
+        let poller = GLOBAL_POLLER.lock().await;
+        tracing::info!("poller {:?}", poller);
+        if let Some(handle) = poller.as_ref() {
+            handle.abort();
+        }
+
+        // Wipe database
+        if let Some(user_dir) = GLOBAL_USER_DIR.lock().await.as_ref() {
+            let db_dir = Path::new(&user_dir).join("client.db");
+            std::fs::remove_dir_all(db_dir)?
+        }
+
         tracing::info!("Client removed");
         Ok(())
     }
 
     pub async fn set(client: Arc<Client>) {
-        *GLOBAL_CLIENT.lock().await = Some(client);
+        remove().await.expect("couldn't remove client");
+        *GLOBAL_CLIENT.lock().await = Some(client.clone());
+        let poller = tokio::spawn(async move { client.poll().await });
+        *GLOBAL_POLLER.lock().await = Some(poller);
+    }
+
+    pub async fn get_user_dir() -> Result<String> {
+        let user_dir = GLOBAL_USER_DIR
+            .lock()
+            .await
+            .as_ref()
+            .ok_or(anyhow!("not initialized"))?
+            .clone();
+        Ok(user_dir)
+    }
+
+    pub async fn set_user_dir(user_dir: String) {
+        *GLOBAL_USER_DIR.lock().await = Some(user_dir.clone());
+        tracing::info!("set user dir {}", &user_dir);
     }
 }
 
@@ -81,17 +117,15 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
         .unwrap_or_else(|error| tracing::info!("Error installing logger: {}", error));
 
     RUNTIME.block_on(async {
+        global_client::set_user_dir(path.clone()).await;
         if global_client::is_some().await {
             return connection_status_private().await;
         };
-        global_client::remove().await?;
         let filename = Path::new(&path).join("client.db");
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         if let Some(client) = Client::try_load(Box::new(db)).await? {
             let client = Arc::new(client);
             global_client::set(client.clone()).await;
-            // TODO: kill the poll task on leave
-            tokio::spawn(async move { client.poll().await });
             let status = connection_status_private().await?;
             return Ok(status);
         }
@@ -99,18 +133,16 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
     })
 }
 
-pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
+pub fn join_federation(config_url: String) -> Result<()> {
     RUNTIME.block_on(async {
-        global_client::remove().await?;
+        let user_dir = global_client::get_user_dir().await?;
+        tracing::info!("user dir {}", user_dir);
         let filename = Path::new(&user_dir).join("client.db");
-        std::fs::remove_dir_all(&filename)?;
         let db = sled::open(&filename)?.open_tree("mint-client")?;
         let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
         // for good measure, make sure the balance is updated (FIXME)
         client.client.fetch_all_coins().await;
         global_client::set(client.clone()).await;
-        // TODO: kill the poll task on leave
-        tokio::spawn(async move { client.poll().await });
         Ok(())
     })
 }
@@ -118,7 +150,10 @@ pub fn join_federation(user_dir: String, config_url: String) -> Result<()> {
 pub fn leave_federation() -> Result<()> {
     // delete the database (their ecash tokens will disappear ... this shouldn't be done lightly ...)
     // set CLIENT to None
-    Ok(())
+    RUNTIME.block_on(async {
+        global_client::remove().await?;
+        Ok(())
+    })
 }
 
 pub fn balance() -> Result<u64> {

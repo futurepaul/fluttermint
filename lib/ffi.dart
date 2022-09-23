@@ -32,8 +32,7 @@ class MinimintClientImpl implements MinimintClient {
 
   @override
   Future<void> joinFederation({required String configUrl}) async {
-    final userDir = await getApplicationDocumentsDirectory();
-    await api.joinFederation(configUrl: configUrl, userDir: userDir.path);
+    await api.joinFederation(configUrl: configUrl);
   }
 
   @override
