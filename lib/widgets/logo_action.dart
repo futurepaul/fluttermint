@@ -13,7 +13,8 @@ class FedimintLogoAction extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => showDialog<String>(
+      onTap: () => {context.go("/about")},
+      onLongPress: () => showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Leave Federation?'),

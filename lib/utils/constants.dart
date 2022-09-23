@@ -26,6 +26,8 @@ const spacer12 = SizedBox(
   width: 12.0,
 );
 const spacer24 = SizedBox(height: 24.0, width: 12.0);
+const spacer6 = SizedBox(height: 6.0, width: 6.0);
+const spacer0 = SizedBox.shrink();
 
 const TextTheme textThemeDefault = TextTheme(
   headline1: TextStyle(
