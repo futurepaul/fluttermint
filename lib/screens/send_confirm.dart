@@ -64,7 +64,7 @@ class SendConfirm extends ConsumerWidget {
                       amountSats: send.amountSats,
                     ),
                     spacer12,
-                    Text("$fee fee"),
+                    Text("$fee sat gateway fee"),
                     const SizedBox(height: 8),
                     Text(desc, style: Theme.of(context).textTheme.bodyText2),
                     const SizedBox(height: 16),
