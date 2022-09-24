@@ -33,9 +33,8 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    // qr_code_scanner only works with v32
+    // mobile_scaner only works with v32
     compileSdkVersion 32
-    // compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -53,8 +52,8 @@ android {
 
     defaultConfig {
         applicationId "com.justinmoon.fluttermint"
-        // qr_code_scanner only works with v20
-        minSdkVersion 20
+        // mobile_scanner only works with v21
+        minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
