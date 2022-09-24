@@ -28,26 +28,6 @@ Tail logs from terminal:
 adb logcat | grep -F "`adb shell ps | grep com.justinmoon.fluttermint  | tr -s [:space:] ' ' | cut -d' ' -f2`"
 ```
 
-## Building for WASM
-
-### Prerequisites
-
-1. [wasm-pack](https://rustwasm.github.io/wasm-pack/)
-2. Typescript
-3. [dart_js_facade_gen](https://github.com/dart-lang/js_facade_gen)
-
-For debug build:
-
-```sh
-just wasm --dev
-````
-
-For release build:
-
-```sh
-just wasm
-```
-
 # Testflight
 
 Build the IPA:

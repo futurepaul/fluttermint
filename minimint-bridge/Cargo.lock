@@ -287,16 +287,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "console_error_panic_hook"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
-dependencies = [
- "cfg-if",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -804,10 +794,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fc3cb4d91f53b50155bdcfd23f6a4c39ae1969c2ae85982b135750cccaf5fce"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "wasi 0.9.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -1312,15 +1300,12 @@ dependencies = [
  "fedimint-core",
  "flutter_rust_bridge",
  "futures",
- "getrandom 0.1.16",
- "js-sys",
  "lazy_static",
  "lightning-invoice",
  "mint-client",
  "paranoid-android",
  "rand 0.6.5",
  "reqwest",
- "rexie",
  "serde",
  "serde_json",
  "sled",
@@ -1328,9 +1313,6 @@ dependencies = [
  "tracing",
  "tracing-oslog",
  "tracing-subscriber",
- "tracing-wasm",
- "wasm-bindgen",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -1802,7 +1784,6 @@ dependencies = [
  "libc",
  "rand_core 0.4.2",
  "rdrand",
- "wasm-bindgen",
  "winapi",
 ]
 
@@ -1939,21 +1920,6 @@ dependencies = [
  "web-sys",
  "webpki-roots",
  "winreg",
-]
-
-[[package]]
-name = "rexie"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fef172ff9cdf146cdc934e28cdeb137517bf954fb75e6ee8987dd44b58f351b1"
-dependencies = [
- "console_error_panic_hook",
- "js-sys",
- "num-traits",
- "thiserror",
- "tokio",
- "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]
@@ -2557,17 +2523,6 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
-]
-
-[[package]]
-name = "tracing-wasm"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4575c663a174420fa2d78f4108ff68f65bf2fbb7dd89f33749b6e826b3626e07"
-dependencies = [
- "tracing",
- "tracing-subscriber",
- "wasm-bindgen",
 ]
 
 [[package]]
