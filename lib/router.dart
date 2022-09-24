@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttermint/client.dart';
+import 'package:fluttermint/ffi.dart';
 import 'package:fluttermint/screens/about.dart';
 import 'package:fluttermint/screens/error_page.dart';
 import 'package:go_router/go_router.dart';

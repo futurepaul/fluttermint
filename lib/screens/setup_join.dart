@@ -13,7 +13,7 @@ import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import '../client.dart';
+import '../ffi.dart';
 
 final isConnectedToFederation = StateProvider<bool>((ref) => false);
 

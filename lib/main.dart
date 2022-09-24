@@ -3,13 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/router.dart';
 import 'package:fluttermint/utils/constants.dart';
-import './client.dart';
+import 'package:path_provider/path_provider.dart';
+import './ffi.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    final success = await api.init();
+    final userDir = (await getApplicationDocumentsDirectory()).path;
+    final success = await api.init(path: userDir);
     debugPrint("init was = $success");
   } catch (e) {
     debugPrint('Caught error in init: $e');

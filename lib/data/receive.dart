@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod/riverpod.dart';
 
-import '../client.dart';
+import '../ffi.dart';
 
 @immutable
 class Receive {

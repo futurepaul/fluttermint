@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'package:fluttermint/bridge_generated.dart';
-import 'package:fluttermint/client.dart';
+import 'package:fluttermint/ffi.dart';
 
 extension ParseToString on PaymentStatus {
   String toReadableString() {
@@ -70,7 +70,7 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
 
   fetchTransactions() async {
     debugPrint("Fetching txs");
-    var payments = await api.fetchPayments();
+    var payments = await api.listPayments();
     payments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     List<Transaction> txs = [];
     for (var payment in payments) {

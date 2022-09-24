@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttermint/client.dart';
+import 'package:fluttermint/ffi.dart';
 import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/utils/network_detector_notifier.dart';
