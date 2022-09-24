@@ -29,9 +29,7 @@ class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: Icons.arrow_back,
                   semanticLabel: "Back",
                 )
-              : const SizedBox(
-                  width: 24,
-                ),
+              : const ButtonSizedSpacer(),
           Text(title, style: Theme.of(context).textTheme.headline3),
           SimpleIconButton(
             action: closeAction,
@@ -41,6 +39,19 @@ class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
     );
+  }
+}
+
+class ButtonSizedSpacer extends StatelessWidget {
+  const ButtonSizedSpacer({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.all(8.0),
+        child: const SizedBox(width: 24.0, height: 24.0));
   }
 }
 
