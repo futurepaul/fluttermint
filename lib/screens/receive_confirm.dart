@@ -140,14 +140,4 @@ class ReceiveConfirm extends ConsumerWidget {
           )),
     );
   }
-
-  Future<bool?> copiedToast() {
-    return Fluttertoast.showToast(
-        msg: "Invoice Copied",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: black,
-        textColor: white,
-        fontSize: 16.0);
-  }
 }
