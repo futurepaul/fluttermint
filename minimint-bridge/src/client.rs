@@ -87,6 +87,7 @@ impl Client {
         let connect_cfg: WsFederationConnect = serde_json::from_str(cfg_json)?;
         let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
         let cfg: ClientConfig = api
+            // FIXME: is this the correct policy?
             .request("/config", (), CurrentConsensus::new(connect_cfg.max_evil))
             .await?;
 

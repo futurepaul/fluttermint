@@ -199,7 +199,58 @@ pub extern "C" fn wire_calculate_fee(port_: i64, bolt11: *mut wire_uint_8_list) 
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_list_federations(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "list_federations",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| Ok(list_federations()),
+    )
+}
+
+#[no_mangle]
+pub extern "C" fn wire_switch_federation(port_: i64, federation: *mut wire_BridgeFederationInfo) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "switch_federation",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_federation = federation.wire2api();
+            move |task_callback| switch_federation(api_federation)
+        },
+    )
+}
+
 // Section: wire structs
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct wire_BridgeFederationInfo {
+    name: *mut wire_uint_8_list,
+    network: *mut wire_uint_8_list,
+    current: bool,
+    guardians: *mut wire_list_bridge_guardian_info,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct wire_BridgeGuardianInfo {
+    name: *mut wire_uint_8_list,
+    address: *mut wire_uint_8_list,
+    online: bool,
+}
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct wire_list_bridge_guardian_info {
+    ptr: *mut wire_BridgeGuardianInfo,
+    len: i32,
+}
 
 #[repr(C)]
 #[derive(Clone)]
@@ -213,6 +264,20 @@ pub struct wire_uint_8_list {
 // Section: static checks
 
 // Section: allocate functions
+
+#[no_mangle]
+pub extern "C" fn new_box_autoadd_bridge_federation_info_0() -> *mut wire_BridgeFederationInfo {
+    support::new_leak_box_ptr(wire_BridgeFederationInfo::new_with_null_ptr())
+}
+
+#[no_mangle]
+pub extern "C" fn new_list_bridge_guardian_info_0(len: i32) -> *mut wire_list_bridge_guardian_info {
+    let wrap = wire_list_bridge_guardian_info {
+        ptr: support::new_leak_vec_ptr(<wire_BridgeGuardianInfo>::new_with_null_ptr(), len),
+        len,
+    };
+    support::new_leak_box_ptr(wrap)
+}
 
 #[no_mangle]
 pub extern "C" fn new_uint_8_list_0(len: i32) -> *mut wire_uint_8_list {
@@ -249,6 +314,50 @@ impl Wire2Api<String> for *mut wire_uint_8_list {
     }
 }
 
+impl Wire2Api<bool> for bool {
+    fn wire2api(self) -> bool {
+        self
+    }
+}
+
+impl Wire2Api<BridgeFederationInfo> for *mut wire_BridgeFederationInfo {
+    fn wire2api(self) -> BridgeFederationInfo {
+        let wrap = unsafe { support::box_from_leak_ptr(self) };
+        Wire2Api::<BridgeFederationInfo>::wire2api(*wrap).into()
+    }
+}
+
+impl Wire2Api<BridgeFederationInfo> for wire_BridgeFederationInfo {
+    fn wire2api(self) -> BridgeFederationInfo {
+        BridgeFederationInfo {
+            name: self.name.wire2api(),
+            network: self.network.wire2api(),
+            current: self.current.wire2api(),
+            guardians: self.guardians.wire2api(),
+        }
+    }
+}
+
+impl Wire2Api<BridgeGuardianInfo> for wire_BridgeGuardianInfo {
+    fn wire2api(self) -> BridgeGuardianInfo {
+        BridgeGuardianInfo {
+            name: self.name.wire2api(),
+            address: self.address.wire2api(),
+            online: self.online.wire2api(),
+        }
+    }
+}
+
+impl Wire2Api<Vec<BridgeGuardianInfo>> for *mut wire_list_bridge_guardian_info {
+    fn wire2api(self) -> Vec<BridgeGuardianInfo> {
+        let vec = unsafe {
+            let wrap = support::box_from_leak_ptr(self);
+            support::vec_from_leak_ptr(wrap.ptr, wrap.len)
+        };
+        vec.into_iter().map(Wire2Api::wire2api).collect()
+    }
+}
+
 impl Wire2Api<u64> for u64 {
     fn wire2api(self) -> u64 {
         self
@@ -282,7 +391,53 @@ impl<T> NewWithNullPtr for *mut T {
     }
 }
 
+impl NewWithNullPtr for wire_BridgeFederationInfo {
+    fn new_with_null_ptr() -> Self {
+        Self {
+            name: core::ptr::null_mut(),
+            network: core::ptr::null_mut(),
+            current: Default::default(),
+            guardians: core::ptr::null_mut(),
+        }
+    }
+}
+
+impl NewWithNullPtr for wire_BridgeGuardianInfo {
+    fn new_with_null_ptr() -> Self {
+        Self {
+            name: core::ptr::null_mut(),
+            address: core::ptr::null_mut(),
+            online: Default::default(),
+        }
+    }
+}
+
 // Section: impl IntoDart
+
+impl support::IntoDart for BridgeFederationInfo {
+    fn into_dart(self) -> support::DartCObject {
+        vec![
+            self.name.into_dart(),
+            self.network.into_dart(),
+            self.current.into_dart(),
+            self.guardians.into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl support::IntoDartExceptPrimitive for BridgeFederationInfo {}
+
+impl support::IntoDart for BridgeGuardianInfo {
+    fn into_dart(self) -> support::DartCObject {
+        vec![
+            self.name.into_dart(),
+            self.address.into_dart(),
+            self.online.into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl support::IntoDartExceptPrimitive for BridgeGuardianInfo {}
 
 impl support::IntoDart for BridgeInvoice {
     fn into_dart(self) -> support::DartCObject {
