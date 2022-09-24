@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 use bitcoin::hashes::sha256;
+use bitcoin::Network;
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
 use tokio::runtime;
@@ -280,4 +281,70 @@ pub fn calculate_fee(bolt11: String) -> Result<Option<u64>> {
         // FIXME janky msat -> sat conversion
         .map(|msat| (msat as f64 / 1000 as f64).round() as u64);
     Ok(fee)
+}
+
+/// Bridge representation of a fedimint node
+#[derive(Clone, Debug)]
+pub struct BridgeGuardianInfo {
+    pub name: String,
+    pub address: String,
+    pub online: bool,
+}
+
+/// Bridge representation of a fedimint node
+#[derive(Clone, Debug)]
+pub struct BridgeFederationInfo {
+    pub name: String,
+    pub network: String,
+    pub current: bool,
+    pub guardians: Vec<BridgeGuardianInfo>,
+}
+
+/// Returns the federations we're members of
+///
+/// At most one will be `active`
+pub fn list_federations() -> Vec<BridgeFederationInfo> {
+    return vec![
+        BridgeFederationInfo {
+            name: "Trimont State Bank".into(),
+            network: Network::Bitcoin.to_string(),
+            current: true,
+            guardians: vec![
+                BridgeGuardianInfo {
+                    name: "Tony".into(),
+                    address: "https://locahost:5000".into(),
+                    online: true,
+                },
+                BridgeGuardianInfo {
+                    name: "Cal".into(),
+                    address: "https://locahost:6000".into(),
+                    online: false,
+                },
+            ],
+        },
+        BridgeFederationInfo {
+            name: "CypherU".into(),
+            network: Network::Signet.to_string(),
+            current: false,
+            guardians: vec![
+                BridgeGuardianInfo {
+                    name: "Eric".into(),
+                    address: "https://locahost:7000".into(),
+                    online: false,
+                },
+                BridgeGuardianInfo {
+                    name: "Obi".into(),
+                    address: "https://locahost:8000".into(),
+                    online: true,
+                },
+            ],
+        },
+    ];
+}
+
+/// Switch to a federation that we've already joined
+///
+/// This assumes federation config is already saved locally
+pub fn switch_federation(federation: BridgeFederationInfo) -> Result<()> {
+    Ok(())
 }

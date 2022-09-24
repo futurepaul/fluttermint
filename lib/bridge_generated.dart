@@ -66,6 +66,49 @@ abstract class MinimintBridge {
   Future<int?> calculateFee({required String bolt11, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kCalculateFeeConstMeta;
+
+  /// Returns the federations we're members of
+  ///
+  /// At most one will be `active`
+  Future<List<BridgeFederationInfo>> listFederations({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kListFederationsConstMeta;
+
+  /// Switch to a federation that we've already joined
+  ///
+  /// This assumes federation config is already saved locally
+  Future<void> switchFederation(
+      {required BridgeFederationInfo federation, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kSwitchFederationConstMeta;
+}
+
+/// Bridge representation of a fedimint node
+class BridgeFederationInfo {
+  final String name;
+  final String network;
+  final bool current;
+  final List<BridgeGuardianInfo> guardians;
+
+  BridgeFederationInfo({
+    required this.name,
+    required this.network,
+    required this.current,
+    required this.guardians,
+  });
+}
+
+/// Bridge representation of a fedimint node
+class BridgeGuardianInfo {
+  final String name;
+  final String address;
+  final bool online;
+
+  BridgeGuardianInfo({
+    required this.name,
+    required this.address,
+    required this.online,
+  });
 }
 
 class BridgeInvoice {
@@ -323,9 +366,61 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: ["bolt11"],
       );
 
+  Future<List<BridgeFederationInfo>> listFederations({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_list_federations(port_),
+        parseSuccessData: _wire2api_list_bridge_federation_info,
+        constMeta: kListFederationsConstMeta,
+        argValues: [],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kListFederationsConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "list_federations",
+        argNames: [],
+      );
+
+  Future<void> switchFederation(
+          {required BridgeFederationInfo federation, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_switch_federation(
+            port_, _api2wire_box_autoadd_bridge_federation_info(federation)),
+        parseSuccessData: _wire2api_unit,
+        constMeta: kSwitchFederationConstMeta,
+        argValues: [federation],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kSwitchFederationConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "switch_federation",
+        argNames: ["federation"],
+      );
+
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
+  }
+
+  bool _api2wire_bool(bool raw) {
+    return raw;
+  }
+
+  ffi.Pointer<wire_BridgeFederationInfo>
+      _api2wire_box_autoadd_bridge_federation_info(BridgeFederationInfo raw) {
+    final ptr = inner.new_box_autoadd_bridge_federation_info_0();
+    _api_fill_to_wire_bridge_federation_info(raw, ptr.ref);
+    return ptr;
+  }
+
+  ffi.Pointer<wire_list_bridge_guardian_info>
+      _api2wire_list_bridge_guardian_info(List<BridgeGuardianInfo> raw) {
+    final ans = inner.new_list_bridge_guardian_info_0(raw.length);
+    for (var i = 0; i < raw.length; ++i) {
+      _api_fill_to_wire_bridge_guardian_info(raw[i], ans.ref.ptr[i]);
+    }
+    return ans;
   }
 
   int _api2wire_u64(int raw) {
@@ -344,6 +439,26 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
 
   // Section: api_fill_to_wire
 
+  void _api_fill_to_wire_box_autoadd_bridge_federation_info(
+      BridgeFederationInfo apiObj,
+      ffi.Pointer<wire_BridgeFederationInfo> wireObj) {
+    _api_fill_to_wire_bridge_federation_info(apiObj, wireObj.ref);
+  }
+
+  void _api_fill_to_wire_bridge_federation_info(
+      BridgeFederationInfo apiObj, wire_BridgeFederationInfo wireObj) {
+    wireObj.name = _api2wire_String(apiObj.name);
+    wireObj.network = _api2wire_String(apiObj.network);
+    wireObj.current = _api2wire_bool(apiObj.current);
+    wireObj.guardians = _api2wire_list_bridge_guardian_info(apiObj.guardians);
+  }
+
+  void _api_fill_to_wire_bridge_guardian_info(
+      BridgeGuardianInfo apiObj, wire_BridgeGuardianInfo wireObj) {
+    wireObj.name = _api2wire_String(apiObj.name);
+    wireObj.address = _api2wire_String(apiObj.address);
+    wireObj.online = _api2wire_bool(apiObj.online);
+  }
 }
 
 // Section: wire2api
@@ -357,6 +472,29 @@ bool _wire2api_bool(dynamic raw) {
 
 int _wire2api_box_autoadd_u64(dynamic raw) {
   return raw as int;
+}
+
+BridgeFederationInfo _wire2api_bridge_federation_info(dynamic raw) {
+  final arr = raw as List<dynamic>;
+  if (arr.length != 4)
+    throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+  return BridgeFederationInfo(
+    name: _wire2api_String(arr[0]),
+    network: _wire2api_String(arr[1]),
+    current: _wire2api_bool(arr[2]),
+    guardians: _wire2api_list_bridge_guardian_info(arr[3]),
+  );
+}
+
+BridgeGuardianInfo _wire2api_bridge_guardian_info(dynamic raw) {
+  final arr = raw as List<dynamic>;
+  if (arr.length != 3)
+    throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+  return BridgeGuardianInfo(
+    name: _wire2api_String(arr[0]),
+    address: _wire2api_String(arr[1]),
+    online: _wire2api_bool(arr[2]),
+  );
 }
 
 BridgeInvoice _wire2api_bridge_invoice(dynamic raw) {
@@ -390,6 +528,14 @@ ConnectionStatus _wire2api_connection_status(dynamic raw) {
 
 int _wire2api_i32(dynamic raw) {
   return raw as int;
+}
+
+List<BridgeFederationInfo> _wire2api_list_bridge_federation_info(dynamic raw) {
+  return (raw as List<dynamic>).map(_wire2api_bridge_federation_info).toList();
+}
+
+List<BridgeGuardianInfo> _wire2api_list_bridge_guardian_info(dynamic raw) {
+  return (raw as List<dynamic>).map(_wire2api_bridge_guardian_info).toList();
 }
 
 List<BridgePayment> _wire2api_list_bridge_payment(dynamic raw) {
@@ -647,6 +793,67 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   late final _wire_calculate_fee = _wire_calculate_feePtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
+  void wire_list_federations(
+    int port_,
+  ) {
+    return _wire_list_federations(
+      port_,
+    );
+  }
+
+  late final _wire_list_federationsPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_list_federations');
+  late final _wire_list_federations =
+      _wire_list_federationsPtr.asFunction<void Function(int)>();
+
+  void wire_switch_federation(
+    int port_,
+    ffi.Pointer<wire_BridgeFederationInfo> federation,
+  ) {
+    return _wire_switch_federation(
+      port_,
+      federation,
+    );
+  }
+
+  late final _wire_switch_federationPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Void Function(
+                  ffi.Int64, ffi.Pointer<wire_BridgeFederationInfo>)>>(
+      'wire_switch_federation');
+  late final _wire_switch_federation = _wire_switch_federationPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_BridgeFederationInfo>)>();
+
+  ffi.Pointer<wire_BridgeFederationInfo>
+      new_box_autoadd_bridge_federation_info_0() {
+    return _new_box_autoadd_bridge_federation_info_0();
+  }
+
+  late final _new_box_autoadd_bridge_federation_info_0Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<wire_BridgeFederationInfo>
+              Function()>>('new_box_autoadd_bridge_federation_info_0');
+  late final _new_box_autoadd_bridge_federation_info_0 =
+      _new_box_autoadd_bridge_federation_info_0Ptr
+          .asFunction<ffi.Pointer<wire_BridgeFederationInfo> Function()>();
+
+  ffi.Pointer<wire_list_bridge_guardian_info> new_list_bridge_guardian_info_0(
+    int len,
+  ) {
+    return _new_list_bridge_guardian_info_0(
+      len,
+    );
+  }
+
+  late final _new_list_bridge_guardian_info_0Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<wire_list_bridge_guardian_info> Function(
+              ffi.Int32)>>('new_list_bridge_guardian_info_0');
+  late final _new_list_bridge_guardian_info_0 =
+      _new_list_bridge_guardian_info_0Ptr.asFunction<
+          ffi.Pointer<wire_list_bridge_guardian_info> Function(int)>();
+
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,
   ) {
@@ -696,6 +903,33 @@ class wire_uint_8_list extends ffi.Struct {
 
   @ffi.Int32()
   external int len;
+}
+
+class wire_BridgeGuardianInfo extends ffi.Struct {
+  external ffi.Pointer<wire_uint_8_list> name;
+
+  external ffi.Pointer<wire_uint_8_list> address;
+
+  @ffi.Bool()
+  external bool online;
+}
+
+class wire_list_bridge_guardian_info extends ffi.Struct {
+  external ffi.Pointer<wire_BridgeGuardianInfo> ptr;
+
+  @ffi.Int32()
+  external int len;
+}
+
+class wire_BridgeFederationInfo extends ffi.Struct {
+  external ffi.Pointer<wire_uint_8_list> name;
+
+  external ffi.Pointer<wire_uint_8_list> network;
+
+  @ffi.Bool()
+  external bool current;
+
+  external ffi.Pointer<wire_list_bridge_guardian_info> guardians;
 }
 
 typedef DartPostCObjectFnType = ffi.Pointer<
