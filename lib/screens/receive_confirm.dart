@@ -1,12 +1,14 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
+import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/chill_info_card.dart';
 import 'package:fluttermint/widgets/qr_display.dart';
-import 'package:fluttermint/widgets/small_balance_display.dart';
+import 'package:fluttermint/widgets/transaction_list.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
@@ -48,6 +50,9 @@ class ReceiveConfirm extends ConsumerWidget {
     // Don't context.go across async boundary
     ref.listen<Receive?>(receiveProvider, (_, receive) {
       if (receive?.receiveStatus == "paid") {
+        // TODO: kind of hacky...
+        // Toggle transactions closed so they have to refresh it by opening it
+        ref.read(showTransactionsProvider.notifier).update((show) => false);
         context.go("/");
       }
     });
@@ -92,7 +97,10 @@ class ReceiveConfirm extends ConsumerWidget {
                             child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            SmallBalanceDisplay(amountSats: amount ?? 0),
+                            ActualBalanceDisplay(
+                              small: true,
+                              balance: Balance(amountSats: amount ?? 0),
+                            ),
                             spacer12,
                             if (desc != null && desc.isNotEmpty) ...[
                               Text(desc, style: paymentDescriptionText),

@@ -6,6 +6,7 @@ import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/data_expander.dart';
+import 'package:fluttermint/widgets/transaction_list.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:fluttermint/widgets/content_padding.dart';
@@ -110,6 +111,11 @@ class SendConfirm extends ConsumerWidget {
                             .read(balanceProvider.notifier)
                             .refreshBalance()
                             .then((_) async {
+                          // TODO: kind of hacky...
+                          // Toggle transactions closed so they have to refresh it by opening it
+                          ref
+                              .read(showTransactionsProvider.notifier)
+                              .update((show) => false);
                           context.go("/");
                         });
                       } catch (err) {
