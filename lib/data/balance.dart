@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../ffi.dart';
@@ -27,7 +28,7 @@ class Balance {
   String prettyPrint() {
     switch (denomination) {
       case Denom.sats:
-        return amountSats.toString();
+        return NumberFormat.decimalPattern().format(amountSats);
       case Denom.btc:
         return (amountSats / 100000000).toStringAsFixed(8);
     }

@@ -5,6 +5,7 @@ const grey = Color.fromRGBO(255, 255, 255, 0.498);
 const disabledGrey = Color(0xFFC4C4C4);
 const offwhite = Color(0xFFA0A0A0);
 const white = Color(0xFFF1F1F1);
+const whiteFaded = Color(0xCCF1F1F1); // 0.8 opacity
 
 Map<int, Color> color = {
   50: const Color.fromRGBO(241, 241, 241, .1),
@@ -34,6 +35,20 @@ const navTitleText = TextStyle(
   color: white,
   fontSize: 16,
   fontWeight: FontWeight.w500,
+);
+
+const paymentDescriptionText = TextStyle(
+  fontFamily: "Albert Sans",
+  color: white,
+  fontSize: 14,
+  fontWeight: FontWeight.w400,
+);
+
+const smallBalanceText = TextStyle(
+  fontFamily: "Archivo 125",
+  color: white,
+  fontSize: 28,
+  fontWeight: FontWeight.w400,
 );
 
 const TextTheme textThemeDefault = TextTheme(
@@ -78,5 +93,5 @@ const TextTheme textThemeDefault = TextTheme(
       color: Color(0xCCF1F1F1), fontSize: 14, fontWeight: FontWeight.w400),
   subtitle1: TextStyle(color: white, fontSize: 16, fontWeight: FontWeight.w400),
   subtitle2: TextStyle(color: grey, fontSize: 12),
-  caption: TextStyle(fontFamily: "Archivo 125", color: black, fontSize: 12),
+  caption: TextStyle(color: black, fontSize: 12),
 );

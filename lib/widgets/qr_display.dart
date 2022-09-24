@@ -24,14 +24,21 @@ class QrDisplay extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            QrImage(
-                data: data,
-                version: QrVersions.auto,
-                // Screen width minus 40.0 for container and 48.0 for app padding
-                // limit to 300 px
-                size:
-                    (MediaQuery.of(context).size.width - 88.0).clamp(0, 300.0)),
-            spacer12,
+            // debugPrint(constraints.toString());
+            Container(
+              constraints: BoxConstraints(
+                  maxHeight: (MediaQuery.of(context).size.height / 2)),
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: QrImage(
+                    data: data,
+                    version: QrVersions.auto,
+                  ),
+                ),
+              ),
+            ),
             EllipsableText(
                 text: displayText, style: Theme.of(context).textTheme.caption),
           ],
