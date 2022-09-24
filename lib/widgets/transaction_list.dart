@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttermint/data/transactions.dart';
+import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/single_tx.dart';
 import 'package:fluttermint/widgets/toggle.dart';
 
@@ -62,6 +63,7 @@ class TransactionsList extends ConsumerWidget {
                   blendMode: BlendMode.dstOut,
                   child: ListView(shrinkWrap: true, children: [
                     if (transactions.txs.isEmpty) ...[
+                      spacer24,
                       const Center(child: Text("No transactions"))
                     ],
                     ...transactions.txs.map((tx) => SingleTx(tx: tx))
