@@ -1,16 +1,20 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
+import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermint/widgets/chill_info_card.dart';
 import 'package:fluttermint/widgets/qr_display.dart';
-import 'package:fluttermint/widgets/small_balance_display.dart';
+import 'package:fluttermint/widgets/transaction_list.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
+import 'package:intl/intl.dart';
 
 import 'package:share_plus/share_plus.dart';
 
@@ -37,9 +41,18 @@ class ReceiveConfirm extends ConsumerWidget {
 
     final statusProvider = ref.watch(paymentStatusStreamProvider);
 
+    final statusText = statusProvider.when(
+        data: (data) =>
+            data != null ? "$data..." : "No status, something went wrong.",
+        loading: () => "Loading...",
+        error: (err, _) => err.toString());
+
     // Don't context.go across async boundary
     ref.listen<Receive?>(receiveProvider, (_, receive) {
       if (receive?.receiveStatus == "paid") {
+        // TODO: kind of hacky...
+        // Toggle transactions closed so they have to refresh it by opening it
+        ref.read(showTransactionsProvider.notifier).update((show) => false);
         context.go("/");
       }
     });
@@ -48,6 +61,17 @@ class ReceiveConfirm extends ConsumerWidget {
     final lightningUri = "lightning:$invoice";
     final desc = receive?.description;
     final amount = receive?.amountSats;
+
+    void _copy() {
+      Clipboard.setData(ClipboardData(text: invoice));
+      Fluttertoast.showToast(
+          msg: "Invoice Copied",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: black,
+          textColor: white,
+          fontSize: 16.0);
+    }
 
     return Textured(
       child: Scaffold(
@@ -73,28 +97,25 @@ class ReceiveConfirm extends ConsumerWidget {
                             child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text("RECEIVE",
-                                style: Theme.of(context).textTheme.headline4),
-                            spacer12,
-                            SmallBalanceDisplay(amountSats: amount ?? 0),
+                            ActualBalanceDisplay(
+                              small: true,
+                              balance: Balance(amountSats: amount ?? 0),
+                            ),
                             spacer12,
                             if (desc != null && desc.isNotEmpty) ...[
-                              Text(desc,
-                                  style: Theme.of(context).textTheme.bodyText2),
+                              Text(desc, style: paymentDescriptionText),
                             ],
-                            statusProvider.when(
-                                data: (data) => Text(
-                                    data ?? "no status something went wrong?"),
-                                loading: () => const Padding(
-                                      padding: EdgeInsets.all(4.0),
-                                      child: Text("loading"),
-                                    ),
-                                error: (err, _) => Text(err.toString())),
+                            spacer12,
+                            Text(toBeginningOfSentenceCase(statusText) ?? "",
+                                style: paymentDescriptionText)
                           ],
                         )),
                         spacer24,
-                        QrDisplay(
-                            data: lightningUri, displayText: invoice ?? ""),
+                        GestureDetector(
+                          onLongPress: _copy,
+                          child: QrDisplay(
+                              data: lightningUri, displayText: invoice ?? ""),
+                        ),
                       ],
                     ),
                   ),
@@ -110,11 +131,8 @@ class ReceiveConfirm extends ConsumerWidget {
                     ),
                     const SizedBox(width: 20),
                     Expanded(
-                        child: OutlineGradientButton(
-                      text: "Copy",
-                      onTap: () =>
-                          Clipboard.setData(ClipboardData(text: invoice)),
-                    )),
+                        child:
+                            OutlineGradientButton(text: "Copy", onTap: _copy)),
                   ],
                 )
               ],

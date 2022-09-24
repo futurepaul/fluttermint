@@ -127,7 +127,7 @@ class OutlineGradientButton extends StatelessWidget {
                           )
                         : Text(text,
                             style: TextStyle(
-                                fontFamily: "Archivo",
+                                fontFamily: "Albert Sans",
                                 color: primary
                                     ? black
                                     : disabled

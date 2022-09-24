@@ -33,6 +33,8 @@ class Home extends ConsumerWidget {
     final network = ref.watch(networkAwareProvider);
     final bitcoinNetwork = ref.watch(bitcoinNetworkProvider);
 
+    final showTransactions = ref.watch(showTransactionsProvider);
+
     // FIXME: annoying to have this value and not be able to update it effectively
     final Balance initialBalance = Balance(amountSats: balanceOnce.value ?? 0);
 
@@ -55,22 +57,86 @@ class Home extends ConsumerWidget {
             ),
           ),
           body: ContentPadding(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                NotConnectedWarning(
-                  networkStatus: network,
-                ),
-                BalanceDisplay(
-                  initialBalance: initialBalance,
-                ),
-                spacer24,
-                const TransactionsList(),
-                spacer24,
-                HomeButtonRow(network: network, initialBalance: initialBalance),
-              ],
-            ),
+            child: showTransactions
+                ? HomeTxsOpen(network: network, initialBalance: initialBalance)
+                : HomeTxsNotOpen(
+                    network: network, initialBalance: initialBalance),
           )),
+    );
+  }
+}
+
+// FIXME: these are really redundant widgets I just wasn't winning at flexbox and this made it simpler to reason about
+class HomeTxsOpen extends StatelessWidget {
+  const HomeTxsOpen({
+    Key? key,
+    required this.network,
+    required this.initialBalance,
+  }) : super(key: key);
+
+  final NetworkStatus network;
+  final Balance initialBalance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        NotConnectedWarning(
+          networkStatus: network,
+        ),
+        Flexible(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              BalanceDisplay(
+                small: true,
+                initialBalance: initialBalance,
+              ),
+              spacer24,
+              const Expanded(child: TransactionsList()),
+            ],
+          ),
+        ),
+        spacer12,
+        HomeButtonRow(network: network, initialBalance: initialBalance),
+      ],
+    );
+  }
+}
+
+class HomeTxsNotOpen extends StatelessWidget {
+  const HomeTxsNotOpen({
+    Key? key,
+    required this.network,
+    required this.initialBalance,
+  }) : super(key: key);
+
+  final NetworkStatus network;
+  final Balance initialBalance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Spacer(),
+        NotConnectedWarning(
+          networkStatus: network,
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            BalanceDisplay(
+              initialBalance: initialBalance,
+            ),
+            spacer24,
+            const TransactionsList(),
+          ],
+        ),
+        const Spacer(),
+        HomeButtonRow(network: network, initialBalance: initialBalance),
+      ],
     );
   }
 }

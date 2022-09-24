@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttermint/utils/constants.dart';
 
 class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -29,10 +30,8 @@ class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: Icons.arrow_back,
                   semanticLabel: "Back",
                 )
-              : const SizedBox(
-                  width: 24,
-                ),
-          Text(title, style: Theme.of(context).textTheme.headline3),
+              : const ButtonSizedSpacer(),
+          Text(title, style: navTitleText),
           SimpleIconButton(
             action: closeAction,
             icon: Icons.close,
@@ -41,6 +40,19 @@ class FediAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
     );
+  }
+}
+
+class ButtonSizedSpacer extends StatelessWidget {
+  const ButtonSizedSpacer({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.all(8.0),
+        child: const SizedBox(width: 24.0, height: 24.0));
   }
 }
 
