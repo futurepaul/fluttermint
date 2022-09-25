@@ -51,6 +51,13 @@ const smallBalanceText = TextStyle(
   fontWeight: FontWeight.w400,
 );
 
+const guardianText = TextStyle(
+  fontFamily: "Alberto Sans",
+  color: white,
+  fontSize: 16,
+  fontWeight: FontWeight.w500,
+);
+
 const TextTheme textThemeDefault = TextTheme(
   headline1: TextStyle(
     fontFamily: "Archivo 125",
