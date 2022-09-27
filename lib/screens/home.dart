@@ -5,6 +5,7 @@ import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/utils/network_detector_notifier.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermint/widgets/chill_info_card.dart';
 import 'package:fluttermint/widgets/logo_action.dart';
 import 'package:fluttermint/widgets/not_connected_warning.dart';
 
@@ -105,7 +106,7 @@ class HomeTxsOpen extends StatelessWidget {
   }
 }
 
-class HomeTxsNotOpen extends StatelessWidget {
+class HomeTxsNotOpen extends ConsumerWidget {
   const HomeTxsNotOpen({
     Key? key,
     required this.network,
@@ -116,7 +117,33 @@ class HomeTxsNotOpen extends StatelessWidget {
   final Balance initialBalance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bitcoinNetwork = ref.watch(bitcoinNetworkProvider);
+
+    // This warning should only show up when we're on mainnet
+    final mainnetWarning = bitcoinNetwork.when(
+        loading: () => const SizedBox.shrink(),
+        error: (error, stack) => const SizedBox.shrink(),
+        data: (value) => value == "bitcoin"
+            ? Column(
+                children: [
+                  ChillInfoCard(
+                    warning: true,
+                    child: Column(
+                      children: [
+                        Text("Warning",
+                            style: Theme.of(context).textTheme.headline6),
+                        spacer12,
+                        Text("This is alpha software, use at your own risk!",
+                            style: Theme.of(context).textTheme.subtitle1),
+                      ],
+                    ),
+                  ),
+                  spacer24,
+                ],
+              )
+            : const SizedBox.shrink());
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -124,6 +151,7 @@ class HomeTxsNotOpen extends StatelessWidget {
         NotConnectedWarning(
           networkStatus: network,
         ),
+        mainnetWarning,
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
