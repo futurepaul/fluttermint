@@ -14,7 +14,6 @@ import 'package:go_router/go_router.dart';
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
-import 'package:intl/intl.dart';
 
 import 'package:share_plus/share_plus.dart';
 
@@ -42,9 +41,8 @@ class ReceiveConfirm extends ConsumerWidget {
     final statusProvider = ref.watch(paymentStatusStreamProvider);
 
     final statusText = statusProvider.when(
-        data: (data) =>
-            data != null ? "$data..." : "No status, something went wrong.",
-        loading: () => "Loading...",
+        data: (data) => data ?? "error",
+        loading: () => "loading",
         error: (err, _) => err.toString());
 
     // Don't context.go across async boundary
@@ -103,11 +101,21 @@ class ReceiveConfirm extends ConsumerWidget {
                             ),
                             spacer12,
                             if (desc != null && desc.isNotEmpty) ...[
-                              Text(desc, style: paymentDescriptionText),
+                              Column(
+                                children: [
+                                  Text(desc, style: paymentDescriptionText),
+                                  spacer12,
+                                ],
+                              ),
                             ],
-                            spacer12,
-                            Text(toBeginningOfSentenceCase(statusText) ?? "",
-                                style: paymentDescriptionText)
+                            Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: white.withOpacity(0.1)),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 8),
+                                child: Text(statusText.toUpperCase(),
+                                    style: const TextStyle(fontSize: 10))),
                           ],
                         )),
                         spacer24,
