@@ -131,7 +131,7 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
         };
         let filename = Path::new(&path).join("client.db");
         // TODO: use federation name as "tree"
-        let db = SledDb::open(filename, "mint-client")?;
+        let db = SledDb::open(filename, "client")?;
         if let Some(client) = Client::try_load(db.into()).await? {
             let client = Arc::new(client);
             global_client::set(client.clone()).await;
@@ -148,7 +148,7 @@ pub fn join_federation(config_url: String) -> Result<()> {
         tracing::info!("user dir {}", user_dir);
         let filename = Path::new(&user_dir).join("client.db");
         // TODO: use federation name as "tree"
-        let db = SledDb::open(filename, "mint-client")?;
+        let db = SledDb::open(filename, "client")?;
         let client = Arc::new(Client::new(db.into(), &config_url).await?);
         // for good measure, make sure the balance is updated (FIXME)
         client.client.fetch_all_coins().await;
