@@ -115,7 +115,6 @@ impl Client {
 
     async fn pay_inner(&self, bolt11: Invoice) -> anyhow::Result<()> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
-        let http = reqwest::Client::new();
 
         let (contract_id, outpoint) = self
             .client
@@ -126,11 +125,8 @@ impl Client {
             .await_outgoing_contract_acceptance(outpoint)
             .await?;
 
-        let gw = self.client.fetch_active_gateway().await?;
-        http.post(&format!("{}/pay_invoice", gw.api))
-            .json(&contract_id)
-            // .timeout(Duration::from_secs(15)) // TODO: add timeout
-            .send()
+        self.client
+            .await_outgoing_contract_execution(contract_id)
             .await?;
 
         Ok(())

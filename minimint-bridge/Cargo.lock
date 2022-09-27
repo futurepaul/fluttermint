@@ -1322,7 +1322,6 @@ dependencies = [
  "mint-client",
  "paranoid-android",
  "rand 0.6.5",
- "reqwest",
  "serde",
  "serde_json",
  "sled",
