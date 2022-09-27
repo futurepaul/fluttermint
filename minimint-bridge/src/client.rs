@@ -4,6 +4,7 @@ use bitcoin::hashes::sha256;
 use fedimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
+    NumPeers,
 };
 use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
@@ -75,7 +76,7 @@ impl DatabaseKeyPrefixConst for ConfigKey {
 }
 
 impl Client {
-    pub async fn try_load(db: Box<dyn Database>) -> anyhow::Result<Option<Self>> {
+    pub async fn try_load(db: Database) -> anyhow::Result<Option<Self>> {
         if let Some(cfg_json) = db.get_value(&ConfigKey).expect("db error") {
             Ok(Some(Self::new(db, &cfg_json).await?))
         } else {
@@ -83,12 +84,16 @@ impl Client {
         }
     }
 
-    pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
+    pub async fn new(db: Database, cfg_json: &str) -> anyhow::Result<Self> {
         let connect_cfg: WsFederationConnect = serde_json::from_str(cfg_json)?;
-        let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
+        let api = WsFederationApi::new(connect_cfg.members);
         let cfg: ClientConfig = api
             // FIXME: is this the correct policy?
-            .request("/config", (), CurrentConsensus::new(connect_cfg.max_evil))
+            .request(
+                "/config",
+                (),
+                CurrentConsensus::new(api.peers().one_honest()),
+            )
             .await?;
 
         // FIXME: this isn't the right thing to store

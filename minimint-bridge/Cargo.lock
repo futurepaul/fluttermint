@@ -446,7 +446,7 @@ checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 [[package]]
 name = "fedimint-api"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -464,7 +464,6 @@ dependencies = [
  "secp256k1-zkp",
  "serde",
  "serde_json",
- "sled",
  "tbs",
  "thiserror",
  "tokio",
@@ -476,7 +475,7 @@ dependencies = [
 [[package]]
 name = "fedimint-core"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "async-trait",
  "bincode",
@@ -505,7 +504,7 @@ dependencies = [
 [[package]]
 name = "fedimint-derive"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -516,7 +515,7 @@ dependencies = [
 [[package]]
 name = "fedimint-ln"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "async-trait",
  "bincode",
@@ -538,7 +537,7 @@ dependencies = [
 [[package]]
 name = "fedimint-mint"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "async-trait",
  "bincode",
@@ -556,9 +555,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "fedimint-sled"
+version = "0.1.0"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
+dependencies = [
+ "anyhow",
+ "fedimint-api",
+ "sled",
+ "tracing",
+]
+
+[[package]]
 name = "fedimint-wallet"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -639,11 +649,10 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "form_urlencoded"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fc25a87fa4fd2094bffb06925852034d90a17f0d1e05197d4956d3555752191"
+checksum = "a9c384f161156f5260c24a097c56119f9be8c798586aecc13afbcbe7b7e26bf8"
 dependencies = [
- "matches",
  "percent-encoding",
 ]
 
@@ -910,12 +919,9 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
 name = "heck"
-version = "0.3.3"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d621efb26863f0e9924c6ac577e8275e5e6b77455db64ffa6c65c904e9e132c"
-dependencies = [
- "unicode-segmentation",
-]
+checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
 
 [[package]]
 name = "hermit-abi"
@@ -1027,6 +1033,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "idna"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e14ddfc70884202db2244c223200c204c2bda1bc6e0998d11b5e024d657209e6"
+dependencies = [
+ "unicode-bidi",
+ "unicode-normalization",
+]
+
+[[package]]
 name = "if_chain"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1059,9 +1075,9 @@ checksum = "879d54834c8c76457ef4293a689b2a8c59b076067ad77b15efafbb05f92a592b"
 
 [[package]]
 name = "itertools"
-version = "0.10.3"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
+checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
 dependencies = [
  "either",
 ]
@@ -1298,6 +1314,7 @@ dependencies = [
  "bitcoin",
  "fedimint-api",
  "fedimint-core",
+ "fedimint-sled",
  "flutter_rust_bridge",
  "futures",
  "lazy_static",
@@ -1328,7 +1345,7 @@ dependencies = [
 [[package]]
 name = "mint-client"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1539,9 +1556,9 @@ checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
 
 [[package]]
 name = "percent-encoding"
-version = "2.1.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
+checksum = "478c572c3d73181ff3c2539045f6eb99e5491218eae919370993b890cdbdd98e"
 
 [[package]]
 name = "pin-project"
@@ -2080,18 +2097,18 @@ checksum = "f638d531eccd6e23b980caf34876660d38e265409d8e99b397ab71eb3612fad0"
 
 [[package]]
 name = "serde"
-version = "1.0.143"
+version = "1.0.145"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53e8e5d5b70924f74ff5c6d64d9a5acd91422117c60f48c4e07855238a254553"
+checksum = "728eb6351430bccb993660dfffc5a72f91ccc1295abaa8ce19b27ebe4f75568b"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.143"
+version = "1.0.145"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3d8e8de557aee63c26b85b947f5e59b690d0454c753f3adeb5cd7835ab88391"
+checksum = "81fa1584d3d1bcacd84c277a0dfe21f5b0f6accf4a23d04d4c6d61f1af522b4c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2262,7 +2279,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tbs"
 version = "0.1.0"
-source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-2#d3929ac9336a5b48a7b95d5227a37a553d87f3f9"
+source = "git+https://github.com/justinmoon/fedimint?branch=fluttermint-3#c2ea5e0e322d53638007d619c1c6124776044540"
 dependencies = [
  "bls12_381",
  "ff 0.11.1",
@@ -2559,12 +2576,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "unicode-segmentation"
-version = "1.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e8820f5d777f6224dc4be3632222971ac30164d4a258d595640799554ebfd99"
-
-[[package]]
 name = "unicode-width"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2578,13 +2589,12 @@ checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
 name = "url"
-version = "2.2.2"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a507c383b2d33b5fc35d1861e77e6b383d158b2da5e14fe51b83dfedf6fd578c"
+checksum = "0d68c799ae75762b8c3fe375feb6600ef5602c883c5d21eb51c09f22b83c4643"
 dependencies = [
  "form_urlencoded",
- "idna",
- "matches",
+ "idna 0.3.0",
  "percent-encoding",
  "serde",
 ]
@@ -2595,7 +2605,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32ad5bf234c7d3ad1042e5252b7eddb2c4669ee23f32c7dd0e9b7705f07ef591"
 dependencies = [
- "idna",
+ "idna 0.2.3",
  "lazy_static",
  "regex",
  "serde",

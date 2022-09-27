@@ -4,6 +4,7 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use bitcoin::hashes::sha256;
 use bitcoin::Network;
+use fedimint_sled::SledDb;
 use lazy_static::lazy_static;
 use lightning_invoice::Invoice;
 use tokio::runtime;
@@ -26,6 +27,9 @@ mod global_client {
     static GLOBAL_CLIENT: Mutex<Option<Arc<Client>>> = Mutex::const_new(None);
     static GLOBAL_POLLER: Mutex<Option<JoinHandle<()>>> = Mutex::const_new(None);
     static GLOBAL_USER_DIR: Mutex<Option<String>> = Mutex::const_new(None);
+
+    // Justin: static function to return a reference to the federation you're working on.
+    // Dart side can call methods on it.
 
     pub async fn get() -> Result<Arc<Client>> {
         let client = GLOBAL_CLIENT
@@ -126,8 +130,9 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
             return connection_status_private().await;
         };
         let filename = Path::new(&path).join("client.db");
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
-        if let Some(client) = Client::try_load(Box::new(db)).await? {
+        // TODO: use federation name as "tree"
+        let db = SledDb::open(filename, "mint-client")?;
+        if let Some(client) = Client::try_load(db.into()).await? {
             let client = Arc::new(client);
             global_client::set(client.clone()).await;
             let status = connection_status_private().await?;
@@ -142,8 +147,9 @@ pub fn join_federation(config_url: String) -> Result<()> {
         let user_dir = global_client::get_user_dir().await?;
         tracing::info!("user dir {}", user_dir);
         let filename = Path::new(&user_dir).join("client.db");
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
-        let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
+        // TODO: use federation name as "tree"
+        let db = SledDb::open(filename, "mint-client")?;
+        let client = Arc::new(Client::new(db.into(), &config_url).await?);
         // for good measure, make sure the balance is updated (FIXME)
         client.client.fetch_all_coins().await;
         global_client::set(client.clone()).await;
