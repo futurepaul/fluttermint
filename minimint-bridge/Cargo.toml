@@ -11,10 +11,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 anyhow = "1"
 futures = "0.3"
 
-mint-client = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-3" }
-fedimint-api = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-3" }
-fedimint-core = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-3" }
-fedimint-sled = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-3" }
+mint-client = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+fedimint-api = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+fedimint-core = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+fedimint-sled = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
 # mint-client = { path = "../../fedimint/client/client-lib/"}
 # fedimint-api = { path = "../../fedimint/fedimint-api/" }
 # fedimint-core = { path = "../../fedimint/fedimint-core/" }

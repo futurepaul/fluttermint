@@ -51,6 +51,10 @@ impl Payment {
     pub fn expired(&self) -> bool {
         self.status == PaymentStatus::Expired
     }
+
+    pub fn incoming(&self) -> bool {
+        self.direction == PaymentDirection::Incoming
+    }
 }
 
 #[derive(Debug, Clone, Encodable, Decodable)]

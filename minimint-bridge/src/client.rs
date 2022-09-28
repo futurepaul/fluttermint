@@ -1,4 +1,6 @@
 //! Minimint client with simpler types
+use std::time::{Duration, SystemTime};
+
 use anyhow::anyhow;
 use bitcoin::hashes::sha256;
 use fedimint_api::{
@@ -6,8 +8,8 @@ use fedimint_api::{
     encoding::{Decodable, Encodable},
     NumPeers,
 };
-use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
+use fedimint_core::{config::ClientConfig, modules::ln::contracts::IdentifyableContract};
 use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::{Invoice, InvoiceDescription};
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
@@ -125,11 +127,17 @@ impl Client {
             .await_outgoing_contract_acceptance(outpoint)
             .await?;
 
-        self.client
-            .await_outgoing_contract_execution(contract_id)
-            .await?;
+        let result = self
+            .client
+            .await_outgoing_contract_execution(contract_id, &mut rng)
+            .await;
 
-        Ok(())
+        // FIXME: actually check that a refund happened
+        if result.is_err() {
+            self.client.fetch_all_coins().await;
+        }
+
+        Ok(result?)
     }
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
@@ -186,13 +194,14 @@ impl Client {
     }
 
     pub async fn poll(&self) {
-        // Spawn a thread to check balances and claim incoming contracts
+        let mut last_outgoing_check = SystemTime::now();
         loop {
+            // Try to complete incoming payments
             let mut requests = self
                 .list_payments()
                 .into_iter()
                 // TODO: should we filter
-                .filter(|payment| !payment.paid() && !payment.expired())
+                .filter(|payment| !payment.paid() && !payment.expired() && payment.incoming())
                 .map(|payment| async move {
                     // FIXME: don't create rng in here ...
                     let invoice_expired = payment.invoice.is_expired();
@@ -223,6 +232,64 @@ impl Client {
             // FIXME: is there a better way to consume these futures?
             while let Some(_) = requests.next().await {
                 tracing::info!("completed api request");
+            }
+
+            // Only check outgoing payments once per minute
+            if last_outgoing_check
+                .elapsed()
+                .expect("Unix time not available")
+                > Duration::from_secs(60)
+            {
+                // Try to complete outgoing payments
+                let consensus_block_height = match self
+                    .client
+                    .wallet_client()
+                    .context
+                    .api
+                    .fetch_consensus_block_height()
+                    .await
+                {
+                    Ok(height) => height,
+                    Err(_) => {
+                        tracing::error!("failed to get block height");
+                        continue;
+                    }
+                };
+
+                // TODO: only do this once per minute
+                tracing::info!("looking for refunds...");
+                let mut requests = self
+                    .client
+                    .ln_client()
+                    .refundable_outgoing_contracts(consensus_block_height)
+                    .into_iter()
+                    .map(|contract| async move {
+                        tracing::info!(
+                            "attempting to get refund {:?}",
+                            contract.contract_account.contract.contract_id(),
+                        );
+                        match self
+                            .client
+                            .try_refund_outgoing_contract(
+                                contract.contract_account.contract.contract_id(),
+                                rand::rngs::OsRng::new().unwrap(),
+                            )
+                            .await
+                        {
+                            Ok(_) => {
+                                tracing::info!("got refund");
+                                self.client.fetch_all_coins().await;
+                            }
+                            Err(e) => tracing::info!("refund failed {:?}", e),
+                        }
+                    })
+                    .collect::<FuturesUnordered<_>>();
+
+                // FIXME: is there a better way to consume these futures?
+                while let Some(_) = requests.next().await {
+                    tracing::info!("completed api request");
+                }
+                last_outgoing_check = SystemTime::now();
             }
 
             fedimint_api::task::sleep(std::time::Duration::from_secs(1)).await;

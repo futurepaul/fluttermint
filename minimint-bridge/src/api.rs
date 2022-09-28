@@ -351,6 +351,6 @@ pub fn list_federations() -> Vec<BridgeFederationInfo> {
 /// Switch to a federation that we've already joined
 ///
 /// This assumes federation config is already saved locally
-pub fn switch_federation(federation: BridgeFederationInfo) -> Result<()> {
+pub fn switch_federation(_federation: BridgeFederationInfo) -> Result<()> {
     Ok(())
 }
