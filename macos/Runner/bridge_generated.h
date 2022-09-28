@@ -45,8 +45,6 @@ void wire_balance(int64_t port_);
 
 void wire_pay(int64_t port_, struct wire_uint_8_list *bolt11);
 
-void wire_decode_invoice(int64_t port_, struct wire_uint_8_list *bolt11);
-
 void wire_invoice(int64_t port_, uint64_t amount, struct wire_uint_8_list *description);
 
 void wire_fetch_payment(int64_t port_, struct wire_uint_8_list *payment_hash);
@@ -63,7 +61,9 @@ void wire_calculate_fee(int64_t port_, struct wire_uint_8_list *bolt11);
 
 void wire_list_federations(int64_t port_);
 
-void wire_switch_federation(int64_t port_, struct wire_BridgeFederationInfo *federation);
+void wire_switch_federation(int64_t port_, struct wire_BridgeFederationInfo *_federation);
+
+void wire_decode_invoice(int64_t port_, struct wire_uint_8_list *bolt11);
 
 struct wire_BridgeFederationInfo *new_box_autoadd_bridge_federation_info_0(void);
 
@@ -82,7 +82,6 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) wire_leave_federation);
     dummy_var ^= ((int64_t) (void*) wire_balance);
     dummy_var ^= ((int64_t) (void*) wire_pay);
-    dummy_var ^= ((int64_t) (void*) wire_decode_invoice);
     dummy_var ^= ((int64_t) (void*) wire_invoice);
     dummy_var ^= ((int64_t) (void*) wire_fetch_payment);
     dummy_var ^= ((int64_t) (void*) wire_list_payments);
@@ -92,6 +91,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) wire_calculate_fee);
     dummy_var ^= ((int64_t) (void*) wire_list_federations);
     dummy_var ^= ((int64_t) (void*) wire_switch_federation);
+    dummy_var ^= ((int64_t) (void*) wire_decode_invoice);
     dummy_var ^= ((int64_t) (void*) new_box_autoadd_bridge_federation_info_0);
     dummy_var ^= ((int64_t) (void*) new_list_bridge_guardian_info_0);
     dummy_var ^= ((int64_t) (void*) new_uint_8_list_0);
