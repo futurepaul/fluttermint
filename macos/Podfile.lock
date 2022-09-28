@@ -3,6 +3,8 @@ PODS:
     - FlutterMacOS
     - Reachability
   - FlutterMacOS (1.0.0)
+  - mobile_scanner (0.0.1):
+    - FlutterMacOS
   - package_info_plus_macos (0.0.1):
     - FlutterMacOS
   - path_provider_macos (0.0.1):
@@ -16,6 +18,7 @@ PODS:
 DEPENDENCIES:
   - connectivity_macos (from `Flutter/ephemeral/.symlinks/plugins/connectivity_macos/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos`)
   - package_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
   - share_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/share_plus_macos/macos`)
@@ -30,6 +33,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/connectivity_macos/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  mobile_scanner:
+    :path: Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos
   package_info_plus_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos
   path_provider_macos:
@@ -42,12 +47,13 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity_macos: 5dae6ee11d320fac7c05f0d08bd08fc32b5514d9
   FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
+  mobile_scanner: 35dc92ffdbd7934b0dbc411b1c731bc2ef23c2dc
   package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
   path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   share_plus_macos: 853ee48e7dce06b633998ca0735d482dd671ade4
   url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
 
-PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+PODFILE CHECKSUM: 9c287df83456b84329f6ecc46f20e235558c2010
 
 COCOAPODS: 1.11.3
