@@ -180,10 +180,13 @@ pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
 
 pub fn invoice(amount: u64, description: String) -> Result<String> {
     RUNTIME.block_on(async {
-        global_client::get()
-            .await?
-            .invoice(amount, description)
-            .await
+        let client = global_client::get().await?;
+
+        if client.network() == Network::Bitcoin && amount > 60000 {
+            return Err(anyhow!("Maximum invoice size on mainnet is 60000 sats"));
+        }
+
+        client.invoice(amount, description).await
     })
 }
 
