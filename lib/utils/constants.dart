@@ -37,12 +37,21 @@ const navTitleText = TextStyle(
   fontWeight: FontWeight.w500,
 );
 
+const errorTitleText = TextStyle(
+  fontFamily: "Archivo 125",
+  color: white,
+  fontSize: 16,
+  fontWeight: FontWeight.w500,
+);
+
 const paymentDescriptionText = TextStyle(
   fontFamily: "Albert Sans",
   color: white,
   fontSize: 14,
   fontWeight: FontWeight.w400,
 );
+
+const errorDescriptionText = paymentDescriptionText;
 
 const smallBalanceText = TextStyle(
   fontFamily: "Archivo 125",

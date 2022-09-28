@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
+import 'package:fluttermint/screens/error_page.dart';
 import 'package:fluttermint/screens/home.dart';
 import 'package:fluttermint/widgets/autopaste_text_field.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -11,10 +13,13 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../ffi.dart';
 
 final isConnectedToFederation = StateProvider<bool>((ref) => false);
+
+const MAINNET_SCARY = "bitcoin";
 
 class SetupJoin extends ConsumerWidget {
   const SetupJoin({super.key});
@@ -23,12 +28,20 @@ class SetupJoin extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textController = TextEditingController();
 
-    // Trying this so we don't do context.go across async boundary
+    // This listener is so we don't context.go across async boundary
     ref.listen<bool>(isConnectedToFederation, (_, isConnected) {
-      debugPrint(isConnected.toString());
+      // When we connect to another federation we need to refresh which network
+      ref.refresh(bitcoinNetworkProvider);
       if (isConnected) {
-        // When we connect to another federation we need to refresh which network
-        context.go("/");
+        api.network().then((value) async {
+          // If we connect to a mainnet federation, warn about it
+          if (value == MAINNET_SCARY) {
+            await joinWarning(context, ref);
+          } else {
+            // Otherwise we're clear to go to home
+            context.go("/");
+          }
+        });
       }
     });
 
@@ -37,10 +50,13 @@ class SetupJoin extends ConsumerWidget {
         ref.read(isConnectedToFederation.notifier).state = false;
         await api.joinFederation(configUrl: cfg);
         ref.read(isConnectedToFederation.notifier).state = true;
-        ref.refresh(bitcoinNetworkProvider);
-      } catch (e) {
+      } on FfiException catch (e) {
         debugPrint('Caught error in joinFederation: $e');
         ref.read(isConnectedToFederation.notifier).state = false;
+        debugPrint(e.message);
+        context.go("/errormodal",
+            extra: ErrorWhy(
+                title: "Failed to join federation", reason: e.message));
       }
     }
 
@@ -48,12 +64,7 @@ class SetupJoin extends ConsumerWidget {
       final data = barcode.rawValue;
       if (data != null) {
         debugPrint('Barcode found! $data');
-        try {
-          joinFederation(data);
-        } catch (e) {
-          debugPrint('Caught error in onDetect: $e');
-          context.go("/errormodal", extra: e);
-        }
+        joinFederation(data);
       }
     }
 
@@ -88,16 +99,35 @@ class SetupJoin extends ConsumerWidget {
                     text: "Continue",
                     onTap: () async {
                       var newText = textController.text;
-                      // https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
-                      try {
-                        joinFederation(newText);
-                      } catch (err) {
-                        context.go("/errormodal", extra: err);
-                      }
+                      joinFederation(newText);
                     })
               ],
             ),
           )),
+    );
+  }
+
+  joinWarning(BuildContext context, WidgetRef ref) async {
+    showPlatformDialog(
+      context: context,
+      builder: (_) => PlatformAlertDialog(
+        title: const Text('Warning'),
+        content: const Text(
+            "You've just joined a mainnet federation. Fluttermint is in early alpha, and fund-loss is a real possibility. Please use with caution!"),
+        actions: <Widget>[
+          PlatformDialogAction(
+              onPressed: () async {
+                context.go("/setup");
+                await api.leaveFederation();
+              },
+              child: const Text("Cancel")),
+          PlatformDialogAction(
+              onPressed: () {
+                context.go("/");
+              },
+              child: const Text("Ok")),
+        ],
+      ),
     );
   }
 }

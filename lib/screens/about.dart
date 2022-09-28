@@ -1,3 +1,4 @@
+import 'package:fluttermint/screens/home.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class AboutScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final packageInfoOnce = ref.watch(packageInfoProvider);
+    final bitcionNetwork = ref.watch(bitcoinNetworkProvider);
     return Textured(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -40,6 +42,13 @@ class AboutScreen extends HookConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text("NETWORK", style: Theme.of(context).textTheme.headline6),
+                  spacer6,
+                  bitcionNetwork.when(
+                      data: (data) => Text(data),
+                      error: (err, stacktrace) => Text(err.toString()),
+                      loading: () => spacer0),
+                  spacer24,
                   Text("VERSION", style: Theme.of(context).textTheme.headline6),
                   spacer6,
                   packageInfoOnce.when(

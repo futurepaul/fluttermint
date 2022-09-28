@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:fluttermint/data/send.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermint/screens/error_page.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
@@ -41,6 +43,9 @@ class SendScreen extends ConsumerWidget {
         await sendNotifier.createSend(send).then((_) {
           context.go("/send/confirm");
         });
+      } on FfiException catch (err) {
+        context.go("/errormodal",
+            extra: ErrorWhy(title: "Decode Failed", reason: err.message));
       } catch (err) {
         context.go("/errormodal", extra: err);
       }

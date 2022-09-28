@@ -31,7 +31,6 @@ class Home extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final balanceOnce = ref.watch(balanceOnceProvider);
     final network = ref.watch(networkAwareProvider);
-    final bitcoinNetwork = ref.watch(bitcoinNetworkProvider);
 
     final showTransactions = ref.watch(showTransactionsProvider);
 
@@ -45,14 +44,8 @@ class Home extends ConsumerWidget {
             preferredSize: const Size.fromHeight(120), // Set this height
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const FedimintLogoAction(),
-                bitcoinNetwork.when(
-                  loading: () => const Text(""),
-                  error: (error, stack) =>
-                      const Text('Tap here to join a federation'),
-                  data: (value) => Text('(on $value)'),
-                )
+              children: const [
+                FedimintLogoAction(),
               ],
             ),
           ),
@@ -105,7 +98,7 @@ class HomeTxsOpen extends StatelessWidget {
   }
 }
 
-class HomeTxsNotOpen extends StatelessWidget {
+class HomeTxsNotOpen extends ConsumerWidget {
   const HomeTxsNotOpen({
     Key? key,
     required this.network,
@@ -116,7 +109,7 @@ class HomeTxsNotOpen extends StatelessWidget {
   final Balance initialBalance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
