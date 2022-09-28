@@ -13,10 +13,13 @@ import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../ffi.dart';
 
 final isConnectedToFederation = StateProvider<bool>((ref) => false);
+
+const MAINNET_SCARY = "bitcoin";
 
 class SetupJoin extends ConsumerWidget {
   const SetupJoin({super.key});
@@ -32,7 +35,7 @@ class SetupJoin extends ConsumerWidget {
       if (isConnected) {
         api.network().then((value) async {
           // If we connect to a mainnet federation, warn about it
-          if (value == "bitcoin") {
+          if (value == MAINNET_SCARY) {
             await joinWarning(context, ref);
           } else {
             // Otherwise we're clear to go to home
@@ -105,27 +108,24 @@ class SetupJoin extends ConsumerWidget {
   }
 
   joinWarning(BuildContext context, WidgetRef ref) async {
-    showDialog<String>(
+    showPlatformDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
+      builder: (_) => PlatformAlertDialog(
         title: const Text('Warning'),
         content: const Text(
             "You've just joined a mainnet federation. Fluttermint is in early alpha, and fund-loss is a real possibility. Please use with caution!"),
         actions: <Widget>[
-          TextButton(
-            onPressed: () async {
-              context.go("/setup");
-              await api.leaveFederation();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              // This triggers to nav to "/"
-              ref.read(isConnectedToFederation.notifier).state = true;
-            },
-            child: const Text('OK'),
-          ),
+          PlatformDialogAction(
+              onPressed: () async {
+                context.go("/setup");
+                await api.leaveFederation();
+              },
+              child: const Text("Cancel")),
+          PlatformDialogAction(
+              onPressed: () {
+                context.go("/");
+              },
+              child: const Text("Ok")),
         ],
       ),
     );

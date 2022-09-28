@@ -53,6 +53,7 @@ dependencies:
   url_launcher: ^6.1.5
   fluttertoast: ^8.0.9
   mobile_scanner: ^2.0.0
+  flutter_platform_widgets: ^2.0.0
 
 dev_dependencies:
   flutter_test:
