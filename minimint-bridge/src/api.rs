@@ -6,7 +6,8 @@ use bitcoin::hashes::sha256;
 use bitcoin::Network;
 use fedimint_sled::SledDb;
 use lazy_static::lazy_static;
-use lightning_invoice::Invoice;
+use lightning_invoice::{Invoice, InvoiceDescription};
+use mint_client::utils::network_to_currency;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -174,10 +175,6 @@ pub fn pay(bolt11: String) -> Result<()> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
 
-pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
-    crate::client::decode_invoice(bolt11)
-}
-
 pub fn invoice(amount: u64, description: String) -> Result<String> {
     RUNTIME.block_on(async {
         let client = global_client::get().await?;
@@ -217,7 +214,7 @@ pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
             .fetch_payment(&hash)
             .ok_or(anyhow!("payment not found"))?;
         Ok(BridgePayment {
-            invoice: decode_invoice(payment.invoice.to_string())?,
+            invoice: decode_invoice_inner(&payment.invoice)?,
             status: payment.status,
             created_at: payment.created_at,
             paid: payment.paid(),
@@ -236,8 +233,7 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
             // TODO From impl
             .map(|payment| BridgePayment {
                 // FIXME: don't expect
-                invoice: decode_invoice(payment.invoice.to_string())
-                    .expect("couldn't decode invoice"),
+                invoice: decode_invoice_inner(&payment.invoice).expect("couldn't decode invoice"),
                 status: payment.status,
                 created_at: payment.created_at,
                 paid: payment.paid(),
@@ -356,4 +352,44 @@ pub fn list_federations() -> Vec<BridgeFederationInfo> {
 /// This assumes federation config is already saved locally
 pub fn switch_federation(_federation: BridgeFederationInfo) -> Result<()> {
     Ok(())
+}
+
+/// Decodes an invoice and checks that we can pay it
+pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
+    RUNTIME.block_on(async {
+        let client = global_client::get().await?;
+        let invoice: Invoice = bolt11.parse()?;
+        if !client.can_pay(&invoice) {
+            return Err(anyhow!("Can't pay invoice twice"));
+        }
+        if network_to_currency(client.network()) != invoice.currency() {
+            return Err(anyhow!(format!(
+                "Wrong network. Expected {}, got {}",
+                network_to_currency(client.network()),
+                invoice.currency()
+            )));
+        }
+        decode_invoice_inner(&invoice)
+    })
+}
+
+pub fn decode_invoice_inner(invoice: &Invoice) -> anyhow::Result<BridgeInvoice> {
+    let amount = invoice
+        .amount_milli_satoshis()
+        // FIXME:justin this is janky
+        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
+        .ok_or(anyhow!("Invoice missing amount"))?;
+
+    // We might get no description
+    let description = match invoice.description() {
+        InvoiceDescription::Direct(desc) => desc.to_string(),
+        InvoiceDescription::Hash(_) => "".to_string(),
+    };
+
+    Ok(BridgeInvoice {
+        amount,
+        description,
+        invoice: invoice.to_string(),
+        payment_hash: invoice.payment_hash().to_string(),
+    })
 }

@@ -11,14 +11,11 @@ use fedimint_api::{
 use fedimint_core::modules::ln::contracts::ContractId;
 use fedimint_core::{config::ClientConfig, modules::ln::contracts::IdentifyableContract};
 use futures::{stream::FuturesUnordered, StreamExt};
-use lightning_invoice::{Invoice, InvoiceDescription};
+use lightning_invoice::Invoice;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 use mint_client::{api::WsFederationConnect, query::CurrentConsensus};
 
-use crate::{
-    api::BridgeInvoice,
-    payments::{Payment, PaymentDirection, PaymentKey, PaymentKeyPrefix, PaymentStatus},
-};
+use crate::payments::{Payment, PaymentDirection, PaymentKey, PaymentKeyPrefix, PaymentStatus};
 
 pub struct Client {
     pub(crate) client: UserClient,
@@ -142,7 +139,7 @@ impl Client {
 
     // FIXME: this won't let you attempt to pay an invoice where previous payment failed
     // Trying to avoid losing funds at the expense of UX ...
-    fn can_pay(&self, invoice: &Invoice) -> bool {
+    pub fn can_pay(&self, invoice: &Invoice) -> bool {
         // If there isn't an outgoing fluttermint payment, we can pay
         self.list_payments()
             .iter()
@@ -314,27 +311,4 @@ impl Client {
             fedimint_api::task::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
-}
-
-pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
-    let invoice: Invoice = bolt11.parse()?;
-
-    let amount = invoice
-        .amount_milli_satoshis()
-        // FIXME:justin this is janky
-        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
-        .ok_or(anyhow!("Invoice missing amount"))?;
-
-    // We might get no description
-    let description = match invoice.description() {
-        InvoiceDescription::Direct(desc) => desc.to_string(),
-        InvoiceDescription::Hash(_) => "".to_string(),
-    };
-
-    Ok(BridgeInvoice {
-        amount,
-        description,
-        invoice: bolt11,
-        payment_hash: invoice.payment_hash().to_string(),
-    })
 }
