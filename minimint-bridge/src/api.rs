@@ -369,6 +369,9 @@ pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
                 invoice.currency()
             )));
         }
+        if invoice.is_expired() {
+            return Err(anyhow!("Invoice is expired"));
+        }
         decode_invoice_inner(&invoice)
     })
 }
