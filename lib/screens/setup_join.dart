@@ -5,13 +5,12 @@ import 'package:fluttermint/screens/home.dart';
 import 'package:fluttermint/widgets/autopaste_text_field.dart';
 import 'package:fluttermint/widgets/button.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttermint/widgets/qr_scanner.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:fluttermint/widgets/content_padding.dart';
 import 'package:fluttermint/widgets/fedi_appbar.dart';
 import 'package:fluttermint/widgets/textured.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../ffi.dart';
 
@@ -45,8 +44,8 @@ class SetupJoin extends ConsumerWidget {
       }
     }
 
-    void onDetect(Barcode barcode) async {
-      final data = barcode.code;
+    void onDetect(Barcode barcode, MobileScannerArguments? args) async {
+      final data = barcode.rawValue;
       if (data != null) {
         debugPrint('Barcode found! $data');
         try {
@@ -74,7 +73,8 @@ class SetupJoin extends ConsumerWidget {
                   Expanded(
                     child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: QRViewExample(onDetect: onDetect)),
+                        child: MobileScanner(
+                            allowDuplicates: false, onDetect: onDetect)),
                   )
                 ],
                 const SizedBox(height: 16),

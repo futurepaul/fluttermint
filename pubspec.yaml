@@ -43,7 +43,6 @@ dependencies:
   flutter_rust_bridge: ^1.41.3
   path_provider: ^2.0.9
   rive: ^0.9.1
-  qr_code_scanner: ^1.0.0
   ffi: ^2.0.1
   flutter_hooks: ^0.18.5+1
   hooks_riverpod: ^1.0.4
@@ -53,6 +52,7 @@ dependencies:
   package_info_plus: ^1.4.3+1
   url_launcher: ^6.1.5
   fluttertoast: ^8.0.9
+  mobile_scanner: ^2.0.0
 
 dev_dependencies:
   flutter_test:
