@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:fluttermint/data/balance.dart';
 import 'package:fluttermint/data/send.dart';
+import 'package:fluttermint/screens/error_page.dart';
 import 'package:fluttermint/utils/constants.dart';
 import 'package:fluttermint/widgets/balance_display.dart';
 import 'package:fluttermint/widgets/button.dart';
@@ -118,6 +120,10 @@ class SendConfirm extends ConsumerWidget {
                               .update((show) => false);
                           context.go("/");
                         });
+                      } on FfiException catch (err) {
+                        context.go("/errormodal",
+                            extra: ErrorWhy(
+                                title: "Send Failed", reason: err.message));
                       } catch (err) {
                         context.go("/errormodal", extra: err);
                       } finally {

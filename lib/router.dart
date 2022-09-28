@@ -65,7 +65,10 @@ class RouterNotifier extends ChangeNotifier {
     final areWeInSetup =
         state.location == '/setup' || state.location == '/setup/join';
 
-    if (!configured && !areWeInSetup) {
+    final areWeInError = state.location == "/errormodal";
+    debugPrint(areWeInError.toString());
+
+    if (!configured && !areWeInSetup && !areWeInError) {
       debugPrint("redirecting to setup");
       return "/setup";
     }
@@ -111,7 +114,10 @@ class RouterNotifier extends ChangeNotifier {
               pageBuilder: (context, state) {
                 return MaterialPage(
                     fullscreenDialog: true,
-                    child: ErrorPage(errorReason: state.extra.toString()));
+                    child: ErrorPage(
+                        errorReason: state.extra is ErrorWhy
+                            ? state.extra as ErrorWhy
+                            : ErrorWhy(reason: state.extra.toString())));
               }),
           GoRoute(
             path: "about",

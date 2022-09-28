@@ -1,4 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
+import 'package:fluttermint/screens/error_page.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluttermint/data/receive.dart';
 import 'package:fluttermint/utils/constants.dart';
@@ -86,6 +88,10 @@ class ReceiveScreen extends HookConsumerWidget {
                           .then((_) {
                         context.go("/receive/confirm");
                       });
+                    } on FfiException catch (err) {
+                      context.go("/errormodal",
+                          extra: ErrorWhy(
+                              title: "Receive Failed", reason: err.message));
                     } catch (err) {
                       context.go("/errormodal", extra: err);
                     } finally {
