@@ -11,19 +11,20 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 anyhow = "1"
 futures = "0.3"
 
-mint-client = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2" }
-fedimint-api = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2" }
-fedimint-core = { git = "https://github.com/justinmoon/fedimint", branch = "fluttermint-2" }
+mint-client = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+fedimint-api = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+fedimint-core = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+fedimint-sled = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
 # mint-client = { path = "../../fedimint/client/client-lib/"}
 # fedimint-api = { path = "../../fedimint/fedimint-api/" }
 # fedimint-core = { path = "../../fedimint/fedimint-core/" }
+# fedimint-sled = { path = "../../fedimint/fedimint-sled/" }
 
 serde = { version = "1.0.142", features = [ "derive" ] }
 serde_json = "1.0.79"
 rand = { version = "0.6.5" }
 bitcoin = "0.28.1"
 lazy_static = "1.4.0"
-reqwest = { version = "0.11.0", features = [ "json" ], default-features = false }
 lightning-invoice = "0.18.0"
 tracing = "0.1.26"
 

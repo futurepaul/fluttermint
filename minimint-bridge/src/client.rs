@@ -1,21 +1,21 @@
 //! Minimint client with simpler types
+use std::time::{Duration, SystemTime};
+
 use anyhow::anyhow;
 use bitcoin::hashes::sha256;
 use fedimint_api::{
     db::{Database, DatabaseKeyPrefixConst},
     encoding::{Decodable, Encodable},
+    NumPeers,
 };
-use fedimint_core::config::ClientConfig;
 use fedimint_core::modules::ln::contracts::ContractId;
+use fedimint_core::{config::ClientConfig, modules::ln::contracts::IdentifyableContract};
 use futures::{stream::FuturesUnordered, StreamExt};
-use lightning_invoice::{Invoice, InvoiceDescription};
+use lightning_invoice::Invoice;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
 use mint_client::{api::WsFederationConnect, query::CurrentConsensus};
 
-use crate::{
-    api::BridgeInvoice,
-    payments::{Payment, PaymentDirection, PaymentKey, PaymentKeyPrefix, PaymentStatus},
-};
+use crate::payments::{Payment, PaymentDirection, PaymentKey, PaymentKeyPrefix, PaymentStatus};
 
 pub struct Client {
     pub(crate) client: UserClient,
@@ -75,7 +75,7 @@ impl DatabaseKeyPrefixConst for ConfigKey {
 }
 
 impl Client {
-    pub async fn try_load(db: Box<dyn Database>) -> anyhow::Result<Option<Self>> {
+    pub async fn try_load(db: Database) -> anyhow::Result<Option<Self>> {
         if let Some(cfg_json) = db.get_value(&ConfigKey).expect("db error") {
             Ok(Some(Self::new(db, &cfg_json).await?))
         } else {
@@ -83,12 +83,16 @@ impl Client {
         }
     }
 
-    pub async fn new(db: Box<dyn Database>, cfg_json: &str) -> anyhow::Result<Self> {
+    pub async fn new(db: Database, cfg_json: &str) -> anyhow::Result<Self> {
         let connect_cfg: WsFederationConnect = serde_json::from_str(cfg_json)?;
-        let api = WsFederationApi::new(connect_cfg.max_evil, connect_cfg.members);
+        let api = WsFederationApi::new(connect_cfg.members);
         let cfg: ClientConfig = api
             // FIXME: is this the correct policy?
-            .request("/config", (), CurrentConsensus::new(connect_cfg.max_evil))
+            .request(
+                "/config",
+                (),
+                CurrentConsensus::new(api.peers().one_honest()),
+            )
             .await?;
 
         // FIXME: this isn't the right thing to store
@@ -110,7 +114,6 @@ impl Client {
 
     async fn pay_inner(&self, bolt11: Invoice) -> anyhow::Result<()> {
         let mut rng = rand::rngs::OsRng::new().unwrap();
-        let http = reqwest::Client::new();
 
         let (contract_id, outpoint) = self
             .client
@@ -121,18 +124,37 @@ impl Client {
             .await_outgoing_contract_acceptance(outpoint)
             .await?;
 
-        let gw = self.client.fetch_active_gateway().await?;
-        http.post(&format!("{}/pay_invoice", gw.api))
-            .json(&contract_id)
-            // .timeout(Duration::from_secs(15)) // TODO: add timeout
-            .send()
-            .await?;
+        let result = self
+            .client
+            .await_outgoing_contract_execution(contract_id, &mut rng)
+            .await;
 
-        Ok(())
+        // FIXME: actually check that a refund happened
+        if result.is_err() {
+            self.client.fetch_all_coins().await;
+        }
+
+        Ok(result?)
+    }
+
+    // FIXME: this won't let you attempt to pay an invoice where previous payment failed
+    // Trying to avoid losing funds at the expense of UX ...
+    pub fn can_pay(&self, invoice: &Invoice) -> bool {
+        // If there isn't an outgoing fluttermint payment, we can pay
+        self.list_payments()
+            .iter()
+            .filter(|payment| payment.outgoing() && &payment.invoice == invoice)
+            .next()
+            .is_none()
     }
 
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
         let invoice: Invoice = bolt11.parse()?;
+
+        if !self.can_pay(&invoice) {
+            return Err(anyhow!("Can't pay invoice twice"));
+        }
+
         match self.pay_inner(invoice.clone()).await {
             Ok(_) => {
                 self.save_payment(&Payment::new(
@@ -184,14 +206,25 @@ impl Client {
         }
     }
 
+    async fn block_height(&self) -> anyhow::Result<u64> {
+        Ok(self
+            .client
+            .wallet_client()
+            .context
+            .api
+            .fetch_consensus_block_height()
+            .await?)
+    }
+
     pub async fn poll(&self) {
-        // Spawn a thread to check balances and claim incoming contracts
+        let mut last_outgoing_check = SystemTime::now();
         loop {
+            // Try to complete incoming payments
             let mut requests = self
                 .list_payments()
                 .into_iter()
                 // TODO: should we filter
-                .filter(|payment| !payment.paid() && !payment.expired())
+                .filter(|payment| !payment.paid() && !payment.expired() && payment.incoming())
                 .map(|payment| async move {
                     // FIXME: don't create rng in here ...
                     let invoice_expired = payment.invoice.is_expired();
@@ -224,32 +257,58 @@ impl Client {
                 tracing::info!("completed api request");
             }
 
+            // Only check outgoing payments once per minute
+            if last_outgoing_check
+                .elapsed()
+                .expect("Unix time not available")
+                > Duration::from_secs(60)
+            {
+                // Try to complete outgoing payments
+                let consensus_block_height = match self.block_height().await {
+                    Ok(height) => height,
+                    Err(_) => {
+                        tracing::error!("failed to get block height");
+                        continue;
+                    }
+                };
+
+                // TODO: only do this once per minute
+                tracing::info!("looking for refunds...");
+                let mut requests = self
+                    .client
+                    .ln_client()
+                    .refundable_outgoing_contracts(consensus_block_height)
+                    .into_iter()
+                    .map(|contract| async move {
+                        tracing::info!(
+                            "attempting to get refund {:?}",
+                            contract.contract_account.contract.contract_id(),
+                        );
+                        match self
+                            .client
+                            .try_refund_outgoing_contract(
+                                contract.contract_account.contract.contract_id(),
+                                rand::rngs::OsRng::new().unwrap(),
+                            )
+                            .await
+                        {
+                            Ok(_) => {
+                                tracing::info!("got refund");
+                                self.client.fetch_all_coins().await;
+                            }
+                            Err(e) => tracing::info!("refund failed {:?}", e),
+                        }
+                    })
+                    .collect::<FuturesUnordered<_>>();
+
+                // FIXME: is there a better way to consume these futures?
+                while let Some(_) = requests.next().await {
+                    tracing::info!("completed api request");
+                }
+                last_outgoing_check = SystemTime::now();
+            }
+
             fedimint_api::task::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
-}
-
-pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
-    let bolt11: Invoice = bolt11.parse()?;
-
-    let amount = bolt11
-        .amount_milli_satoshis()
-        // FIXME:justin this is janky
-        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
-        .ok_or(anyhow!("Invoice missing amount"))?;
-
-    let invoice = bolt11.to_string();
-
-    // We might get no description
-    let description = match bolt11.description() {
-        InvoiceDescription::Direct(desc) => desc.to_string(),
-        InvoiceDescription::Hash(_) => "".to_string(),
-    };
-
-    Ok(BridgeInvoice {
-        amount,
-        description,
-        invoice,
-        payment_hash: bolt11.payment_hash().to_string(),
-    })
 }

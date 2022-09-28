@@ -4,8 +4,10 @@ use std::sync::Arc;
 use anyhow::{anyhow, Result};
 use bitcoin::hashes::sha256;
 use bitcoin::Network;
+use fedimint_sled::SledDb;
 use lazy_static::lazy_static;
-use lightning_invoice::Invoice;
+use lightning_invoice::{Invoice, InvoiceDescription};
+use mint_client::utils::network_to_currency;
 use tokio::runtime;
 use tokio::sync::Mutex;
 
@@ -26,6 +28,9 @@ mod global_client {
     static GLOBAL_CLIENT: Mutex<Option<Arc<Client>>> = Mutex::const_new(None);
     static GLOBAL_POLLER: Mutex<Option<JoinHandle<()>>> = Mutex::const_new(None);
     static GLOBAL_USER_DIR: Mutex<Option<String>> = Mutex::const_new(None);
+
+    // Justin: static function to return a reference to the federation you're working on.
+    // Dart side can call methods on it.
 
     pub async fn get() -> Result<Arc<Client>> {
         let client = GLOBAL_CLIENT
@@ -126,8 +131,9 @@ pub fn init(path: String) -> Result<ConnectionStatus> {
             return connection_status_private().await;
         };
         let filename = Path::new(&path).join("client.db");
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
-        if let Some(client) = Client::try_load(Box::new(db)).await? {
+        // TODO: use federation name as "tree"
+        let db = SledDb::open(filename, "client")?;
+        if let Some(client) = Client::try_load(db.into()).await? {
             let client = Arc::new(client);
             global_client::set(client.clone()).await;
             let status = connection_status_private().await?;
@@ -142,8 +148,9 @@ pub fn join_federation(config_url: String) -> Result<()> {
         let user_dir = global_client::get_user_dir().await?;
         tracing::info!("user dir {}", user_dir);
         let filename = Path::new(&user_dir).join("client.db");
-        let db = sled::open(&filename)?.open_tree("mint-client")?;
-        let client = Arc::new(Client::new(Box::new(db), &config_url).await?);
+        // TODO: use federation name as "tree"
+        let db = SledDb::open(filename, "client")?;
+        let client = Arc::new(Client::new(db.into(), &config_url).await?);
         // for good measure, make sure the balance is updated (FIXME)
         client.client.fetch_all_coins().await;
         global_client::set(client.clone()).await;
@@ -168,16 +175,15 @@ pub fn pay(bolt11: String) -> Result<()> {
     RUNTIME.block_on(async { global_client::get().await?.pay(bolt11).await })
 }
 
-pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
-    crate::client::decode_invoice(bolt11)
-}
-
 pub fn invoice(amount: u64, description: String) -> Result<String> {
     RUNTIME.block_on(async {
-        global_client::get()
-            .await?
-            .invoice(amount, description)
-            .await
+        let client = global_client::get().await?;
+
+        if client.network() == Network::Bitcoin && amount > 60000 {
+            return Err(anyhow!("Maximum invoice size on mainnet is 60000 sats"));
+        }
+
+        client.invoice(amount, description).await
     })
 }
 
@@ -208,7 +214,7 @@ pub fn fetch_payment(payment_hash: String) -> Result<BridgePayment> {
             .fetch_payment(&hash)
             .ok_or(anyhow!("payment not found"))?;
         Ok(BridgePayment {
-            invoice: decode_invoice(payment.invoice.to_string())?,
+            invoice: decode_invoice_inner(&payment.invoice)?,
             status: payment.status,
             created_at: payment.created_at,
             paid: payment.paid(),
@@ -227,8 +233,7 @@ pub fn list_payments() -> Result<Vec<BridgePayment>> {
             // TODO From impl
             .map(|payment| BridgePayment {
                 // FIXME: don't expect
-                invoice: decode_invoice(payment.invoice.to_string())
-                    .expect("couldn't decode invoice"),
+                invoice: decode_invoice_inner(&payment.invoice).expect("couldn't decode invoice"),
                 status: payment.status,
                 created_at: payment.created_at,
                 paid: payment.paid(),
@@ -345,6 +350,49 @@ pub fn list_federations() -> Vec<BridgeFederationInfo> {
 /// Switch to a federation that we've already joined
 ///
 /// This assumes federation config is already saved locally
-pub fn switch_federation(federation: BridgeFederationInfo) -> Result<()> {
+pub fn switch_federation(_federation: BridgeFederationInfo) -> Result<()> {
     Ok(())
+}
+
+/// Decodes an invoice and checks that we can pay it
+pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
+    RUNTIME.block_on(async {
+        let client = global_client::get().await?;
+        let invoice: Invoice = bolt11.parse()?;
+        if !client.can_pay(&invoice) {
+            return Err(anyhow!("Can't pay invoice twice"));
+        }
+        if network_to_currency(client.network()) != invoice.currency() {
+            return Err(anyhow!(format!(
+                "Wrong network. Expected {}, got {}",
+                network_to_currency(client.network()),
+                invoice.currency()
+            )));
+        }
+        if invoice.is_expired() {
+            return Err(anyhow!("Invoice is expired"));
+        }
+        decode_invoice_inner(&invoice)
+    })
+}
+
+pub fn decode_invoice_inner(invoice: &Invoice) -> anyhow::Result<BridgeInvoice> {
+    let amount = invoice
+        .amount_milli_satoshis()
+        // FIXME:justin this is janky
+        .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
+        .ok_or(anyhow!("Invoice missing amount"))?;
+
+    // We might get no description
+    let description = match invoice.description() {
+        InvoiceDescription::Direct(desc) => desc.to_string(),
+        InvoiceDescription::Hash(_) => "".to_string(),
+    };
+
+    Ok(BridgeInvoice {
+        amount,
+        description,
+        invoice: invoice.to_string(),
+        payment_hash: invoice.payment_hash().to_string(),
+    })
 }

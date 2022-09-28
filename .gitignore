@@ -46,3 +46,5 @@ app.*.map.json
 # NDK build artifacts
 
 android/app/src/main/jniLibs/*
+
+/minimint-bridge/.direnv
