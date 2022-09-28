@@ -98,7 +98,7 @@ class HomeTxsOpen extends StatelessWidget {
   }
 }
 
-class HomeTxsNotOpen extends ConsumerWidget {
+class HomeTxsNotOpen extends StatelessWidget {
   const HomeTxsNotOpen({
     Key? key,
     required this.network,
@@ -109,7 +109,7 @@ class HomeTxsNotOpen extends ConsumerWidget {
   final Balance initialBalance;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

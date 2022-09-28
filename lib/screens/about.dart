@@ -25,7 +25,7 @@ class AboutScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final packageInfoOnce = ref.watch(packageInfoProvider);
-    final bitcionNetwork = ref.watch(bitcoinNetworkProvider);
+    final bitcoinNetwork = ref.watch(bitcoinNetworkProvider);
     return Textured(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -44,7 +44,7 @@ class AboutScreen extends HookConsumerWidget {
                 children: [
                   Text("NETWORK", style: Theme.of(context).textTheme.headline6),
                   spacer6,
-                  bitcionNetwork.when(
+                  bitcoinNetwork.when(
                       data: (data) => Text(data),
                       error: (err, stacktrace) => Text(err.toString()),
                       loading: () => spacer0),
