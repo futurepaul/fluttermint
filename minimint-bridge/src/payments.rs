@@ -55,6 +55,10 @@ impl Payment {
     pub fn incoming(&self) -> bool {
         self.direction == PaymentDirection::Incoming
     }
+
+    pub fn outgoing(&self) -> bool {
+        self.direction == PaymentDirection::Outgoing
+    }
 }
 
 #[derive(Debug, Clone, Encodable, Decodable)]

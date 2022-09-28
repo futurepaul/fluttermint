@@ -140,8 +140,24 @@ impl Client {
         Ok(result?)
     }
 
+    // FIXME: this won't let you attempt to pay an invoice where previous payment failed
+    // Trying to avoid losing funds at the expense of UX ...
+    fn can_pay(&self, invoice: &Invoice) -> bool {
+        // If there isn't an outgoing fluttermint payment, we can pay
+        self.list_payments()
+            .iter()
+            .filter(|payment| payment.outgoing() && &payment.invoice == invoice)
+            .next()
+            .is_none()
+    }
+
     pub async fn pay(&self, bolt11: String) -> anyhow::Result<()> {
         let invoice: Invoice = bolt11.parse()?;
+
+        if !self.can_pay(&invoice) {
+            return Err(anyhow!("Can't pay invoice twice"));
+        }
+
         match self.pay_inner(invoice.clone()).await {
             Ok(_) => {
                 self.save_payment(&Payment::new(
@@ -193,6 +209,16 @@ impl Client {
         }
     }
 
+    async fn block_height(&self) -> anyhow::Result<u64> {
+        Ok(self
+            .client
+            .wallet_client()
+            .context
+            .api
+            .fetch_consensus_block_height()
+            .await?)
+    }
+
     pub async fn poll(&self) {
         let mut last_outgoing_check = SystemTime::now();
         loop {
@@ -241,14 +267,7 @@ impl Client {
                 > Duration::from_secs(60)
             {
                 // Try to complete outgoing payments
-                let consensus_block_height = match self
-                    .client
-                    .wallet_client()
-                    .context
-                    .api
-                    .fetch_consensus_block_height()
-                    .await
-                {
+                let consensus_block_height = match self.block_height().await {
                     Ok(height) => height,
                     Err(_) => {
                         tracing::error!("failed to get block height");
@@ -298,18 +317,16 @@ impl Client {
 }
 
 pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
-    let bolt11: Invoice = bolt11.parse()?;
+    let invoice: Invoice = bolt11.parse()?;
 
-    let amount = bolt11
+    let amount = invoice
         .amount_milli_satoshis()
         // FIXME:justin this is janky
         .map(|amount| (amount as f64 / 1000 as f64).round() as u64)
         .ok_or(anyhow!("Invoice missing amount"))?;
 
-    let invoice = bolt11.to_string();
-
     // We might get no description
-    let description = match bolt11.description() {
+    let description = match invoice.description() {
         InvoiceDescription::Direct(desc) => desc.to_string(),
         InvoiceDescription::Hash(_) => "".to_string(),
     };
@@ -317,7 +334,7 @@ pub fn decode_invoice(bolt11: String) -> anyhow::Result<BridgeInvoice> {
     Ok(BridgeInvoice {
         amount,
         description,
-        invoice,
-        payment_hash: bolt11.payment_hash().to_string(),
+        invoice: bolt11,
+        payment_hash: invoice.payment_hash().to_string(),
     })
 }
