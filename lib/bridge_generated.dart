@@ -33,10 +33,6 @@ abstract class MinimintBridge {
 
   FlutterRustBridgeTaskConstMeta get kPayConstMeta;
 
-  Future<BridgeInvoice> decodeInvoice({required String bolt11, dynamic hint});
-
-  FlutterRustBridgeTaskConstMeta get kDecodeInvoiceConstMeta;
-
   Future<String> invoice(
       {required int amount, required String description, dynamic hint});
 
@@ -81,6 +77,11 @@ abstract class MinimintBridge {
       {required BridgeFederationInfo federation, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kSwitchFederationConstMeta;
+
+  /// Decodes an invoice and checks that we can pay it
+  Future<BridgeInvoice> decodeInvoice({required String bolt11, dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kDecodeInvoiceConstMeta;
 }
 
 /// Bridge representation of a fedimint node
@@ -241,22 +242,6 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
         argNames: ["bolt11"],
       );
 
-  Future<BridgeInvoice> decodeInvoice({required String bolt11, dynamic hint}) =>
-      executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) =>
-            inner.wire_decode_invoice(port_, _api2wire_String(bolt11)),
-        parseSuccessData: _wire2api_bridge_invoice,
-        constMeta: kDecodeInvoiceConstMeta,
-        argValues: [bolt11],
-        hint: hint,
-      ));
-
-  FlutterRustBridgeTaskConstMeta get kDecodeInvoiceConstMeta =>
-      const FlutterRustBridgeTaskConstMeta(
-        debugName: "decode_invoice",
-        argNames: ["bolt11"],
-      );
-
   Future<String> invoice(
           {required int amount, required String description, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
@@ -396,6 +381,22 @@ class MinimintBridgeImpl extends FlutterRustBridgeBase<MinimintBridgeWire>
       const FlutterRustBridgeTaskConstMeta(
         debugName: "switch_federation",
         argNames: ["federation"],
+      );
+
+  Future<BridgeInvoice> decodeInvoice({required String bolt11, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) =>
+            inner.wire_decode_invoice(port_, _api2wire_String(bolt11)),
+        parseSuccessData: _wire2api_bridge_invoice,
+        constMeta: kDecodeInvoiceConstMeta,
+        argValues: [bolt11],
+        hint: hint,
+      ));
+
+  FlutterRustBridgeTaskConstMeta get kDecodeInvoiceConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "decode_invoice",
+        argNames: ["bolt11"],
       );
 
   // Section: api2wire
@@ -669,23 +670,6 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
   late final _wire_pay = _wire_payPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
-  void wire_decode_invoice(
-    int port_,
-    ffi.Pointer<wire_uint_8_list> bolt11,
-  ) {
-    return _wire_decode_invoice(
-      port_,
-      bolt11,
-    );
-  }
-
-  late final _wire_decode_invoicePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64,
-              ffi.Pointer<wire_uint_8_list>)>>('wire_decode_invoice');
-  late final _wire_decode_invoice = _wire_decode_invoicePtr
-      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
-
   void wire_invoice(
     int port_,
     int amount,
@@ -809,11 +793,11 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
 
   void wire_switch_federation(
     int port_,
-    ffi.Pointer<wire_BridgeFederationInfo> federation,
+    ffi.Pointer<wire_BridgeFederationInfo> _federation,
   ) {
     return _wire_switch_federation(
       port_,
-      federation,
+      _federation,
     );
   }
 
@@ -824,6 +808,23 @@ class MinimintBridgeWire implements FlutterRustBridgeWireBase {
       'wire_switch_federation');
   late final _wire_switch_federation = _wire_switch_federationPtr
       .asFunction<void Function(int, ffi.Pointer<wire_BridgeFederationInfo>)>();
+
+  void wire_decode_invoice(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> bolt11,
+  ) {
+    return _wire_decode_invoice(
+      port_,
+      bolt11,
+    );
+  }
+
+  late final _wire_decode_invoicePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_decode_invoice');
+  late final _wire_decode_invoice = _wire_decode_invoicePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_BridgeFederationInfo>
       new_box_autoadd_bridge_federation_info_0() {
