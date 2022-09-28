@@ -7,6 +7,7 @@ use bitcoin::Network;
 use fedimint_sled::SledDb;
 use lazy_static::lazy_static;
 use lightning_invoice::{Invoice, InvoiceDescription};
+use mint_client::api::WsFederationConnect;
 use mint_client::utils::network_to_currency;
 use tokio::runtime;
 use tokio::sync::Mutex;
@@ -150,6 +151,10 @@ pub fn join_federation(config_url: String) -> Result<()> {
         let filename = Path::new(&user_dir).join("client.db");
         // TODO: use federation name as "tree"
         let db = SledDb::open(filename, "client")?;
+        // FIXME: just doing this twice so that I can report a better error
+        if let Err(_) = serde_json::from_str::<WsFederationConnect>(&config_url) {
+            return Err(anyhow!("Invalid federation QR / code"));
+        }
         let client = Arc::new(Client::new(db.into(), &config_url).await?);
         // for good measure, make sure the balance is updated (FIXME)
         client.client.fetch_all_coins().await;
