@@ -31,7 +31,6 @@ class SetupJoin extends ConsumerWidget {
       ref.refresh(bitcoinNetworkProvider);
       if (isConnected) {
         api.network().then((value) async {
-          debugPrint(value);
           // If we connect to a mainnet federation, warn about it
           if (value == "bitcoin") {
             await joinWarning(context, ref);

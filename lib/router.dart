@@ -66,7 +66,6 @@ class RouterNotifier extends ChangeNotifier {
         state.location == '/setup' || state.location == '/setup/join';
 
     final areWeInError = state.location == "/errormodal";
-    debugPrint(areWeInError.toString());
 
     if (!configured && !areWeInSetup && !areWeInError) {
       debugPrint("redirecting to setup");

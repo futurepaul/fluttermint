@@ -39,13 +39,16 @@ class FedimintLogoAction extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
-          Text(
-            "Fluttermint",
-            style: TextStyle(
-                fontFamily: "Archivo 125",
-                fontSize: 18,
-                color: white,
-                fontWeight: FontWeight.w600),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Fluttermint",
+              style: TextStyle(
+                  fontFamily: "Archivo 125",
+                  fontSize: 18,
+                  color: white,
+                  fontWeight: FontWeight.w600),
+            ),
           )
         ],
       ),
