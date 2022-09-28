@@ -358,7 +358,10 @@ pub fn switch_federation(_federation: BridgeFederationInfo) -> Result<()> {
 pub fn decode_invoice(bolt11: String) -> Result<BridgeInvoice> {
     RUNTIME.block_on(async {
         let client = global_client::get().await?;
-        let invoice: Invoice = bolt11.parse()?;
+        let invoice: Invoice = match bolt11.parse() {
+            Ok(i) => Ok(i),
+            Err(_) => Err(anyhow!("Invalid lightning invoice")),
+        }?;
         if !client.can_pay(&invoice) {
             return Err(anyhow!("Can't pay invoice twice"));
         }
