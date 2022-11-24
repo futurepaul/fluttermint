@@ -4,12 +4,13 @@ use std::time::{Duration, SystemTime};
 use anyhow::anyhow;
 use bitcoin::hashes::sha256;
 use fedimint_api::{
+    config::ClientConfig,
     db::{Database, DatabaseKeyPrefixConst},
-    encoding::{Decodable, Encodable},
+    encoding::{Decodable, Encodable, ModuleRegistry},
     NumPeers,
 };
 use fedimint_core::modules::ln::contracts::ContractId;
-use fedimint_core::{config::ClientConfig, modules::ln::contracts::IdentifyableContract};
+use fedimint_core::modules::ln::contracts::IdentifyableContract;
 use futures::{stream::FuturesUnordered, StreamExt};
 use lightning_invoice::Invoice;
 use mint_client::{api::WsFederationApi, UserClient, UserClientConfig};
@@ -32,6 +33,7 @@ impl Client {
     pub fn fetch_payment(&self, payment_hash: &sha256::Hash) -> Option<Payment> {
         self.client
             .db()
+            .begin_transaction(ModuleRegistry::default())
             .get_value(&PaymentKey(payment_hash.clone()))
             .expect("Db error")
     }
@@ -39,25 +41,32 @@ impl Client {
     pub fn list_payments(&self) -> Vec<Payment> {
         self.client
             .db()
+            .begin_transaction(ModuleRegistry::default())
             .find_by_prefix(&PaymentKeyPrefix)
             .map(|res| res.expect("Db error").1)
             .collect()
     }
 
-    pub fn save_payment(&self, payment: &Payment) {
-        self.client
+    pub async fn save_payment(&self, payment: &Payment) {
+        let mut dbtx = self
+            .client
             .db()
-            .insert_entry(&PaymentKey(payment.invoice.payment_hash().clone()), payment)
+            .begin_transaction(ModuleRegistry::default());
+        dbtx.insert_entry(&PaymentKey(payment.invoice.payment_hash().clone()), payment)
             .expect("Db error");
+        dbtx.commit_tx().await.expect("Db error");
     }
 
-    pub fn update_payment_status(&self, payment_hash: &sha256::Hash, status: PaymentStatus) {
+    pub async fn update_payment_status(&self, payment_hash: &sha256::Hash, status: PaymentStatus) {
         if let Some(mut payment) = self.fetch_payment(&payment_hash) {
-            payment.status = status;
-            self.client
+            let mut dbtx = self
+                .client
                 .db()
-                .insert_entry(&PaymentKey(*payment_hash), &payment)
+                .begin_transaction(ModuleRegistry::default());
+            payment.status = status;
+            dbtx.insert_entry(&PaymentKey(*payment_hash), &payment)
                 .expect("Db error");
+            dbtx.commit_tx().await.expect("Db error");
         }
         // TODO: what to do if this payment doesn't exist?
     }
@@ -76,8 +85,10 @@ impl DatabaseKeyPrefixConst for ConfigKey {
 
 impl Client {
     pub async fn try_load(db: Database) -> anyhow::Result<Option<Self>> {
-        if let Some(cfg_json) = db.get_value(&ConfigKey).expect("db error") {
-            Ok(Some(Self::new(db, &cfg_json).await?))
+        let db_clone = db.clone();
+        let dbtx = db.begin_transaction(ModuleRegistry::default());
+        if let Some(cfg_json) = dbtx.get_value(&ConfigKey).expect("db error") {
+            Ok(Some(Self::new(db_clone, &cfg_json).await?))
         } else {
             Ok(None)
         }
@@ -96,8 +107,10 @@ impl Client {
             .await?;
 
         // FIXME: this isn't the right thing to store
-        db.insert_entry(&ConfigKey, &cfg_json.to_string())
+        let mut dbtx = db.begin_transaction(ModuleRegistry::default());
+        dbtx.insert_entry(&ConfigKey, &cfg_json.to_string())
             .expect("db error");
+        dbtx.commit_tx().await.expect("Db error");
 
         Ok(Self {
             client: UserClient::new(UserClientConfig(cfg.clone()), db, Default::default()),
@@ -113,7 +126,7 @@ impl Client {
     }
 
     async fn pay_inner(&self, bolt11: Invoice) -> anyhow::Result<()> {
-        let mut rng = rand::rngs::OsRng::new().unwrap();
+        let mut rng = rand::rngs::OsRng;
 
         let (contract_id, outpoint) = self
             .client
@@ -161,7 +174,8 @@ impl Client {
                     invoice,
                     PaymentStatus::Paid,
                     PaymentDirection::Outgoing,
-                ));
+                ))
+                .await;
                 self.client.fetch_all_coins().await;
                 Ok(())
             }
@@ -170,19 +184,20 @@ impl Client {
                     invoice,
                     PaymentStatus::Failed,
                     PaymentDirection::Outgoing,
-                ));
+                ))
+                .await;
                 Err(e)
             }
         }
     }
 
     pub async fn invoice(&self, amount: u64, description: String) -> anyhow::Result<String> {
-        let mut rng = rand::rngs::OsRng::new().unwrap();
+        let mut rng = rand::rngs::OsRng;
 
         let amt = fedimint_api::Amount::from_sat(amount);
         let confirmed_invoice = self
             .client
-            .generate_invoice(amt, description, &mut rng)
+            .generate_invoice(amt, description, &mut rng, None)
             .await
             .expect("Couldn't create invoice");
         let invoice = confirmed_invoice.invoice;
@@ -192,7 +207,8 @@ impl Client {
             invoice.clone(),
             PaymentStatus::Pending,
             PaymentDirection::Incoming,
-        ));
+        ))
+        .await;
         tracing::info!("saved invoice to db");
 
         Ok(invoice.to_string())
@@ -228,7 +244,7 @@ impl Client {
                 .map(|payment| async move {
                     // FIXME: don't create rng in here ...
                     let invoice_expired = payment.invoice.is_expired();
-                    let rng = rand::rngs::OsRng::new().unwrap();
+                    let rng = rand::rngs::OsRng;
                     let payment_hash = payment.invoice.payment_hash();
                     tracing::debug!("fetching incoming contract {:?}", &payment_hash);
                     let result = self
@@ -242,11 +258,13 @@ impl Client {
                         tracing::debug!("couldn't complete payment: {:?}", &payment_hash);
                         // Mark it "expired" in db if we couldn't claim it and invoice is expired
                         if invoice_expired {
-                            self.update_payment_status(payment_hash, PaymentStatus::Expired);
+                            self.update_payment_status(payment_hash, PaymentStatus::Expired)
+                                .await;
                         }
                     } else {
                         tracing::debug!("completed payment: {:?}", &payment_hash);
-                        self.update_payment_status(payment_hash, PaymentStatus::Paid);
+                        self.update_payment_status(payment_hash, PaymentStatus::Paid)
+                            .await;
                         self.client.fetch_all_coins().await;
                     }
                 })
@@ -288,7 +306,7 @@ impl Client {
                             .client
                             .try_refund_outgoing_contract(
                                 contract.contract_account.contract.contract_id(),
-                                rand::rngs::OsRng::new().unwrap(),
+                                rand::rngs::OsRng,
                             )
                             .await
                         {

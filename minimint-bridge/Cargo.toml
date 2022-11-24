@@ -11,10 +11,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 anyhow = "1"
 futures = "0.3"
 
-mint-client = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
-fedimint-api = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
-fedimint-core = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
-fedimint-sled = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" }
+mint-client = { git = "https://github.com/justinmoon/fedimint", branch = "aussie" }
+fedimint-api = { git = "https://github.com/justinmoon/fedimint", branch = "aussie" }
+fedimint-core = { git = "https://github.com/justinmoon/fedimint", branch = "aussie" }
+fedimint-sled = { git = "https://github.com/justinmoon/fedimint", branch = "aussie" }
 # mint-client = { path = "../../fedimint/client/client-lib/"}
 # fedimint-api = { path = "../../fedimint/fedimint-api/" }
 # fedimint-core = { path = "../../fedimint/fedimint-core/" }
@@ -22,10 +22,10 @@ fedimint-sled = { git = "https://github.com/fedimint/fedimint", branch = "hcpp" 
 
 serde = { version = "1.0.142", features = [ "derive" ] }
 serde_json = "1.0.79"
-rand = { version = "0.6.5" }
-bitcoin = "0.28.1"
+rand = { version = "0.8.5" }
+bitcoin = "0.29.1"
 lazy_static = "1.4.0"
-lightning-invoice = "0.18.0"
+lightning-invoice = "0.20.0"
 tracing = "0.1.26"
 
 tracing-subscriber = { version = "0.3.1", features = [ "env-filter" ] }
@@ -40,5 +40,4 @@ tracing-oslog = "0.1.2"
 paranoid-android = { git = "https://github.com/justinmoon/paranoid-android", branch="c_char" }
 
 [patch.crates-io]
-bitcoin_hashes = { version = "0.10.0", git = 'https://github.com/fedimint/bitcoin_hashes', branch = 'minimint' }
-secp256k1-zkp = { git = "https://github.com/fedimint/rust-secp256k1-zkp/", branch = "sanket-pr" }
+secp256k1-zkp = { git = "https://github.com/dpc/rust-secp256k1-zkp/", branch = "sanket-pr" }
