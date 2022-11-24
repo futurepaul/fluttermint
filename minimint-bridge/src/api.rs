@@ -184,8 +184,8 @@ pub fn invoice(amount: u64, description: String) -> Result<String> {
     RUNTIME.block_on(async {
         let client = global_client::get().await?;
 
-        if client.network() == Network::Bitcoin && amount > 60000 {
-            return Err(anyhow!("Maximum invoice size on mainnet is 60000 sats"));
+        if client.network() == Network::Bitcoin && amount > 100000 {
+            return Err(anyhow!("Maximum invoice size on mainnet is 100000 sats"));
         }
 
         client.invoice(amount, description).await
